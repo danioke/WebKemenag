@@ -1,0 +1,6 @@
+{
+  "name": "Kemenag OKI Web Portal",
+  "description": "Prototipe website resmi Kementerian Agama Kabupaten Ogan Komering Ilir dengan desain modern dan responsif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

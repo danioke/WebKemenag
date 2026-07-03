@@ -1,0 +1,88 @@
+{
+  "collections": [
+    {
+      "name": "news",
+      "fields": {
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "date": { "type": "string" },
+        "author": { "type": "string" },
+        "image": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "agendas",
+      "fields": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "month": { "type": "string" },
+        "time": { "type": "string" },
+        "location": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "announcements",
+      "fields": {
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "size": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "photos",
+      "fields": {
+        "title": { "type": "string" },
+        "image": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "videos",
+      "fields": {
+        "title": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "duration": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "navigation",
+      "fields": {
+        "name": { "type": "string" },
+        "href": { "type": "string" },
+        "hasDropdown": { "type": "boolean" },
+        "order": { "type": "number" },
+        "subItems": { "type": "array" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "allowed_users",
+      "fields": {
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    {
+      "name": "layanan_data",
+      "fields": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "tugasFungsi": { "type": "string" },
+        "kasiName": { "type": "string" },
+        "kasiPhoto": { "type": "string" },
+        "staf": { "type": "array" },
+        "syarat": { "type": "string" },
+        "updatedAt": { "type": "timestamp" }
+      }
+    }
+  ]
+}
