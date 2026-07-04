@@ -22,6 +22,7 @@ import AllPengumuman from './pages/AllPengumuman';
 import AllAgenda from './pages/AllAgenda';
 import Loader from './components/Loader';
 import LayananDetail from './pages/LayananDetail';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   const [showLoader, setShowLoader] = useState(false);
@@ -56,8 +57,9 @@ export default function App() {
           <Route path="/galeri-foto" element={<GaleriFoto />} />
           <Route path="/galeri-video" element={<GaleriVideo />} />
           <Route path="/layanan/:id" element={<LayananDetail />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/hmsoke" element={<Login />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </HelmetProvider>

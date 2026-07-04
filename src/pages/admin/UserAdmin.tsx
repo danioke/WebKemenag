@@ -30,6 +30,17 @@ export default function UserAdmin() {
   // Fetch users
   const fetchUsers = async () => {
     setLoading(true);
+    
+    // If not signed in (Bypass mode), do not attempt to fetch from Firestore to avoid permission errors
+    if (!auth.currentUser) {
+      setUsers([
+        { id: '1', name: 'Super Admin (Anis Reza)', email: 'anisreza498@gmail.com', role: 'Super Admin' },
+        { id: '2', name: 'Contoh User Admin', email: 'admin@contoh.com', role: 'Admin' }
+      ]);
+      setLoading(false);
+      return;
+    }
+    
     try {
       const q = query(collection(db, 'allowed_users'), orderBy('createdAt', 'desc'));
       const snap = await getDocs(q);
@@ -167,7 +178,8 @@ export default function UserAdmin() {
         </div>
         <button
           onClick={handleOpenAddModal}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-95"
+          disabled={!auth.currentUser}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-700 hover:bg-green-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-95"
         >
           <Plus size={18} />
           Tambah User Baru
@@ -181,6 +193,11 @@ export default function UserAdmin() {
           <p className="font-bold">Perhatian Keamanan:</p>
           <p>Hanya pengguna dengan email yang terdaftar di bawah ini yang dapat login menggunakan Google Auth.</p>
           <p>Email developer <strong className="font-semibold text-gray-900">anisreza498@gmail.com</strong> dikonfigurasi sebagai Super Admin bypass untuk menjamin akses sistem tetap terjaga.</p>
+          {!auth.currentUser && (
+            <p className="mt-2 p-2 bg-amber-100 rounded text-amber-900 font-medium">
+              ⚠️ Anda saat ini menggunakan Mode Akses Instan (Bypass). Fitur tambah/hapus user dimatikan karena Anda tidak terautentikasi ke database. Silakan logout dan login menggunakan Google Auth untuk menggunakan fitur ini.
+            </p>
+          )}
         </div>
       </div>
 
@@ -260,13 +277,13 @@ export default function UserAdmin() {
                         </button>
                         <button
                           onClick={() => handleDelete(user.id, user.email)}
-                          disabled={isCurrent || user.email.toLowerCase() === 'anisreza498@gmail.com'}
+                          disabled={isCurrent || user.email.toLowerCase() === 'anisreza498@gmail.com' || !auth.currentUser}
                           className={`p-1.5 rounded-lg transition-colors ${
-                            isCurrent || user.email.toLowerCase() === 'anisreza498@gmail.com'
+                            isCurrent || user.email.toLowerCase() === 'anisreza498@gmail.com' || !auth.currentUser
                               ? 'text-gray-300 cursor-not-allowed' 
                               : 'hover:bg-red-50 text-gray-500 hover:text-red-600'
                           }`}
-                          title={user.email.toLowerCase() === 'anisreza498@gmail.com' ? "Super User Default (Dilindungi)" : "Hapus Akses"}
+                          title={user.email.toLowerCase() === 'anisreza498@gmail.com' ? "Super User Default (Dilindungi)" : (!auth.currentUser ? "Tidak tersedia dalam Akses Instan" : "Hapus Akses")}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -353,8 +370,8 @@ export default function UserAdmin() {
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-green-700 text-white rounded-xl text-xs font-semibold hover:bg-green-800 transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-50"
+                  disabled={submitting || !auth.currentUser}
+                  className="px-4 py-2 bg-green-700 text-white rounded-xl text-xs font-semibold hover:bg-green-800 transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting && <Loader2 className="animate-spin" size={14} />}
                   Simpan
