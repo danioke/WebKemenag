@@ -28,7 +28,7 @@ export default function GaleriFoto() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const photoQ = query(collection(db, 'kemenag_photos'), orderBy('createdAt', 'desc'));
+        const photoQ = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
         const photoSnap = await getDocs(photoQ);
         const photoData = photoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as PhotoData));
         setPhotos(photoData.length > 0 ? photoData : fallbackPhotos);

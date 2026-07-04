@@ -44,7 +44,7 @@ export default function AllNews() {
   useEffect(() => {
     const fetchAllNews = async () => {
       try {
-        const q = query(collection(db, 'kemenag_news'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -197,14 +197,14 @@ export default function AllNews() {
                       </div>
                       
                       <h4 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors leading-snug">
-                        <Link to={`/berita/${item.slug || item.id}`}>{item.title}</Link>
+                        <Link to={`/berita/${item.id}`}>{item.title}</Link>
                       </h4>
                       
                       <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow leading-relaxed">
                         {stripHtml(item.excerpt)}
                       </p>
                       
-                      <Link to={`/berita/${item.slug || item.id}`} className="inline-flex items-center text-sm font-bold text-green-700 hover:text-green-800 mt-auto transition-colors">
+                      <Link to={`/berita/${item.id}`} className="inline-flex items-center text-sm font-bold text-green-700 hover:text-green-800 mt-auto transition-colors">
                         Baca Selengkapnya
                       </Link>
                     </div>

@@ -30,7 +30,7 @@ export default function AllAgenda() {
   useEffect(() => {
     const fetchAgendas = async () => {
       try {
-        const q = query(collection(db, 'kemenag_agendas'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'agendas'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -176,7 +176,7 @@ export default function AllAgenda() {
                         </span>
                       </div>
                       <h4 className="text-lg font-bold text-gray-900 mb-2.5 leading-snug group-hover:text-green-700 transition-colors">
-                        <Link to={`/agenda/${agenda.slug || agenda.id}`}>{agenda.title}</Link>
+                        <Link to={`/agenda/${agenda.id}`}>{agenda.title}</Link>
                       </h4>
                       
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500 font-medium">

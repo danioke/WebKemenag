@@ -14,7 +14,6 @@ interface Berita {
   author: string;
   image: string;
   excerpt: string;
-  slug?: string;
 }
 
 export default function BeritaDetail() {
@@ -28,35 +27,19 @@ export default function BeritaDetail() {
     const fetchData = async () => {
       if (!id) return;
       try {
-        // First try to find by slug
-        const slugQuery = query(collection(db, 'kemenag_news'), where('slug', '==', id));
-        const slugSnap = await getDocs(slugQuery);
-        
-        let foundBerita = null;
-        let foundId = id;
-        
-        if (!slugSnap.empty) {
-          foundBerita = { id: slugSnap.docs[0].id, ...slugSnap.docs[0].data() } as Berita;
-          foundId = slugSnap.docs[0].id;
-        } else {
-          // Fallback to fetch by ID
-          const docRef = doc(db, 'kemenag_news', id);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            foundBerita = { id: docSnap.id, ...docSnap.data() } as Berita;
-          }
-        }
-
-        if (foundBerita) {
-          setBerita(foundBerita);
+        // Fetch current news
+        const docRef = doc(db, 'news', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setBerita({ id: docSnap.id, ...docSnap.data() } as Berita);
         }
 
         // Fetch other news (latest 4, excluding current)
-        const q = query(collection(db, 'kemenag_news'), orderBy('createdAt', 'desc'), limit(5));
+        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
         const newsData = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Berita))
-          .filter(item => item.id !== foundId)
+          .filter(item => item.id !== id)
           .slice(0, 4);
         setOtherNews(newsData);
 
@@ -181,7 +164,7 @@ export default function BeritaDetail() {
               {otherNews.map((item, idx) => (
                 <Link 
                   key={item.id} 
-                  to={`/berita/${item.slug || item.id}`}
+                  to={`/berita/${item.id}`}
                   className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 transition-all group flex flex-col"
                 >
                   <div className="relative overflow-hidden aspect-[16/10] bg-gray-100">

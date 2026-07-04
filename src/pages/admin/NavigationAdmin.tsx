@@ -122,7 +122,7 @@ export default function NavigationAdmin() {
     setLoading(true);
     const pathForList = 'navigation';
     try {
-      const q = query(collection(db, pathForList.startsWith('kemenag_') ? pathForList : 'kemenag_' + pathForList), orderBy('order', 'asc'));
+      const q = query(collection(db, pathForList), orderBy('order', 'asc'));
       const querySnapshot = await getDocs(q);
       let docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NavLink));
       
@@ -548,7 +548,7 @@ export default function NavigationAdmin() {
     try {
       const defaults = getDefaultsList();
       for (const item of defaults) {
-        await addDoc(collection(db, 'kemenag_navigation'), item);
+        await addDoc(collection(db, 'navigation'), item);
       }
     } catch (e) {
       console.error("Failed silent seeding of navigation defaults", e);
@@ -564,15 +564,15 @@ export default function NavigationAdmin() {
     setLoading(true);
     try {
       // 1. Delete all existing navigation
-      const q = query(collection(db, 'kemenag_navigation'));
+      const q = query(collection(db, 'navigation'));
       const snapshot = await getDocs(q);
-      const deletePromises = snapshot.docs.map(docSnapshot => deleteDoc(doc(db, 'kemenag_navigation', docSnapshot.id)));
+      const deletePromises = snapshot.docs.map(docSnapshot => deleteDoc(doc(db, 'navigation', docSnapshot.id)));
       await Promise.all(deletePromises);
 
       // 2. Add defaults
       const defaults = getDefaultsList();
       for (const item of defaults) {
-        await addDoc(collection(db, 'kemenag_navigation'), item);
+        await addDoc(collection(db, 'navigation'), item);
       }
 
       toast.success('Navigasi berhasil diatur ulang ke setelan bawaan');
@@ -603,11 +603,11 @@ export default function NavigationAdmin() {
       };
 
       if (isEditingMain) {
-        const docRef = doc(db, 'kemenag_navigation', mainForm.id);
+        const docRef = doc(db, 'navigation', mainForm.id);
         await updateDoc(docRef, dataPayload);
         toast.success('Navigasi Utama berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'kemenag_navigation'), {
+        await addDoc(collection(db, 'navigation'), {
           ...dataPayload,
           createdAt: serverTimestamp()
         });
@@ -637,7 +637,7 @@ export default function NavigationAdmin() {
   const handleDeleteMain = async (id: string) => {
     if (window.confirm('Hapus menu navigasi ini? Seluruh sub-menu di dalamnya juga akan terhapus.')) {
       try {
-        await deleteDoc(doc(db, 'kemenag_navigation', id));
+        await deleteDoc(doc(db, 'navigation', id));
         toast.success('Menu navigasi berhasil dihapus');
         fetchData();
       } catch (error) {
@@ -667,8 +667,8 @@ export default function NavigationAdmin() {
     const swapTarget = direction === 'up' ? data[currentIndex - 1] : data[currentIndex + 1];
 
     try {
-      const docRef1 = doc(db, 'kemenag_navigation', item.id);
-      const docRef2 = doc(db, 'kemenag_navigation', swapTarget.id);
+      const docRef1 = doc(db, 'navigation', item.id);
+      const docRef2 = doc(db, 'navigation', swapTarget.id);
 
       await updateDoc(docRef1, { order: swapTarget.order });
       await updateDoc(docRef2, { order: item.order });
@@ -738,7 +738,7 @@ export default function NavigationAdmin() {
       // Sort by order
       currentSubItems.sort((a, b) => a.order - b.order);
 
-      const docRef = doc(db, 'kemenag_navigation', selectedMainItem.id);
+      const docRef = doc(db, 'navigation', selectedMainItem.id);
       await updateDoc(docRef, { subItems: currentSubItems });
 
       toast.success('Sub-Menu berhasil disimpan');
@@ -755,7 +755,7 @@ export default function NavigationAdmin() {
         const currentSubItems = [...(parent.subItems || [])];
         currentSubItems.splice(index, 1);
 
-        const docRef = doc(db, 'kemenag_navigation', parent.id);
+        const docRef = doc(db, 'navigation', parent.id);
         await updateDoc(docRef, { subItems: currentSubItems });
 
         toast.success('Sub-menu berhasil dihapus');

@@ -31,12 +31,12 @@ export default function MediaGallery() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const photoQ = query(collection(db, 'kemenag_photos'), orderBy('createdAt', 'desc'));
+        const photoQ = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
         const photoSnap = await getDocs(photoQ);
         const photoData = photoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as PhotoData));
         setPhotos(photoData.length > 0 ? photoData : fallbackPhotos);
 
-        const videoQ = query(collection(db, 'kemenag_videos'), orderBy('createdAt', 'desc'));
+        const videoQ = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
         const videoSnap = await getDocs(videoQ);
         const videoData = videoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as VideoData));
         setVideos(videoData.length > 0 ? videoData : fallbackVideos);

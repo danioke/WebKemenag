@@ -10,12 +10,17 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <img 
-                src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
-                alt="Logo Kementerian Agama" 
-                className="w-11 h-11 object-contain shrink-0 filter drop-shadow-sm hover:scale-105 transition-transform"
-                referrerPolicy="no-referrer"
-              />
+              <svg className="w-11 h-11 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="46" fill="#15803d" stroke="#f59e0b" strokeWidth="3" />
+                <circle cx="50" cy="50" r="38" fill="#166534" />
+                <path d="M50 18L53.5 26.5H62.5L55.5 31.5L58 40L50 35L42 40L44.5 31.5L37.5 26.5H46.5L50 18Z" fill="#fbbf24" />
+                <path d="M50 52C45 47 37 47 32 49V64C37 62 45 62 50 67C55 62 63 62 68 64V49C63 47 55 47 50 52Z" fill="#ffffff" stroke="#fbbf24" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M35 53H45M35 57H45M35 60H45M65 53H55M65 57H55M65 60H55" stroke="#166534" strokeWidth="1" />
+                <path d="M44 68H56V74H44V68Z" fill="#fbbf24" />
+                <path d="M22 50C22 35 34 26 44 26" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+                <path d="M78 50C78 35 66 26 56 26" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+                <path d="M50 33L70 43V60C70 72 50 82 50 82C50 82 30 72 30 60V43L50 33Z" stroke="#fbbf24" strokeWidth="1.5" fill="none" />
+              </svg>
               <div className="flex flex-col">
                 <span className="font-extrabold text-white leading-none text-base tracking-tight uppercase">Kementerian Agama</span>
                 <span className="text-[10px] text-green-500 font-bold tracking-widest uppercase">Kabupaten Ogan Komering Ilir</span>

@@ -31,16 +31,6 @@ interface WPPost {
   };
 }
 
-
-  const generateSlug = (text: string) => {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')       // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')   // Remove all non-word chars
-      .replace(/\-\-+/g, '-');    // Replace multiple - with single -
-  };
 export default function WordPressImporter() {
   const navigate = useNavigate();
   const [wpUrl, setWpUrl] = useState('https://sumsel.kemenag.go.id');
@@ -137,7 +127,7 @@ export default function WordPressImporter() {
 
       try {
         // Simple check to prevent duplicate imports by matching title
-        const newsRef = collection(db, 'kemenag_news');
+        const newsRef = collection(db, 'news');
         const dupQuery = query(newsRef, where('title', '==', post.title.rendered));
         const dupSnap = await getDocs(dupQuery);
 
@@ -170,14 +160,13 @@ export default function WordPressImporter() {
         }
 
         // Add to Firestore
-        await addDoc(collection(db, 'kemenag_news'), {
+        await addDoc(collection(db, 'news'), {
           title: post.title.rendered,
           category: customCategory,
           date: postDate,
           author: authorName,
           image: imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80',
           excerpt: fullContent,
-          slug: generateSlug(post.title.rendered),
           createdAt: serverTimestamp()
         });
 

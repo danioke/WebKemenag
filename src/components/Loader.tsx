@@ -78,11 +78,17 @@ export default function Loader({ onComplete }: LoaderProps) {
             transition={{ type: "spring", stiffness: 100, damping: 15 }}
             className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-xl shadow-green-700/20 relative z-10 p-1"
           >
-            <img 
-              src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
-              alt="Logo Kemenag" 
-              className="w-full h-full object-contain"
-            />
+            <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="46" fill="#15803d" stroke="#f59e0b" strokeWidth="3" />
+              <circle cx="50" cy="50" r="38" fill="#166534" />
+              <path d="M50 18L53.5 26.5H62.5L55.5 31.5L58 40L50 35L42 40L44.5 31.5L37.5 26.5H46.5L50 18Z" fill="#fbbf24" />
+              <path d="M50 52C45 47 37 47 32 49V64C37 62 45 62 50 67C55 62 63 62 68 64V49C63 47 55 47 50 52Z" fill="#ffffff" stroke="#fbbf24" strokeWidth="2" strokeLinejoin="round" />
+              <path d="M35 53H45M35 57H45M35 60H45M65 53H55M65 57H55M65 60H55" stroke="#166534" strokeWidth="1" />
+              <path d="M44 68H56V74H44V68Z" fill="#fbbf24" />
+              <path d="M22 50C22 35 34 26 44 26" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+              <path d="M78 50C78 35 66 26 56 26" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+              <path d="M50 33L70 43V60C70 72 50 82 50 82C50 82 30 72 30 60V43L50 33Z" stroke="#fbbf24" strokeWidth="1.5" fill="none" />
+            </svg>
           </motion.div>
         </div>
 

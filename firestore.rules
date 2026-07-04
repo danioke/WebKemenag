@@ -12,41 +12,41 @@ service cloud.firestore {
     // For prototype, we allow reads for everyone and writes for authenticated users.
     // In production, you would check admin claims or a specific users collection.
     
-    match /kemenag_news/{id} {
+    match /news/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }
     
-    match /kemenag_agendas/{id} {
+    match /agendas/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }
     
-    match /kemenag_announcements/{id} {
+    match /announcements/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }
     
-    match /kemenag_photos/{id} {
+    match /photos/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }
     
-    match /kemenag_videos/{id} {
+    match /videos/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }
     
-    match /kemenag_navigation/{id} {
+    match /navigation/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }
     
-    match /kemenag_allowed_users/{id} {
+    match /allowed_users/{id} {
       allow read, write: if isSignedIn();
     }
     
-    match /kemenag_layanan_data/{id} {
+    match /layanan_data/{id} {
       allow read: if true;
       allow write: if isSignedIn();
     }

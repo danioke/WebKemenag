@@ -4,16 +4,6 @@ import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, HardDrive } from 'lucide-react';
 import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
-  const generateSlug = (text: string) => {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')       // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')   // Remove all non-word chars
-      .replace(/\-\-+/g, '-');    // Replace multiple - with single -
-  };
-
 
 interface Pengumuman {
   id: string;
@@ -33,7 +23,7 @@ export default function PengumumanAdmin() {
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'kemenag_announcements'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Pengumuman));
       setData(docs);
@@ -58,22 +48,20 @@ export default function PengumumanAdmin() {
     
     try {
       if (isEditing) {
-        const docRef = doc(db, 'kemenag_announcements', formData.id);
+        const docRef = doc(db, 'announcements', formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           date: formData.date,
           size: formData.size || '0 KB',
-          slug: generateSlug(formData.title),
           fileUrl: formData.fileUrl || '#',
         });
         toast.success('Pengumuman berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'kemenag_announcements'), {
+        await addDoc(collection(db, 'announcements'), {
           title: formData.title,
           date: formData.date,
           size: formData.size || '0 KB',
           fileUrl: formData.fileUrl || '#',
-          slug: generateSlug(formData.title),
           createdAt: serverTimestamp()
         });
         toast.success('Pengumuman berhasil ditambahkan');
@@ -95,7 +83,7 @@ export default function PengumumanAdmin() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {
       try {
-        await deleteDoc(doc(db, 'kemenag_announcements', id));
+        await deleteDoc(doc(db, 'announcements', id));
         toast.success('Pengumuman berhasil dihapus');
         fetchData();
       } catch (error) {

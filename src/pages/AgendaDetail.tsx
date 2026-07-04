@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs, query, orderBy, limit, where } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Clock, MapPin, ArrowLeft, Calendar as CalendarIcon, Tag, Share2, ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -13,7 +13,6 @@ interface Agenda {
   time: string;
   location: string;
   status: string;
-  slug?: string;
 }
 
 export default function AgendaDetail() {
@@ -28,35 +27,19 @@ export default function AgendaDetail() {
       if (!id) return;
       setLoading(true);
       try {
-        // First try to find by slug
-        const slugQuery = query(collection(db, 'kemenag_agendas'), where('slug', '==', id));
-        const slugSnap = await getDocs(slugQuery);
-        
-        let foundAgenda = null;
-        let foundId = id;
-        
-        if (!slugSnap.empty) {
-          foundAgenda = { id: slugSnap.docs[0].id, ...slugSnap.docs[0].data() } as Agenda;
-          foundId = slugSnap.docs[0].id;
-        } else {
-          // Fallback to fetch by ID
-          const docRef = doc(db, 'kemenag_agendas', id);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            foundAgenda = { id: docSnap.id, ...docSnap.data() } as Agenda;
-          }
-        }
-
-        if (foundAgenda) {
-          setAgenda(foundAgenda);
+        // Fetch current
+        const docRef = doc(db, 'agendas', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setAgenda({ id: docSnap.id, ...docSnap.data() } as Agenda);
         }
 
         // Fetch other agendas
-        const q = query(collection(db, 'kemenag_agendas'), orderBy('createdAt', 'desc'), limit(5));
+        const q = query(collection(db, 'agendas'), orderBy('createdAt', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
         const others = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Agenda))
-          .filter(item => item.id !== foundId)
+          .filter(item => item.id !== id)
           .slice(0, 3); // top 3 other agendas
 
         if (others.length > 0) {
@@ -191,7 +174,7 @@ export default function AgendaDetail() {
                 {otherAgendas.map((item) => (
                   <Link 
                     key={item.id} 
-                    to={`/agenda/${item.slug || item.id}`}
+                    to={`/agenda/${item.id}`}
                     className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-all group animate-fade-in"
                   >
                     <div className="flex flex-col items-center justify-center bg-green-50 text-green-800 rounded-xl w-16 h-16 shrink-0 border border-green-100">

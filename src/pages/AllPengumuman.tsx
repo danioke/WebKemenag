@@ -27,7 +27,7 @@ export default function AllPengumuman() {
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
-        const q = query(collection(db, 'kemenag_announcements'), orderBy('createdAt', 'desc'));
+        const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -139,7 +139,7 @@ export default function AllPengumuman() {
                       </div>
                       <div className="flex-grow min-w-0">
                         <h4 className="text-base font-bold text-gray-900 mb-1.5 leading-snug group-hover:text-green-700 transition-colors">
-                          <Link to={`/pengumuman/${item.slug || item.id}`} className="focus:outline-none">
+                          <Link to={`/pengumuman/${item.id}`} className="focus:outline-none">
                             <span className="absolute inset-0" aria-hidden="true"></span>
                             {item.title}
                           </Link>

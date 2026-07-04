@@ -24,7 +24,7 @@ export default function VideoAdmin() {
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'kemenag_videos'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as VideoData));
       setData(docs);
@@ -49,7 +49,7 @@ export default function VideoAdmin() {
     
     try {
       if (isEditing) {
-        const docRef = doc(db, 'kemenag_videos', formData.id);
+        const docRef = doc(db, 'videos', formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           thumbnail: formData.thumbnail,
@@ -58,7 +58,7 @@ export default function VideoAdmin() {
         });
         toast.success('Video berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'kemenag_videos'), {
+        await addDoc(collection(db, 'videos'), {
           title: formData.title,
           thumbnail: formData.thumbnail,
           videoUrl: formData.videoUrl || '',
@@ -90,7 +90,7 @@ export default function VideoAdmin() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus video ini?')) {
       try {
-        await deleteDoc(doc(db, 'kemenag_videos', id));
+        await deleteDoc(doc(db, 'videos', id));
         toast.success('Video berhasil dihapus');
         fetchData();
       } catch (error) {

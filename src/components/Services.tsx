@@ -1,19 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Book, Heart, GraduationCap, Building2, BookOpen, Award, ArrowRight } from 'lucide-react';
+import { Book, Heart, GraduationCap, Building2, BookOpen, Headset, ArrowRight } from 'lucide-react';
 
 export default function Services() {
   const navigate = useNavigate();
-  const services: {
-    title: string;
-    description: string;
-    icon: any;
-    color: string;
-    borderColor: string;
-    path: string;
-    isExternal?: boolean;
-  }[] = [
+  const services = [
     {
       title: "Sertifikasi Halal",
       description: "Layanan pendaftaran dan informasi proses sertifikasi halal BPJPH.",
@@ -55,12 +47,13 @@ export default function Services() {
       path: "/layanan/bimas-islam"
     },
     {
-      title: "Pendidikan Agama Islam (PAIS)",
-      description: "Data SIAGA, TPG Guru Agama Islam, serta layanan administrasi keagamaan sekolah.",
-      icon: Award,
-      color: "bg-emerald-50 text-emerald-700",
-      borderColor: "group-hover:border-emerald-200",
-      path: "/layanan/pendidikan-agama-islam"
+      title: "Layanan Pengaduan",
+      description: "Pusat bantuan, konsultasi publik, dan layanan terpadu satu pintu.",
+      icon: Headset,
+      color: "bg-slate-50 text-slate-700",
+      borderColor: "group-hover:border-slate-200",
+      path: "https://dumas.kemenagoki.id/",
+      isExternal: true
     }
   ];
 

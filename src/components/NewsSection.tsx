@@ -36,7 +36,7 @@ export default function NewsSection() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const q = query(collection(db, 'kemenag_news'), orderBy('createdAt', 'desc'), limit(3));
+        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(3));
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -130,14 +130,14 @@ export default function NewsSection() {
                   </div>
                   
                   <h4 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors">
-                    <Link to={`/berita/${item.slug || item.id}`}>{item.title}</Link>
+                    <Link to={`/berita/${item.id}`}>{item.title}</Link>
                   </h4>
                   
                   <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow">
                     {stripHtml(item.excerpt)}
                   </p>
                   
-                  <Link to={`/berita/${item.slug || item.id}`} className="inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-800 mt-auto">
+                  <Link to={`/berita/${item.id}`} className="inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-800 mt-auto">
                     Baca Selengkapnya
                   </Link>
                 </div>

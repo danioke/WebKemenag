@@ -91,53 +91,6 @@ export const makeFilePublic = async (fileId: string, token: string): Promise<boo
   }
 };
 
-const getOrCreateDriveFolder = async (folderName: string, token: string, parentId?: string): Promise<string> => {
-  try {
-    let query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`;
-    if (parentId) {
-      query += ` and '${parentId}' in parents`;
-    }
-    
-    const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id)`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    
-    if (searchRes.ok) {
-      const searchData = await searchRes.json();
-      if (searchData.files && searchData.files.length > 0) {
-        return searchData.files[0].id;
-      }
-    }
-    
-    const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: folderName,
-        mimeType: 'application/vnd.google-apps.folder',
-        parents: parentId ? [parentId] : undefined
-      })
-    });
-    
-    if (!createRes.ok) {
-      throw new Error('Failed to create folder');
-    }
-    
-    const createData = await createRes.json();
-    await makeFilePublic(createData.id, token);
-    
-    return createData.id;
-  } catch (err) {
-    console.error('Error in getOrCreateDriveFolder:', err);
-    throw err;
-  }
-};
-
 // Helper to upload a file to Google Drive and make it public
 export const uploadFileToDrive = async (
   file: File,
@@ -145,56 +98,31 @@ export const uploadFileToDrive = async (
   onProgress?: (percent: number) => void
 ): Promise<{ id: string; name: string; webViewLink: string; webContentLink: string; size: string } | null> => {
   try {
-    let subFolderName = 'dokumen';
-    if (file.type.startsWith('image/')) {
-      subFolderName = 'foto';
-    } else if (file.type.startsWith('video/')) {
-      subFolderName = 'video';
-    } else if (file.type === 'application/pdf') {
-      subFolderName = 'pdf';
-    }
-    
-    const mainFolderId = await getOrCreateDriveFolder('webgaleri', token);
-    const subFolderId = await getOrCreateDriveFolder(subFolderName, token, mainFolderId);
-
-    const boundary = '-------314159265358979323846';
-    const delimiter = `\r\n--${boundary}\r\n`;
-    const close_delim = `\r\n--${boundary}--`;
-
+    // 1. Prepare Metadata
     const metadata = {
       name: file.name,
       mimeType: file.type,
-      parents: [subFolderId]
     };
 
-    const multipartRequestBody = new Blob([
-      delimiter,
-      'Content-Type: application/json\r\n\r\n',
-      JSON.stringify(metadata),
-      delimiter,
-      `Content-Type: ${file.type}\r\n\r\n`,
-      file,
-      close_delim
-    ]);
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file);
 
     const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink,webContentLink,size', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`
       },
-      body: multipartRequestBody
+      body: form,
     });
 
     if (!res.ok) {
-      const errText = await res.text();
-      console.error('Drive upload failed:', res.status, errText);
       throw new Error(`Upload gagal dengan status: ${res.status}`);
     }
 
     const data = await res.json();
-
-    // 3. Make it public so visitors can see it
+    
+    // 2. Make it public so visitors can see it
     await makeFilePublic(data.id, token);
 
     // Format size

@@ -88,7 +88,7 @@ export default function Header() {
   const [navLinks, setNavLinks] = useState<NavLink[]>(staticNavLinks);
 
   useEffect(() => {
-    const q = query(collection(db, 'kemenag_navigation'), orderBy('order', 'asc'));
+    const q = query(collection(db, 'navigation'), orderBy('order', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       if (!snapshot.empty) {
         const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
@@ -128,17 +128,6 @@ export default function Header() {
           dangerouslySetInnerHTML={{ __html: (matchedSubItem as any).content }}
         />
       );
-    } else if (id.startsWith('layanan-') && id !== 'layanan-ptsp') {
-      const layananId = id.replace('layanan-', '');
-      // Ensure we use the correct mapping for bimas
-      const mappedId = layananId === 'bimas' ? 'bimas-islam' : 
-                       layananId === 'madrasah' ? 'pendidikan-madrasah' : 
-                       layananId === 'pesantren' ? 'pondok-pesantren' :
-                       layananId === 'pai' ? 'pendidikan-agama-islam' :
-                       layananId === 'zakat-wakaf' ? 'sertifikasi-halal' :
-                       layananId === 'kecamatan' ? 'urusan-agama-islam' : layananId;
-      window.location.href = `/layanan/${mappedId}`;
-      return;
     } else if (id === 'visi-misi') {
       icon = Award;
       title = 'Visi & Misi';
@@ -453,12 +442,17 @@ export default function Header() {
             <div className="flex justify-between items-center">
               {/* Logo */}
               <div className="flex items-center gap-3">
-                <img 
-                  src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
-                  alt="Logo Kementerian Agama" 
-                  className="w-11 h-11 object-contain shrink-0 filter drop-shadow-sm hover:scale-105 transition-transform"
-                  referrerPolicy="no-referrer"
-                />
+                <svg className="w-11 h-11 shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="50" cy="50" r="46" fill="#15803d" stroke="#f59e0b" strokeWidth="3" />
+                  <circle cx="50" cy="50" r="38" fill="#166534" />
+                  <path d="M50 18L53.5 26.5H62.5L55.5 31.5L58 40L50 35L42 40L44.5 31.5L37.5 26.5H46.5L50 18Z" fill="#fbbf24" />
+                  <path d="M50 52C45 47 37 47 32 49V64C37 62 45 62 50 67C55 62 63 62 68 64V49C63 47 55 47 50 52Z" fill="#ffffff" stroke="#fbbf24" strokeWidth="2" strokeLinejoin="round" />
+                  <path d="M35 53H45M35 57H45M35 60H45M65 53H55M65 57H55M65 60H55" stroke="#166534" strokeWidth="1" />
+                  <path d="M44 68H56V74H44V68Z" fill="#fbbf24" />
+                  <path d="M22 50C22 35 34 26 44 26" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M78 50C78 35 66 26 56 26" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M50 33L70 43V60C70 72 50 82 50 82C50 82 30 72 30 60V43L50 33Z" stroke="#fbbf24" strokeWidth="1.5" fill="none" />
+                </svg>
                 <div className="flex flex-col">
                   <span className="font-extrabold text-gray-900 leading-none text-sm md:text-base tracking-tight uppercase">Kementerian Agama</span>
                   <span className="text-[9px] md:text-xs text-green-700 font-bold tracking-widest uppercase">Kabupaten Ogan Komering Ilir</span>
@@ -540,118 +534,75 @@ export default function Header() {
           </div>
         </nav>
 
-        {/* Mobile Nav - Slide Drawer with Bounce Effect */}
+        {/* Mobile Nav */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <>
-              {/* Backdrop Overlay */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setMobileMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 md:hidden"
-              />
-              
-              {/* Slide Out Menu */}
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ 
-                  type: 'spring', 
-                  stiffness: 180, 
-                  damping: 15 
-                }}
-                className="fixed top-0 right-0 h-screen w-80 max-w-[85vw] bg-white shadow-2xl z-50 md:hidden flex flex-col border-l border-gray-100"
-              >
-                {/* Header inside Menu */}
-                <div className="p-5 border-b border-green-100 flex items-center justify-between bg-green-50/50">
-                  <div className="flex items-center gap-2.5">
-                    <img 
-                      src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
-                      alt="Logo Kemenag" 
-                      className="w-10 h-10 object-contain shrink-0"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-extrabold text-gray-950 text-sm tracking-tight uppercase leading-none">KEMENTERIAN AGAMA</span>
-                      <span className="text-[10px] text-green-700 font-bold tracking-wider uppercase mt-1">Kabupaten Ogan Komering Ilir</span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-1.5 hover:bg-green-100 rounded-full transition-colors text-green-800"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                {/* Nav Links Container */}
-                <div className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
-                  {navLinks.map((link, idx) => (
-                    <div key={idx} className="block">
-                      {link.hasDropdown ? (
-                        <div className="bg-gray-50/50 rounded-xl border border-gray-100 overflow-hidden">
-                          <button
-                            onClick={() => setMobileDropdownOpen(mobileDropdownOpen === link.name ? null : link.name)}
-                            className="w-full flex items-center justify-between px-4 py-3 text-base font-semibold text-gray-800 hover:bg-green-50 hover:text-green-700 transition-colors"
-                          >
-                            <span>{link.name}</span>
-                            <ChevronDown size={18} className={`text-gray-400 transition-transform ${mobileDropdownOpen === link.name ? 'rotate-180 text-green-700' : ''}`} />
-                          </button>
-                          
-                          {/* Mobile Collapsible Subitems */}
-                          <AnimatePresence>
-                            {mobileDropdownOpen === link.name && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="px-2 pb-2 space-y-0.5 bg-white border-t border-gray-50"
-                              >
-                                {link.subItems?.map((sub, sidx) => {
-                                  const SubIcon = (typeof sub.icon === 'string' ? iconMap[sub.icon] : sub.icon) || BookOpen;
-                                  return (
-                                    <button
-                                      key={sidx}
-                                      onClick={() => handleItemClick(sub.id, sub.name)}
-                                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-600 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors font-medium"
-                                    >
-                                      <SubIcon size={16} className="text-green-700" />
-                                      <span>{sub.name}</span>
-                                    </button>
-                                  );
-                                })}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      ) : (
-                        <a 
-                          href={link.href} 
-                          onClick={(e) => handleLinkClick(e, link.href)}
-                          className="block px-4 py-3 text-base font-semibold text-gray-800 hover:bg-green-50 hover:text-green-700 rounded-xl transition-colors"
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="md:hidden bg-white shadow-xl absolute w-full border-t border-gray-100 z-40 max-h-[85vh] overflow-y-auto"
+            >
+              <div className="px-4 pt-2 pb-6 space-y-1">
+                {navLinks.map((link, idx) => (
+                  <div key={idx} className="block">
+                    {link.hasDropdown ? (
+                      <div>
+                        <button
+                          onClick={() => setMobileDropdownOpen(mobileDropdownOpen === link.name ? null : link.name)}
+                          className="w-full flex items-center justify-between px-3 py-3 text-base font-medium text-gray-800 hover:bg-green-50 hover:text-green-700 rounded-md"
                         >
-                          {link.name}
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Bottom Action Button */}
-                <div className="p-5 border-t border-gray-100 bg-gray-50">
+                          <span>{link.name}</span>
+                          <ChevronDown size={18} className={`text-gray-400 transition-transform ${mobileDropdownOpen === link.name ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        {/* Mobile Collapsible Subitems */}
+                        <AnimatePresence>
+                          {mobileDropdownOpen === link.name && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="pl-4 space-y-1 overflow-hidden"
+                            >
+                              {link.subItems?.map((sub, sidx) => {
+                                const SubIcon = (typeof sub.icon === 'string' ? iconMap[sub.icon] : sub.icon) || BookOpen;
+                                return (
+                                  <button
+                                    key={sidx}
+                                    onClick={() => handleItemClick(sub.id, sub.name)}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm text-gray-600 hover:bg-green-50 hover:text-green-700 rounded-md transition-colors"
+                                  >
+                                    <SubIcon size={16} className="text-green-700" />
+                                    <span>{sub.name}</span>
+                                  </button>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ) : (
+                      <a 
+                        href={link.href} 
+                        onClick={(e) => handleLinkClick(e, link.href)}
+                        className="block px-3 py-3 text-base font-medium text-gray-800 hover:bg-green-50 hover:text-green-700 rounded-md"
+                      >
+                        {link.name}
+                      </a>
+                    )}
+                  </div>
+                ))}
+                <div className="pt-4 px-3">
                   <button 
                     onClick={() => handleItemClick('layanan-ptsp', 'Layanan PTSP')}
-                    className="w-full flex justify-center py-3.5 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl shadow-md hover:shadow-lg shadow-green-700/10 active:scale-[0.98] transition-all cursor-pointer"
+                    className="w-full flex justify-center py-3 bg-green-700 hover:bg-green-800 text-white font-medium rounded-md shadow-sm transition-colors cursor-pointer"
                   >
                     Layanan PTSP
                   </button>
                 </div>
-              </motion.div>
-            </>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </header>

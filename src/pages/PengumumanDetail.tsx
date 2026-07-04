@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs, query, orderBy, limit, where } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { ArrowLeft, FileText, Download, ExternalLink, Share2, ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -11,7 +11,6 @@ interface Pengumuman {
   date: string;
   size: string;
   fileUrl: string;
-  slug?: string;
 }
 
 export default function PengumumanDetail() {
@@ -26,35 +25,19 @@ export default function PengumumanDetail() {
       if (!id) return;
       setLoading(true);
       try {
-        // First try to find by slug
-        const slugQuery = query(collection(db, 'kemenag_announcements'), where('slug', '==', id));
-        const slugSnap = await getDocs(slugQuery);
-        
-        let foundPengumuman = null;
-        let foundId = id;
-        
-        if (!slugSnap.empty) {
-          foundPengumuman = { id: slugSnap.docs[0].id, ...slugSnap.docs[0].data() } as Pengumuman;
-          foundId = slugSnap.docs[0].id;
-        } else {
-          // Fallback to fetch by ID
-          const docRef = doc(db, 'kemenag_announcements', id);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            foundPengumuman = { id: docSnap.id, ...docSnap.data() } as Pengumuman;
-          }
-        }
-
-        if (foundPengumuman) {
-          setPengumuman(foundPengumuman);
+        // Fetch current
+        const docRef = doc(db, 'announcements', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setPengumuman({ id: docSnap.id, ...docSnap.data() } as Pengumuman);
         }
 
         // Fetch others
-        const q = query(collection(db, 'kemenag_announcements'), orderBy('createdAt', 'desc'), limit(5));
+        const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
         const querySnapshot = await getDocs(q);
         const others = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Pengumuman))
-          .filter(item => item.id !== foundId)
+          .filter(item => item.id !== id)
           .slice(0, 3); // top 3 other ones
 
         if (others.length > 0) {
@@ -206,7 +189,7 @@ export default function PengumumanDetail() {
                 {otherAnnouncements.map((item) => (
                   <Link 
                     key={item.id} 
-                    to={`/pengumuman/${item.slug || item.id}`}
+                    to={`/pengumuman/${item.id}`}
                     className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-all group animate-fade-in"
                   >
                     <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">

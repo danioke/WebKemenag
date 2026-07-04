@@ -3,16 +3,6 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
 import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
-  const generateSlug = (text: string) => {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')       // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')   // Remove all non-word chars
-      .replace(/\-\-+/g, '-');    // Replace multiple - with single -
-  };
-
 
 interface Agenda {
   id: string;
@@ -33,7 +23,7 @@ export default function AgendaAdmin() {
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'kemenag_agendas'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'agendas'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Agenda));
       setData(docs);
@@ -58,20 +48,19 @@ export default function AgendaAdmin() {
     
     try {
       if (isEditing) {
-        const docRef = doc(db, 'kemenag_agendas', formData.id);
+        const docRef = doc(db, 'agendas', formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           date: formData.date,
           month: formData.month,
           time: formData.time,
           location: formData.location,
-          slug: generateSlug(formData.title),
           status: formData.status,
           fullDate: formData.fullDate || '',
         });
         toast.success('Agenda berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'kemenag_agendas'), {
+        await addDoc(collection(db, 'agendas'), {
           title: formData.title,
           date: formData.date,
           month: formData.month,
@@ -79,7 +68,6 @@ export default function AgendaAdmin() {
           location: formData.location,
           status: formData.status,
           fullDate: formData.fullDate || '',
-          slug: generateSlug(formData.title),
           createdAt: serverTimestamp()
         });
         toast.success('Agenda berhasil ditambahkan');
@@ -101,7 +89,7 @@ export default function AgendaAdmin() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus agenda ini?')) {
       try {
-        await deleteDoc(doc(db, 'kemenag_agendas', id));
+        await deleteDoc(doc(db, 'agendas', id));
         toast.success('Agenda berhasil dihapus');
         fetchData();
       } catch (error) {

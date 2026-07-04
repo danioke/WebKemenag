@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from '../../lib/firebase';
+import { db } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { Editor } from '@tinymce/tinymce-react';
 import { 
   Plus, Trash2, Edit2, GraduationCap, BookOpen, Building2, Book, 
-  User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award
+  User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X
 } from 'lucide-react';
 
 // Default values for fallbacks
@@ -155,26 +155,6 @@ const defaultLayananData: Record<string, any> = {
         </div>
       </div>
     `
-  },
-  'pendidikan-agama-islam': {
-    title: 'Pendidikan Agama Islam (PAIS)',
-    tugasFungsi: `
-      <p class="mb-4">Seksi Pendidikan Agama Islam (PAIS) mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data and informasi Pendidikan Agama Islam pada Pendidikan Anak Usia Dini (PAUD), Taman Kanak-Kanak (TK), Sekolah Dasar (SD), Sekolah Menengah Pertama (SMP), Sekolah Menengah Atas (SMA), dan Sekolah Menengah Kejuruan (SMK) di bawah naungan Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.</p>
-      <h4 class="font-bold text-gray-900 mt-6 mb-3 text-lg">Tugas & Fungsi Utama:</h4>
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
-        <li>Penyusunan kebijakan teknis operasional kurikulum, kesiswaan, kelembagaan, sarana prasarana, serta pendidik dan tenaga kependidikan Agama Islam pada sekolah umum.</li>
-        <li>Pelaksanaan pelayanan administrasi pendidik Agama Islam (GPAI) meliputi bimbingan sertifikasi dan peningkatan kompetensi guru.</li>
-        <li>Pelaksanaan bimbingan teknis, monitoring, evaluasi, dan pelaporan pelaksanaan program peningkatan mutu pembelajaran Pendidikan Agama Islam.</li>
-        <li>Pengelolaan sistem informasi pendidikan melalui verifikasi database SIAGA (Sistem Informasi dan Administrasi Guru Agama) secara berkala.</li>
-        <li>Fasilitasi penyaluran tunjangan profesi guru (TPG) bersertifikasi bagi Guru Pendidikan Agama Islam pada sekolah.</li>
-      </ul>
-    `,
-    kasiName: 'H. Junaidi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400',
-    staf: [
-      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250' }
-    ]
   }
 };
 
@@ -210,7 +190,7 @@ export default function LayananAdmin() {
   const loadLayananData = async () => {
     setLoading(true);
     try {
-      const docRef = doc(db, 'kemenag_layanan_data', activeTab);
+      const docRef = doc(db, 'layanan_data', activeTab);
       const docSnap = await getDoc(docRef);
 
       const fallback = defaultLayananData[activeTab];
@@ -230,16 +210,9 @@ export default function LayananAdmin() {
         setStaf(fallback.staf || []);
         setSyarat(fallback.syarat || '');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Gagal mengambil data:", error);
-      toast.error(`Gagal mengambil data dari database: ${error.message || 'Unknown error'}`);
-      const fallback = defaultLayananData[activeTab];
-      setTitle(fallback.title);
-      setTugasFungsi(fallback.tugasFungsi || '');
-      setKasiName(fallback.kasiName || '');
-      setKasiPhoto(fallback.kasiPhoto || '');
-      setStaf(fallback.staf || []);
-      setSyarat(fallback.syarat || '');
+      toast.error("Gagal mengambil data layanan");
     } finally {
       setLoading(false);
     }
@@ -250,14 +223,9 @@ export default function LayananAdmin() {
   }, [activeTab]);
 
   const handleSave = async () => {
-    if (!auth.currentUser) {
-      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
-      return;
-    }
-    
     setSaving(true);
     try {
-      const docRef = doc(db, 'kemenag_layanan_data', activeTab);
+      const docRef = doc(db, 'layanan_data', activeTab);
       await setDoc(docRef, {
         id: activeTab,
         title,
@@ -331,8 +299,7 @@ export default function LayananAdmin() {
     { id: 'pendidikan-madrasah', name: 'Pendidikan Madrasah', icon: GraduationCap },
     { id: 'bimas-islam', name: 'Bimas Islam', icon: BookOpen },
     { id: 'pondok-pesantren', name: 'Pondok Pesantren', icon: Building2 },
-    { id: 'sertifikasi-halal', name: 'Sertifikasi Halal', icon: Book },
-    { id: 'pendidikan-agama-islam', name: 'Pendidikan Agama Islam (PAIS)', icon: Award }
+    { id: 'sertifikasi-halal', name: 'Sertifikasi Halal', icon: Book }
   ];
 
   return (

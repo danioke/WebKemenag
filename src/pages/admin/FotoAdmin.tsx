@@ -21,7 +21,7 @@ export default function FotoAdmin() {
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'kemenag_photos'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Foto));
       setData(docs);
@@ -46,14 +46,14 @@ export default function FotoAdmin() {
     
     try {
       if (isEditing) {
-        const docRef = doc(db, 'kemenag_photos', formData.id);
+        const docRef = doc(db, 'photos', formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           image: formData.image,
         });
         toast.success('Foto berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'kemenag_photos'), {
+        await addDoc(collection(db, 'photos'), {
           title: formData.title,
           image: formData.image,
           createdAt: serverTimestamp()
@@ -77,7 +77,7 @@ export default function FotoAdmin() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
       try {
-        await deleteDoc(doc(db, 'kemenag_photos', id));
+        await deleteDoc(doc(db, 'photos', id));
         toast.success('Foto berhasil dihapus');
         fetchData();
       } catch (error) {

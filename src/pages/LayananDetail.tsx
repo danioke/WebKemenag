@@ -5,7 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, GraduationCap, BookOpen, Building2, Book, Heart, 
-  MapPin, ChevronLeft, ChevronRight, Search, Globe, Phone, Mail, Clock, Award
+  MapPin, ChevronLeft, ChevronRight, Search, Globe, Phone, Mail, Clock
 } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -16,8 +16,7 @@ const iconMap: Record<string, any> = {
   'bimas-islam': BookOpen,
   'pondok-pesantren': Building2,
   'sertifikasi-halal': Book,
-  'urusan-agama-islam': Heart,
-  'pendidikan-agama-islam': Award
+  'urusan-agama-islam': Heart
 };
 
 // Default static and fallbacks for service data
@@ -167,26 +166,6 @@ const defaultLayananData: Record<string, any> = {
         </div>
       </div>
     `
-  },
-  'pendidikan-agama-islam': {
-    title: 'Pendidikan Agama Islam (PAIS)',
-    tugasFungsi: `
-      <p class="mb-4">Seksi Pendidikan Agama Islam (PAIS) mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi Pendidikan Agama Islam pada Pendidikan Anak Usia Dini (PAUD), Taman Kanak-Kanak (TK), Sekolah Dasar (SD), Sekolah Menengah Pertama (SMP), Sekolah Menengah Atas (SMA), dan Sekolah Menengah Kejuruan (SMK) di bawah naungan Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.</p>
-      <h4 class="font-bold text-gray-900 mt-6 mb-3 text-lg">Tugas & Fungsi Utama:</h4>
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
-        <li>Penyusunan kebijakan teknis operasional kurikulum, kesiswaan, kelembagaan, sarana prasarana, serta pendidik dan tenaga kependidikan Agama Islam pada sekolah umum.</li>
-        <li>Pelaksanaan pelayanan administrasi pendidik Agama Islam (GPAI) meliputi bimbingan sertifikasi dan peningkatan kompetensi guru.</li>
-        <li>Pelaksanaan bimbingan teknis, monitoring, evaluasi, dan pelaporan pelaksanaan program peningkatan mutu pembelajaran Pendidikan Agama Islam.</li>
-        <li>Pengelolaan sistem informasi pendidikan melalui verifikasi database SIAGA (Sistem Informasi dan Administrasi Guru Agama) secara berkala.</li>
-        <li>Fasilitasi penyaluran tunjangan profesi guru (TPG) bersertifikasi bagi Guru Pendidikan Agama Islam pada sekolah.</li>
-      </ul>
-    `,
-    kasiName: 'H. Junaidi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400',
-    staf: [
-      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250' }
-    ]
   }
 };
 
@@ -239,7 +218,7 @@ export default function LayananDetail() {
       }
 
       try {
-        const docRef = doc(db, 'kemenag_layanan_data', id);
+        const docRef = doc(db, 'layanan_data', id);
         const docSnap = await getDoc(docRef);
         
         const fallback = defaultLayananData[id] || { title: 'Layanan Utama', tugasFungsi: 'Deskripsi sedang diperbarui.' };
@@ -254,9 +233,8 @@ export default function LayananDetail() {
         } else {
           setData(fallback);
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error("Gagal memuat data layanan:", error);
-        console.error("Error code:", error.code);
         setData(defaultLayananData[id] || { title: 'Layanan Utama' });
       } finally {
         setLoading(false);

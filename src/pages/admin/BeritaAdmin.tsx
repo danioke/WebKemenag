@@ -5,16 +5,6 @@ import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, CloudDownload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
-  const generateSlug = (text: string) => {
-    return text
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '-')       // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')   // Remove all non-word chars
-      .replace(/\-\-+/g, '-');    // Replace multiple - with single -
-  };
-
 
 interface Berita {
   id: string;
@@ -51,7 +41,7 @@ export default function BeritaAdmin() {
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'kemenag_news'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Berita));
       setData(docs);
@@ -76,26 +66,24 @@ export default function BeritaAdmin() {
     
     try {
       if (isEditing) {
-        const docRef = doc(db, 'kemenag_news', formData.id);
+        const docRef = doc(db, 'news', formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           category: formData.category,
           date: formData.date,
           author: formData.author,
           image: formData.image,
-          slug: generateSlug(formData.title),
           excerpt: formData.excerpt,
         });
         toast.success('Berita berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'kemenag_news'), {
+        await addDoc(collection(db, 'news'), {
           title: formData.title,
           category: formData.category,
           date: formData.date,
           author: formData.author,
           image: formData.image,
           excerpt: formData.excerpt,
-          slug: generateSlug(formData.title),
           createdAt: serverTimestamp()
         });
         toast.success('Berita berhasil ditambahkan');
@@ -117,7 +105,7 @@ export default function BeritaAdmin() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
       try {
-        await deleteDoc(doc(db, 'kemenag_news', id));
+        await deleteDoc(doc(db, 'news', id));
         toast.success('Berita berhasil dihapus');
         fetchData();
       } catch (error) {
