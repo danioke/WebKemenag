@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, CloudDownload } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Editor } from '@tinymce/tinymce-react';
+import DefaultEditor from 'react-simple-wysiwyg';
 
 interface Berita {
   id: string;
@@ -59,6 +59,10 @@ export default function BeritaAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
+      return;
+    }
     if (!formData.title || !formData.date || !formData.category) {
       toast.error('Judul, kategori, dan tanggal wajib diisi');
       return;
@@ -103,6 +107,10 @@ export default function BeritaAdmin() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!auth.currentUser) {
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menghapus.');
+      return;
+    }
     if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
       try {
         await deleteDoc(doc(db, 'news', id));
@@ -285,27 +293,10 @@ export default function BeritaAdmin() {
                 </div>
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
-                  <div className="bg-white border border-gray-300 rounded-md overflow-hidden">
-                    <Editor
-                      tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"
+                  <div className="bg-white border border-gray-300 rounded-md overflow-hidden" style={{ minHeight: '350px' }}>
+                    <DefaultEditor
                       value={formData.excerpt}
-                      onEditorChange={(content) => setFormData({ ...formData, excerpt: content })}
-                      init={{
-                        height: 350,
-                        menubar: true,
-                        plugins: [
-                          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'charmap'
-                        ],
-                        toolbar: 'undo redo | blocks | ' +
-                          'bold italic underline | alignleft aligncenter ' +
-                          'alignright alignjustify | blockquote | ' +
-                          'image code fullscreen preview | help',
-                        content_style: 'body { font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px }',
-                        branding: false,
-                        promotion: false
-                      }}
+                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                     />
                   </div>
                 </div>

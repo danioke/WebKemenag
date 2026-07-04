@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Calendar, User, Share2, ArrowLeft, Tag } from 'lucide-react';
+import { Calendar, User, Share2, ArrowLeft, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 
@@ -22,6 +22,7 @@ export default function BeritaDetail() {
   const [berita, setBerita] = useState<Berita | null>(null);
   const [otherNews, setOtherNews] = useState<Berita[]>([]);
   const [loading, setLoading] = useState(true);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,13 +35,13 @@ export default function BeritaDetail() {
           setBerita({ id: docSnap.id, ...docSnap.data() } as Berita);
         }
 
-        // Fetch other news (latest 4, excluding current)
-        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(5));
+        // Fetch other news (latest 5, excluding current)
+        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(6));
         const querySnapshot = await getDocs(q);
         const newsData = querySnapshot.docs
           .map(doc => ({ id: doc.id, ...doc.data() } as Berita))
           .filter(item => item.id !== id)
-          .slice(0, 4);
+          .slice(0, 5);
         setOtherNews(newsData);
 
       } catch (error) {
@@ -61,6 +62,13 @@ export default function BeritaDetail() {
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert('Link disalin ke clipboard');
+    }
+  };
+
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = 340; // width of card + gap
+      carouselRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
     }
   };
 
@@ -123,10 +131,14 @@ export default function BeritaDetail() {
       <main className="flex-grow py-6 sm:py-12">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-white sm:p-10 rounded-none sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 pb-10">
           
-          <div className="flex items-center gap-3 mb-4 mt-4 sm:mt-0 flex-wrap">
+          <div className="flex items-center justify-between mb-4 mt-4 sm:mt-0 flex-wrap gap-3">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
               <Tag size={12} /> {berita.category}
             </span>
+            <button onClick={handleShare} className="flex items-center gap-2 text-gray-500 hover:text-green-700 transition-colors py-1.5 px-4 bg-gray-50 hover:bg-green-50 rounded-full border border-gray-100 shadow-sm text-sm font-medium ml-auto">
+              <Share2 size={16} />
+              <span>Bagikan</span>
+            </button>
           </div>
           
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
@@ -159,8 +171,29 @@ export default function BeritaDetail() {
         {/* Berita Lainnya - Carousel/Horizontal Scroll */}
         {otherNews.length > 0 && (
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Berita Lainnya</h3>
-            <div className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Berita Lainnya</h3>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => scrollCarousel('left')}
+                  className="p-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm text-gray-600"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button 
+                  onClick={() => scrollCarousel('right')}
+                  className="p-2 rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm text-gray-600"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+            
+            <div 
+              ref={carouselRef}
+              className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory scrollbar-hide" 
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
               {otherNews.map((item, idx) => (
                 <Link 
                   key={item.id} 

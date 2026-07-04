@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, HardDrive } from 'lucide-react';
 import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
@@ -41,6 +41,10 @@ export default function PengumumanAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth.currentUser) {
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
+      return;
+    }
     if (!formData.title || !formData.date) {
       toast.error('Judul dan tanggal wajib diisi');
       return;
@@ -81,6 +85,10 @@ export default function PengumumanAdmin() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!auth.currentUser) {
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menghapus.');
+      return;
+    }
     if (window.confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {
       try {
         await deleteDoc(doc(db, 'announcements', id));

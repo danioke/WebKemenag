@@ -8,6 +8,7 @@ import Agenda from '../components/Agenda';
 import MediaGallery from '../components/MediaGallery';
 import AplikasiCarousel from '../components/AplikasiCarousel';
 import Footer from '../components/Footer';
+import JadwalSholatWidget from '../components/JadwalSholatWidget';
 import { ShieldCheck } from 'lucide-react';
 
 export default function HomePage() {
@@ -16,6 +17,14 @@ export default function HomePage() {
       <Header />
       <main className="flex-grow">
         <Hero />
+        
+        {/* Daily Widgets Section */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-20 mb-12">
+          <div className="w-full">
+            <JadwalSholatWidget />
+          </div>
+        </section>
+
         <Services />
         
         {/* Zona Integritas Wilayah Bebas Korupsi (WBK) - Modern Design Banner */}

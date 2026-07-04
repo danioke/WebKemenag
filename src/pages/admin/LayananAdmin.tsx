@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
-import { Editor } from '@tinymce/tinymce-react';
+import DefaultEditor from 'react-simple-wysiwyg';
 import { 
   Plus, Trash2, Edit2, GraduationCap, BookOpen, Building2, Book, 
   User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award
@@ -419,27 +419,10 @@ export default function LayananAdmin() {
                     Mendukung HTML & Formatter
                   </span>
                 </div>
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  <Editor
-                    tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"
+                <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '450px' }}>
+                  <DefaultEditor
                     value={syarat}
-                    onEditorChange={(content) => setSyarat(content)}
-                    init={{
-                      height: 450,
-                      menubar: true,
-                      plugins: [
-                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'charmap'
-                      ],
-                      toolbar: 'undo redo | blocks | ' +
-                        'bold italic underline | alignleft aligncenter ' +
-                        'alignright alignjustify | blockquote | ' +
-                        'image code fullscreen preview | help',
-                      content_style: 'body { font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px }',
-                      branding: false,
-                      promotion: false
-                    }}
+                    onChange={(e) => setSyarat(e.target.value)}
                   />
                 </div>
               </div>
@@ -454,27 +437,10 @@ export default function LayananAdmin() {
                     Mendukung HTML & Formatter
                   </span>
                 </div>
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  <Editor
-                    tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"
+                <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '400px' }}>
+                  <DefaultEditor
                     value={tugasFungsi}
-                    onEditorChange={(content) => setTugasFungsi(content)}
-                    init={{
-                      height: 400,
-                      menubar: true,
-                      plugins: [
-                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'charmap'
-                      ],
-                      toolbar: 'undo redo | blocks | ' +
-                        'bold italic underline | alignleft aligncenter ' +
-                        'alignright alignjustify | blockquote | ' +
-                        'image code fullscreen preview | help',
-                      content_style: 'body { font-family:Inter,Helvetica,Arial,sans-serif; font-size:14px }',
-                      branding: false,
-                      promotion: false
-                    }}
+                    onChange={(e) => setTugasFungsi(e.target.value)}
                   />
                 </div>
               </div>

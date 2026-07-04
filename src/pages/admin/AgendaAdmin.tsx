@@ -40,6 +40,10 @@ export default function AgendaAdmin() {
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (!auth.currentUser) {
+      toast.error("Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.");
+      return;
+    }
     e.preventDefault();
     if (!formData.title || !formData.date || !formData.month) {
       toast.error('Judul, tanggal, dan bulan wajib diisi');
