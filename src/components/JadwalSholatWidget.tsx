@@ -142,16 +142,47 @@ export default function JadwalSholatWidget() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-800"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {times.map((t, i) => (
-            <div key={i} className="bg-gray-50 rounded-xl p-4 flex flex-col justify-center border border-gray-100 hover:border-green-200 transition-colors shadow-sm">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-600 text-sm">{t.name}</span>
-                {t.icon}
+        <div className="relative w-full overflow-hidden">
+          {/* Mobile view: continuous marquee */}
+          <div className="flex md:hidden relative w-full overflow-hidden">
+            <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+              <div className="flex gap-4 pr-4">
+                {times.map((t, i) => (
+                  <div key={`a-${i}`} className="w-36 bg-gray-50 rounded-xl p-4 flex flex-col justify-center border border-gray-100 shadow-sm shrink-0 cursor-default">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600 text-sm font-medium">{t.name}</span>
+                      {t.icon}
+                    </div>
+                    <div className="text-green-800 font-bold text-2xl">{t.time}</div>
+                  </div>
+                ))}
               </div>
-              <div className="text-green-800 font-bold text-2xl">{t.time}</div>
+              <div className="flex gap-4 pr-4">
+                {times.map((t, i) => (
+                  <div key={`b-${i}`} className="w-36 bg-gray-50 rounded-xl p-4 flex flex-col justify-center border border-gray-100 shadow-sm shrink-0 cursor-default">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-gray-600 text-sm font-medium">{t.name}</span>
+                      {t.icon}
+                    </div>
+                    <div className="text-green-800 font-bold text-2xl">{t.time}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Desktop view: normal grid */}
+          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {times.map((t, i) => (
+              <div key={i} className="bg-gray-50 rounded-xl p-4 flex flex-col justify-center border border-gray-100 hover:border-green-200 transition-colors shadow-sm">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-gray-600 text-sm font-medium">{t.name}</span>
+                  {t.icon}
+                </div>
+                <div className="text-green-800 font-bold text-2xl">{t.time}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

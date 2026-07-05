@@ -1,3 +1,4 @@
+import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
@@ -27,30 +28,38 @@ export default function AgendaDetail() {
       if (!id) return;
       setLoading(true);
       try {
-        // Fetch current
-        const docRef = doc(db, 'agendas', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setAgenda({ id: docSnap.id, ...docSnap.data() } as Agenda);
-        }
-
-        // Fetch other agendas
-        const q = query(collection(db, 'agendas'), orderBy('createdAt', 'desc'), limit(5));
+        const q = query(collection(db, 'agendas'));
         const querySnapshot = await getDocs(q);
-        const others = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() } as Agenda))
-          .filter(item => item.id !== id)
-          .slice(0, 3); // top 3 other agendas
-
-        if (others.length > 0) {
-          setOtherAgendas(others);
-        } else {
-          // Fallback others
-          setOtherAgendas([
-            { id: '1', title: "Rapat Koordinasi Persiapan Hari Santri Nasional 2024", date: "15", month: "Okt", time: "09:00 - Selesai", location: "Aula Kemenag OKI", status: "Mendatang" },
-            { id: '2', title: "Bimbingan Manasik Haji Tingkat Kabupaten OKI", date: "22", month: "Okt", time: "08:00 - 15:00", location: "Masjid Agung Kayuagung", status: "Mendatang" },
-            { id: '3', title: "Pembinaan Penyuluh Agama Islam Non-PNS", date: "28", month: "Okt", time: "10:00 - Selesai", location: "KUA Kecamatan Kayuagung", status: "Mendatang" }
-          ].filter(item => item.id !== id).slice(0, 3));
+        
+        let foundDoc = null;
+        for (const doc of querySnapshot.docs) {
+          if (doc.id === id || createSlug(doc.data().title) === id) {
+            foundDoc = { id: doc.id, ...doc.data() } as Agenda;
+            break;
+          }
+        }
+        
+        if (foundDoc) {
+          setAgenda(foundDoc);
+          
+          // Fetch other agendas
+          const otherQ = query(collection(db, 'agendas'), orderBy('createdAt', 'desc'), limit(5));
+          const otherSnap = await getDocs(otherQ);
+          const others = otherSnap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Agenda))
+            .filter(item => item.id !== foundDoc?.id)
+            .slice(0, 3); // top 3 other agendas
+            
+          if (others.length > 0) {
+            setOtherAgendas(others);
+          } else {
+            // Fallback others
+            setOtherAgendas([
+              { id: '1', title: "Rapat Koordinasi Persiapan Hari Santri Nasional 2024", date: "15", month: "Okt", time: "09:00 - Selesai", location: "Aula Kemenag OKI", status: "Mendatang" },
+              { id: '2', title: "Bimbingan Manasik Haji Tingkat Kabupaten OKI", date: "22", month: "Okt", time: "08:00 - 15:00", location: "Masjid Agung Kayuagung", status: "Mendatang" },
+              { id: '3', title: "Pembinaan Penyuluh Agama Islam Non-PNS", date: "28", month: "Okt", time: "10:00 - Selesai", location: "KUA Kecamatan Kayuagung", status: "Mendatang" }
+            ].filter(item => item.id !== foundDoc?.id).slice(0, 3));
+          }
         }
       } catch (error) {
         console.error("Error fetching agenda:", error);
@@ -174,7 +183,7 @@ export default function AgendaDetail() {
                 {otherAgendas.map((item) => (
                   <Link 
                     key={item.id} 
-                    to={`/agenda/${item.id}`}
+                    to={`/agenda/${createSlug(item.title)}`}
                     className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-all group animate-fade-in"
                   >
                     <div className="flex flex-col items-center justify-center bg-green-50 text-green-800 rounded-xl w-16 h-16 shrink-0 border border-green-100">

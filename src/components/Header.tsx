@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Phone, Mail, MapPin, ChevronDown, ChevronRight, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle } from 'lucide-react';
+import { Menu, X, Facebook, Instagram, Youtube, Phone, Mail, MapPin, ChevronDown, ChevronRight, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useSettingsStore } from '../store/useSettingsStore';
+import { useNavigate } from 'react-router-dom';
 
 const iconMap: Record<string, any> = {
   Award,
@@ -70,11 +71,12 @@ const staticNavLinks: NavLink[] = [
 ];
 
 export default function Header() {
-  const { logoUrl, contactInfo } = useSettingsStore();
+  const { logoUrl, contactInfo, socialMedia } = useSettingsStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   // Interactive Modal State
   const [selectedItem, setSelectedItem] = useState<{ title: string; subtitle: string; icon: any; content: React.ReactNode } | null>(null);
@@ -225,18 +227,20 @@ export default function Header() {
           </p>
           <div className="bg-green-50/50 p-4 rounded-xl border border-green-100 text-sm space-y-2">
             <p className="font-bold text-green-900">Alamat Lengkap:</p>
-            <p>Jl. Letnan Muchtar Saleh No. 1, Kelurahan Sidakersa, Kecamatan Kayuagung, Kabupaten Ogan Komering Ilir, Sumatera Selatan, Kode Pos 30613.</p>
+            <p>{contactInfo.address}</p>
             <p><strong>Telepon:</strong> {contactInfo.phone}</p>
             <p><strong>Email resmi:</strong> {contactInfo.email}</p>
           </div>
-          <div className="w-full h-64 rounded-xl border border-gray-200 overflow-hidden relative shadow-inner bg-gray-100 flex flex-col justify-center items-center p-4 text-center">
-            <MapPin size={36} className="text-green-700 animate-bounce mb-2" />
-            <span className="font-bold text-gray-800 text-sm">Kayuagung, OKI</span>
-            <span className="text-xs text-gray-400 mt-1 max-w-xs">Peta Lokasi Kantor Terintegrasi Wilayah Kabupaten OKI</span>
-            {/* Real embedded map placeholder container */}
-            <div className="absolute inset-0 bg-green-900/5 hover:bg-transparent transition-colors cursor-pointer flex items-end p-2 justify-center">
-              <span className="text-[10px] bg-white px-2 py-1 rounded shadow text-gray-600 font-mono">Latitude: -3.3965, Longitude: 104.8398</span>
-            </div>
+          <div className="w-full h-64 rounded-xl border border-gray-200 overflow-hidden relative shadow-inner bg-gray-100 p-0">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.393457597155!2d104.8351059!3d-3.3761763!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e3b1c8f4b1e5f8b%3A0xcb4bb7d896a2db84!2sKantor%20Kementerian%20Agama%20Kab.%20OKI!5e0!3m2!1sen!2sid!4v1714493351984!5m2!1sen!2sid" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
         </div>
       );
@@ -409,6 +413,20 @@ export default function Header() {
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href?: string) => {
     if (!href) return;
     
+    if (href === '#berita') {
+      e.preventDefault();
+      navigate('/berita');
+      setMobileMenuOpen(false);
+      return;
+    }
+    
+    if (href === '#kontak') {
+      e.preventDefault();
+      handleItemClick('peta-lokasi', 'Peta Lokasi Kantor');
+      setMobileMenuOpen(false);
+      return;
+    }
+
     // Smooth scrolling to section if hashtag is provided
     if (href.startsWith('#')) {
       e.preventDefault();
@@ -417,6 +435,10 @@ export default function Header() {
       if (targetElement) {
         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    } else if (href.startsWith('/')) {
+      e.preventDefault();
+      navigate(href);
+      setMobileMenuOpen(false);
     }
   };
 
@@ -427,13 +449,26 @@ export default function Header() {
         <div className="bg-green-800 text-white text-xs py-2 hidden md:block">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <div className="flex space-x-6">
-              <span className="flex items-center gap-1.5"><MapPin size={14} /> Jl. Letnan Muchtar Saleh No. 1, Kayuagung, OKI</span>
+              <span className="flex items-center gap-1.5"><MapPin size={14} /> {contactInfo.address}</span>
               <span className="flex items-center gap-1.5"><Phone size={14} /> {contactInfo.phone}</span>
               <span className="flex items-center gap-1.5"><Mail size={14} /> {contactInfo.email}</span>
             </div>
             <div className="flex space-x-4 font-medium">
-              <a href="#" className="hover:text-green-200 transition-colors">Webmail</a>
-              <a href="#" className="hover:text-green-200 transition-colors">Simpeg</a>
+              {socialMedia.facebook && (
+                <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-green-200 transition-colors flex items-center gap-1.5" aria-label="Facebook">
+                  <Facebook size={14} /> Facebook
+                </a>
+              )}
+              {socialMedia.instagram && (
+                <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="hover:text-green-200 transition-colors flex items-center gap-1.5" aria-label="Instagram">
+                  <Instagram size={14} /> Instagram
+                </a>
+              )}
+              {socialMedia.youtube && (
+                <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-green-200 transition-colors flex items-center gap-1.5" aria-label="YouTube">
+                  <Youtube size={14} /> YouTube
+                </a>
+              )}
             </div>
           </div>
         </div>

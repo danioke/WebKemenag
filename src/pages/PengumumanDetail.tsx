@@ -1,3 +1,4 @@
+import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
@@ -25,30 +26,38 @@ export default function PengumumanDetail() {
       if (!id) return;
       setLoading(true);
       try {
-        // Fetch current
-        const docRef = doc(db, 'announcements', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setPengumuman({ id: docSnap.id, ...docSnap.data() } as Pengumuman);
-        }
-
-        // Fetch others
-        const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
+        const q = query(collection(db, 'announcements'));
         const querySnapshot = await getDocs(q);
-        const others = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() } as Pengumuman))
-          .filter(item => item.id !== id)
-          .slice(0, 3); // top 3 other ones
-
-        if (others.length > 0) {
-          setOtherAnnouncements(others);
-        } else {
-          // Fallback others
-          setOtherAnnouncements([
-            { id: '1', title: "Pengumuman Hasil Seleksi Administrasi Calon PPPK Kementerian Agama Tahun 2024", date: "15 Okt 2024", size: "2.4 MB", fileUrl: "#" },
-            { id: '2', title: "Surat Edaran Panduan Peringatan Hari Santri Nasional Tahun 2024", date: "10 Okt 2024", size: "1.1 MB", fileUrl: "#" },
-            { id: '3', title: "Jadwal Pelaksanaan SKD CPNS Kementerian Agama Formasi Tahun 2024", date: "05 Okt 2024", size: "3.5 MB", fileUrl: "#" }
-          ].filter(item => item.id !== id).slice(0, 3));
+        
+        let foundDoc = null;
+        for (const doc of querySnapshot.docs) {
+          if (doc.id === id || createSlug(doc.data().title) === id) {
+            foundDoc = { id: doc.id, ...doc.data() } as Pengumuman;
+            break;
+          }
+        }
+        
+        if (foundDoc) {
+          setPengumuman(foundDoc);
+          
+          // Fetch others
+          const otherQ = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
+          const otherSnap = await getDocs(otherQ);
+          const others = otherSnap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Pengumuman))
+            .filter(item => item.id !== foundDoc?.id)
+            .slice(0, 3); // top 3 other ones
+            
+          if (others.length > 0) {
+            setOtherAnnouncements(others);
+          } else {
+            // Fallback others
+            setOtherAnnouncements([
+              { id: '1', title: "Pengumuman Hasil Seleksi Administrasi Calon PPPK Kementerian Agama Tahun 2024", date: "15 Okt 2024", size: "2.4 MB", fileUrl: "#" },
+              { id: '2', title: "Surat Edaran Panduan Peringatan Hari Santri Nasional Tahun 2024", date: "10 Okt 2024", size: "1.1 MB", fileUrl: "#" },
+              { id: '3', title: "Jadwal Pelaksanaan SKD CPNS Kementerian Agama Formasi Tahun 2024", date: "05 Okt 2024", size: "3.5 MB", fileUrl: "#" }
+            ].filter(item => item.id !== foundDoc?.id).slice(0, 3));
+          }
         }
       } catch (error) {
         console.error("Error fetching announcement:", error);
@@ -189,7 +198,7 @@ export default function PengumumanDetail() {
                 {otherAnnouncements.map((item) => (
                   <Link 
                     key={item.id} 
-                    to={`/pengumuman/${item.id}`}
+                    to={`/pengumuman/${createSlug(item.title)}`}
                     className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-all group animate-fade-in"
                   >
                     <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">

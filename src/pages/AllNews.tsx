@@ -1,8 +1,9 @@
+import { createSlug } from "../lib/helpers";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { ArrowLeft, Calendar, User, Search, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Search, Tag, Eye } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -194,17 +195,18 @@ export default function AllNews() {
                       <div className="flex items-center gap-4 text-xs text-gray-500 mb-3 font-medium">
                         <span className="flex items-center gap-1"><Calendar size={13} /> {item.date}</span>
                         <span className="flex items-center gap-1"><User size={13} /> {item.author || 'Humas'}</span>
+                        <span className="flex items-center gap-1"><Eye size={13} /> {item.views || 0}</span>
                       </div>
                       
                       <h4 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors leading-snug">
-                        <Link to={`/berita/${item.id}`}>{item.title}</Link>
+                        <Link to={`/berita/${createSlug(item.title)}`}>{item.title}</Link>
                       </h4>
                       
                       <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow leading-relaxed">
                         {stripHtml(item.excerpt)}
                       </p>
                       
-                      <Link to={`/berita/${item.id}`} className="inline-flex items-center text-sm font-bold text-green-700 hover:text-green-800 mt-auto transition-colors">
+                      <Link to={`/berita/${createSlug(item.title)}`} className="inline-flex items-center text-sm font-bold text-green-700 hover:text-green-800 mt-auto transition-colors">
                         Baca Selengkapnya
                       </Link>
                     </div>

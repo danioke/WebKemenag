@@ -1,6 +1,7 @@
+import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { Calendar, User, ArrowRight, Eye } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { db } from '../lib/firebase';
@@ -127,17 +128,18 @@ export default function NewsSection() {
                   <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
                     <span className="flex items-center gap-1"><Calendar size={14} /> {item.date}</span>
                     <span className="flex items-center gap-1"><User size={14} /> {item.author || 'Admin'}</span>
+                    <span className="flex items-center gap-1"><Eye size={14} /> {item.views || 0}</span>
                   </div>
                   
                   <h4 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors">
-                    <Link to={`/berita/${item.id}`}>{item.title}</Link>
+                    <Link to={`/berita/${createSlug(item.title)}`}>{item.title}</Link>
                   </h4>
                   
                   <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-grow">
                     {stripHtml(item.excerpt)}
                   </p>
                   
-                  <Link to={`/berita/${item.id}`} className="inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-800 mt-auto">
+                  <Link to={`/berita/${createSlug(item.title)}`} className="inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-800 mt-auto">
                     Baca Selengkapnya
                   </Link>
                 </div>

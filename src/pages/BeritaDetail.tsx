@@ -1,8 +1,9 @@
+import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { Calendar, User, Share2, ArrowLeft, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, Share2, ArrowLeft, Tag, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'motion/react';
 
@@ -14,6 +15,7 @@ interface Berita {
   author: string;
   image: string;
   excerpt: string;
+  views?: number;
 }
 
 export default function BeritaDetail() {
@@ -28,21 +30,34 @@ export default function BeritaDetail() {
     const fetchData = async () => {
       if (!id) return;
       try {
-        // Fetch current news
-        const docRef = doc(db, 'news', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setBerita({ id: docSnap.id, ...docSnap.data() } as Berita);
-        }
-
-        // Fetch other news (latest 5, excluding current)
-        const q = query(collection(db, 'news'), orderBy('createdAt', 'desc'), limit(6));
+        const q = query(collection(db, 'news'));
         const querySnapshot = await getDocs(q);
-        const newsData = querySnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() } as Berita))
-          .filter(item => item.id !== id)
-          .slice(0, 5);
-        setOtherNews(newsData);
+        
+        let foundDoc = null;
+        for (const d of querySnapshot.docs) {
+          if (d.id === id || createSlug(d.data().title) === id) {
+            foundDoc = { id: d.id, ...d.data() } as Berita;
+            break;
+          }
+        }
+        
+        if (foundDoc) {
+          setBerita(foundDoc);
+          import('firebase/firestore').then(({ updateDoc, doc }) => {
+            updateDoc(doc(db, 'news', foundDoc.id), {
+              views: (foundDoc.views || 0) + 1
+            }).catch(e => console.error("Error updating views", e));
+          });
+          
+          // Fetch other news (latest 5, excluding current)
+          const otherQ = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
+          const otherSnap = await getDocs(otherQ);
+          const newsData = otherSnap.docs
+            .map(d => ({ id: d.id, ...d.data() } as Berita))
+            .filter(item => item.id !== foundDoc?.id)
+            .slice(0, 5);
+          setOtherNews(newsData);
+        }
 
       } catch (error) {
         console.error("Error fetching news:", error);
@@ -154,6 +169,10 @@ export default function BeritaDetail() {
               <User size={16} className="text-gray-400" />
               <span>{berita.author || 'Admin'}</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Eye size={16} className="text-gray-400" />
+              <span>{berita.views || 0} kali dibaca</span>
+            </div>
           </div>
 
           {berita.image && (
@@ -197,7 +216,7 @@ export default function BeritaDetail() {
               {otherNews.map((item, idx) => (
                 <Link 
                   key={item.id} 
-                  to={`/berita/${item.id}`}
+                  to={`/berita/${createSlug(item.title)}`}
                   className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 transition-all group flex flex-col"
                 >
                   <div className="relative overflow-hidden aspect-[16/10] bg-gray-100">

@@ -2,16 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { auth, logout, isEmailAllowed } from '../lib/firebase';
 import { toast } from 'sonner';
-import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, User, Save, Folder, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, ChevronRight, User, Save, Folder, Settings } from 'lucide-react';
 import PengumumanAdmin from './admin/PengumumanAdmin';
 import BeritaAdmin from './admin/BeritaAdmin';
 import AgendaAdmin from './admin/AgendaAdmin';
 import FotoAdmin from './admin/FotoAdmin';
+import BannerAdmin from './admin/BannerAdmin';
+import InfografisAdmin from './admin/InfografisAdmin';
 import VideoAdmin from './admin/VideoAdmin';
 import WordPressImporter from './admin/WordPressImporter';
 import NavigationAdmin from './admin/NavigationAdmin';
 import UserAdmin from './admin/UserAdmin';
 import LayananAdmin from './admin/LayananAdmin';
+import KategoriAdmin from './admin/KategoriAdmin';
+import LaporanAdmin from './admin/LaporanAdmin';
 import MediaAdmin from './admin/MediaAdmin';
 import SettingsAdmin from './admin/SettingsAdmin';
 
@@ -30,6 +34,7 @@ export default function AdminDashboard() {
   const [editName, setEditName] = useState(profileName);
   const [editEmail, setEditEmail] = useState(profileEmail);
   const [editPhoto, setEditPhoto] = useState(profilePhoto);
+  const [isBeritaOpen, setIsBeritaOpen] = useState(true);
 
   useEffect(() => {
     // Check if there's a bypass admin session
@@ -101,16 +106,26 @@ export default function AdminDashboard() {
     { name: 'Layanan Utama', path: '/admin/layanan', icon: Briefcase },
     { name: 'Pengumuman', path: '/admin/pengumuman', icon: FileText },
     { name: 'Agenda', path: '/admin/agenda', icon: Calendar },
-    { name: 'Berita', path: '/admin/berita', icon: FileText },
-    { name: 'Foto', path: '/admin/foto', icon: ImageIcon },
-    { name: 'Video', path: '/admin/video', icon: Video },
+    { 
+      name: 'Berita', 
+      icon: FileText,
+      subItems: [
+        { name: 'Daftar Berita', path: '/admin/berita' },
+        { name: 'Kategori', path: '/admin/kategori' },
+        { name: 'Foto', path: '/admin/foto' },
+        { name: 'Video', path: '/admin/video' },
+        { name: 'Infografis', path: '/admin/infografis' },
+        { name: 'Banner', path: '/admin/banner' },
+      ]
+    },
+    { name: 'Laporan', path: '/admin/laporan', icon: FileText },
     { name: 'Pengaturan', path: '/admin/settings', icon: Settings },
   ];
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row relative">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-green-900 text-white transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-green-900 text-white transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} overflow-y-auto`}>
         <div className="flex items-center justify-between p-4 border-b border-green-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-green-900 font-bold">K</div>
@@ -124,26 +139,47 @@ export default function AdminDashboard() {
           <ul className="space-y-1">
             {navItems.map((item) => (
               <li key={item.name}>
-                <Link
-                  to={item.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${location.pathname === item.path ? 'bg-green-800 text-white border-l-4 border-amber-400' : 'text-green-100 hover:bg-green-800 hover:text-white'}`}
-                >
-                  <item.icon size={18} />
-                  {item.name}
-                </Link>
+                {item.subItems ? (
+                  <div>
+                    <button
+                      onClick={() => setIsBeritaOpen(!isBeritaOpen)}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-sm font-medium transition-colors ${location.pathname.includes('/admin/berita') || location.pathname.includes('/admin/foto') || location.pathname.includes('/admin/video') || location.pathname.includes('/admin/kategori') || location.pathname.includes('/admin/banner') || location.pathname.includes('/admin/infografis') ? 'bg-green-800 text-white border-l-4 border-amber-400' : 'text-green-100 hover:bg-green-800 hover:text-white'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon size={18} />
+                        {item.name}
+                      </div>
+                      {isBeritaOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    </button>
+                    {isBeritaOpen && (
+                      <ul className="bg-green-950/50 py-2 space-y-1">
+                        {item.subItems.map(subItem => (
+                          <li key={subItem.name}>
+                            <Link
+                              to={subItem.path}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={`flex items-center pl-11 pr-4 py-2 text-xs font-medium transition-colors ${location.pathname === subItem.path ? 'text-amber-400' : 'text-green-200 hover:text-white'}`}
+                            >
+                              {subItem.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${location.pathname === item.path ? 'bg-green-800 text-white border-l-4 border-amber-400' : 'text-green-100 hover:bg-green-800 hover:text-white'}`}
+                  >
+                    <item.icon size={18} />
+                    {item.name}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
-        </div>
-        <div className="absolute bottom-0 w-full p-4 border-t border-green-800">
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full text-left text-sm font-medium text-red-200 hover:bg-red-900 hover:text-white rounded-lg transition-colors"
-          >
-            <LogOut size={18} />
-            Logout
-          </button>
         </div>
       </div>
 
@@ -261,9 +297,13 @@ export default function AdminDashboard() {
             <Route path="/berita" element={<BeritaAdmin />} />
             <Route path="/berita/import" element={<WordPressImporter />} />
             <Route path="/foto" element={<FotoAdmin />} />
+            <Route path="/banner" element={<BannerAdmin />} />
+            <Route path="/infografis" element={<InfografisAdmin />} />
             <Route path="/video" element={<VideoAdmin />} />
             <Route path="/users" element={<UserAdmin />} />
             <Route path="/layanan" element={<LayananAdmin />} />
+            <Route path="/kategori" element={<KategoriAdmin />} />
+            <Route path="/laporan" element={<LaporanAdmin />} />
           </Routes>
         </main>
       </div>

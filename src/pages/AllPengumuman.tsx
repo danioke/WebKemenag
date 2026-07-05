@@ -1,3 +1,4 @@
+import { createSlug } from "../lib/helpers";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
@@ -139,7 +140,7 @@ export default function AllPengumuman() {
                       </div>
                       <div className="flex-grow min-w-0">
                         <h4 className="text-base font-bold text-gray-900 mb-1.5 leading-snug group-hover:text-green-700 transition-colors">
-                          <Link to={`/pengumuman/${item.id}`} className="focus:outline-none">
+                          <Link to={`/pengumuman/${createSlug(item.title)}`} className="focus:outline-none">
                             <span className="absolute inset-0" aria-hidden="true"></span>
                             {item.title}
                           </Link>

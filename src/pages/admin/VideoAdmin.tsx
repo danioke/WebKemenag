@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, X, Video, HardDrive } from 'lucide-react';
-import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
+import { Plus, Edit, Trash2, X, Video, Upload } from 'lucide-react';
 
 interface VideoData {
   id: string;
@@ -17,8 +16,8 @@ export default function VideoAdmin() {
   const [data, setData] = useState<VideoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDriveOpen, setIsDriveOpen] = useState(false);
-  const [driveType, setDriveType] = useState<'image' | 'video'>('video');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingThumb, setUploadingThumb] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', thumbnail: '', duration: '', videoUrl: '' });
   const [isEditing, setIsEditing] = useState(false);
 
@@ -39,6 +38,38 @@ export default function VideoAdmin() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'video' | 'thumbnail') => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const form = new FormData();
+    form.append("file", file);
+    
+    if (type === 'video') setUploadingVideo(true);
+    else setUploadingThumb(true);
+    
+    toast.info(`Mengunggah ${type === 'video' ? 'video' : 'thumbnail'}...`);
+    
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        const result = await res.json();
+        if (type === 'video') {
+          setFormData({ ...formData, videoUrl: result.url, title: formData.title || file.name.split('.').slice(0, -1).join('.') });
+        } else {
+          setFormData({ ...formData, thumbnail: result.url });
+        }
+        toast.success(`${type === 'video' ? 'Video' : 'Thumbnail'} berhasil diunggah`);
+      } else {
+        toast.error("Gagal mengunggah file");
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan saat mengunggah");
+    } finally {
+      if (type === 'video') setUploadingVideo(false);
+      else setUploadingThumb(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,48 +205,43 @@ export default function VideoAdmin() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">URL Berkas Video (Google Drive)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Berkas Video</label>
                   <div className="flex gap-2">
                     <input
                       type="url"
+                      readOnly
                       value={formData.videoUrl}
-                      onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                      placeholder="Masukkan URL Video atau pilih dari Google Drive"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Klik Upload Lokal untuk memilih video"
+                      className="flex-1 px-3 py-2 border border-gray-300 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-500 cursor-not-allowed"
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDriveType('video');
-                        setIsDriveOpen(true);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-sm"
-                    >
-                      <HardDrive size={14} /> Drive
-                    </button>
+                    <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap">
+                      {uploadingVideo ? (
+                        <div className="w-3 h-3 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <><Upload size={14} className="mr-1" /> Upload Lokal</>
+                      )}
+                      <input type="file" accept="video/*" className="hidden" onChange={(e) => handleFileUpload(e, 'video')} disabled={uploadingVideo} />
+                    </label>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">URL Thumbnail (Image Link)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Thumbnail</label>
                   <div className="flex gap-2">
                     <input
                       type="url"
-                      required
+                      readOnly
                       value={formData.thumbnail}
-                      onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-                      placeholder="Masukkan URL Gambar atau pilih dari Google Drive"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Klik Upload Lokal untuk memilih gambar"
+                      className="flex-1 px-3 py-2 border border-gray-300 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-500 cursor-not-allowed"
                     />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDriveType('image');
-                        setIsDriveOpen(true);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-sm"
-                    >
-                      <HardDrive size={14} /> Drive
-                    </button>
+                    <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap">
+                      {uploadingThumb ? (
+                        <div className="w-3 h-3 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <><Upload size={14} className="mr-1" /> Upload Lokal</>
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'thumbnail')} disabled={uploadingThumb} />
+                    </label>
                   </div>
                   {formData.thumbnail && (
                     <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
@@ -254,25 +280,6 @@ export default function VideoAdmin() {
         </div>
       )}
 
-      <GoogleDrivePickerModal
-        isOpen={isDriveOpen}
-        onClose={() => setIsDriveOpen(false)}
-        fileType={driveType}
-        onSelect={(file) => {
-          if (driveType === 'video') {
-            setFormData((prev) => ({
-              ...prev,
-              videoUrl: file.url,
-              title: prev.title || file.name.split('.').slice(0, -1).join('.'), // Auto fill title if empty
-            }));
-          } else {
-            setFormData((prev) => ({
-              ...prev,
-              thumbnail: file.url,
-            }));
-          }
-        }}
-      />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Calendar, MapPin, Clock, ArrowRight } from 'lucide-react';
@@ -83,7 +84,7 @@ export default function Agenda() {
                 {/* Content Column */}
                 <div className="flex flex-col justify-center flex-grow">
                   <h4 className="text-lg font-bold text-gray-900 mb-2 leading-tight group-hover:text-green-700 transition-colors">
-                    <Link to={`/agenda/${agenda.id}`}>{agenda.title}</Link>
+                    <Link to={`/agenda/${createSlug(agenda.title)}`}>{agenda.title}</Link>
                   </h4>
                   
                   <div className="space-y-1.5 mt-auto">

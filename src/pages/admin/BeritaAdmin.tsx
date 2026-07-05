@@ -23,6 +23,7 @@ export default function BeritaAdmin() {
   const [formData, setFormData] = useState({ id: '', title: '', category: '', date: '', author: '', image: '', excerpt: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,6 +47,9 @@ export default function BeritaAdmin() {
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Berita));
       setData(docs);
+      
+      const catSnap = await getDocs(query(collection(db, 'categories'), orderBy('name', 'asc')));
+      setCategories(catSnap.docs.map(doc => ({ id: doc.id, name: doc.data().name })));
     } catch (error) {
       console.error(error);
       toast.error('Gagal mengambil data berita');
@@ -278,13 +282,20 @@ export default function BeritaAdmin() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-                    <input
-                      type="text"
+                    <select
                       required
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                    >
+                      <option value="">Pilih Kategori</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))}
+                      <option value="Berita Utama">Berita Utama (Manual)</option>
+                      <option value="Pendidikan">Pendidikan (Manual)</option>
+                      <option value="Keagamaan">Keagamaan (Manual)</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
@@ -311,20 +322,25 @@ export default function BeritaAdmin() {
                   <div className="flex gap-2">
                     <input
                       type="url"
+                      readOnly
                       value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      placeholder="https://... atau klik Upload"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Klik Upload untuk memilih gambar lokal"
+                      className="flex-1 px-3 py-2 border border-gray-300 bg-gray-50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-500 cursor-not-allowed"
                     />
                     <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700">
                       {uploading ? (
                         <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
                       ) : (
-                        <><Upload size={18} className="mr-2" /> Upload</>
+                        <><Upload size={18} className="mr-2" /> Upload Lokal</>
                       )}
                       <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                     </label>
                   </div>
+                  {formData.image && (
+                    <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                      <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>

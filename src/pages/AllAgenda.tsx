@@ -1,3 +1,4 @@
+import { createSlug } from "../lib/helpers";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
@@ -176,7 +177,7 @@ export default function AllAgenda() {
                         </span>
                       </div>
                       <h4 className="text-lg font-bold text-gray-900 mb-2.5 leading-snug group-hover:text-green-700 transition-colors">
-                        <Link to={`/agenda/${agenda.id}`}>{agenda.title}</Link>
+                        <Link to={`/agenda/${createSlug(agenda.title)}`}>{agenda.title}</Link>
                       </h4>
                       
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500 font-medium">

@@ -7,6 +7,8 @@ import NewsSection from '../components/NewsSection';
 import Agenda from '../components/Agenda';
 import MediaGallery from '../components/MediaGallery';
 import AplikasiCarousel from '../components/AplikasiCarousel';
+import BannerCarousel from '../components/BannerCarousel';
+import InfografisMarquee from '../components/InfografisMarquee';
 import Footer from '../components/Footer';
 import JadwalSholatWidget from '../components/JadwalSholatWidget';
 import { ShieldCheck } from 'lucide-react';
@@ -24,6 +26,8 @@ export default function HomePage() {
             <JadwalSholatWidget />
           </div>
         </section>
+
+        <BannerCarousel />
 
         <Services />
         
@@ -66,6 +70,7 @@ export default function HomePage() {
 
         <NewsSection />
         <Pengumuman />
+        <InfografisMarquee />
         <Agenda />
         <MediaGallery />
         <AplikasiCarousel />

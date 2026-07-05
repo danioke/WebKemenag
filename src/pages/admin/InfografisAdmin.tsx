@@ -4,14 +4,14 @@ import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, X, Image as ImageIcon, Upload } from 'lucide-react';
 
-interface Foto {
+interface Infografis {
   id: string;
   title: string;
   image: string;
 }
 
-export default function FotoAdmin() {
-  const [data, setData] = useState<Foto[]>([]);
+export default function InfografisAdmin() {
+  const [data, setData] = useState<Infografis[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', image: '' });
@@ -20,13 +20,13 @@ export default function FotoAdmin() {
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, 'infographics'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
-      const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Foto));
+      const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Infografis));
       setData(docs);
     } catch (error) {
       console.error(error);
-      toast.error('Gagal mengambil data foto');
+      toast.error('Gagal mengambil data infografis');
     } finally {
       setLoading(false);
     }
@@ -68,19 +68,19 @@ export default function FotoAdmin() {
     
     try {
       if (isEditing) {
-        const docRef = doc(db, 'photos', formData.id);
+        const docRef = doc(db, 'infographics', formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           image: formData.image,
         });
-        toast.success('Foto berhasil diperbarui');
+        toast.success('Infografis berhasil diperbarui');
       } else {
-        await addDoc(collection(db, 'photos'), {
+        await addDoc(collection(db, 'infographics'), {
           title: formData.title,
           image: formData.image,
           createdAt: serverTimestamp()
         });
-        toast.success('Foto berhasil ditambahkan');
+        toast.success('Infografis berhasil ditambahkan');
       }
       setIsModalOpen(false);
       fetchData();
@@ -90,21 +90,21 @@ export default function FotoAdmin() {
     }
   };
 
-  const handleEdit = (item: Foto) => {
+  const handleEdit = (item: Infografis) => {
     setFormData(item);
     setIsEditing(true);
     setIsModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+    if (window.confirm('Apakah Anda yakin ingin menghapus infografis ini?')) {
       try {
-        await deleteDoc(doc(db, 'photos', id));
-        toast.success('Foto berhasil dihapus');
+        await deleteDoc(doc(db, 'infographics', id));
+        toast.success('Infografis berhasil dihapus');
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error('Gagal menghapus foto');
+        toast.error('Gagal menghapus infografis');
       }
     }
   };
@@ -122,7 +122,7 @@ export default function FotoAdmin() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Kelola Galeri Foto</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Kelola Pengaturan Infografis</h1>
         <button
           onClick={openAddModal}
           className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -134,7 +134,7 @@ export default function FotoAdmin() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {data.length === 0 ? (
           <div className="col-span-full py-10 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
-            Belum ada data foto.
+            Belum ada data infografis.
           </div>
         ) : (
           data.map((item) => (
@@ -162,15 +162,15 @@ export default function FotoAdmin() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-5 border-b border-gray-100 shrink-0">
-              <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Foto' : 'Tambah Foto'}</h3>
+              <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Infografis' : 'Tambah Infografis'}</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
               </button>
             </div>
             <div className="p-5 overflow-y-auto">
-              <form id="foto-form" onSubmit={handleSubmit} className="space-y-4">
+              <form id="infografis-form" onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul Foto</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul Infografis</label>
                   <input
                     type="text"
                     required
@@ -180,7 +180,7 @@ export default function FotoAdmin() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Foto</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Infografis</label>
                   <div className="flex gap-2">
                     <input
                       type="url"
@@ -216,7 +216,7 @@ export default function FotoAdmin() {
               </button>
               <button
                 type="submit"
-                form="foto-form"
+                form="infografis-form"
                 className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors"
               >
                 Simpan
