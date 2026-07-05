@@ -1,7 +1,9 @@
 import React from 'react';
+import { useSettingsStore } from "../store/useSettingsStore";
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube, ExternalLink, Clock } from 'lucide-react';
 
 export default function Footer() {
+  const { logoUrl, contactInfo, socialMedia } = useSettingsStore();
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8 border-t-4 border-green-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,7 +13,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <img 
-                src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
+                src={logoUrl} 
                 alt="Logo Kementerian Agama" 
                 className="w-11 h-11 object-contain shrink-0 filter drop-shadow-sm hover:scale-105 transition-transform"
                 referrerPolicy="no-referrer"
@@ -25,15 +27,21 @@ export default function Footer() {
               Kementerian Agama Kabupaten Ogan Komering Ilir senantiasa berkomitmen untuk memberikan pelayanan publik yang profesional, transparan, dan akuntabel.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-green-700 hover:text-white transition-colors">
-                <Facebook size={16} />
-              </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-green-700 hover:text-white transition-colors">
-                <Instagram size={16} />
-              </a>
-              <a href="#" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-green-700 hover:text-white transition-colors">
-                <Youtube size={16} />
-              </a>
+              {socialMedia.facebook && (
+                <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-green-700 hover:text-white transition-colors">
+                  <Facebook size={16} />
+                </a>
+              )}
+              {socialMedia.instagram && (
+                <a href={socialMedia.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-green-700 hover:text-white transition-colors">
+                  <Instagram size={16} />
+                </a>
+              )}
+              {socialMedia.youtube && (
+                <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-green-700 hover:text-white transition-colors">
+                  <Youtube size={16} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -43,15 +51,15 @@ export default function Footer() {
             <ul className="space-y-4 text-sm">
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-green-500 shrink-0 mt-0.5" />
-                <span>Jl. Letnan Muchtar Saleh No. 1, Kayuagung, OKI 30611</span>
+                <span>{contactInfo.address}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={18} className="text-green-500 shrink-0" />
-                <span>(0711) 322123</span>
+                <span>{contactInfo.phone}</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-green-500 shrink-0" />
-                <span>kaboki@kemenag.go.id</span>
+                <span>{contactInfo.email}</span>
               </li>
             </ul>
           </div>

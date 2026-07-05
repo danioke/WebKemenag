@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { auth, logout, isEmailAllowed } from '../lib/firebase';
 import { toast } from 'sonner';
-import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, User, Save } from 'lucide-react';
+import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, User, Save, Folder, Settings } from 'lucide-react';
 import PengumumanAdmin from './admin/PengumumanAdmin';
 import BeritaAdmin from './admin/BeritaAdmin';
 import AgendaAdmin from './admin/AgendaAdmin';
@@ -12,6 +12,8 @@ import WordPressImporter from './admin/WordPressImporter';
 import NavigationAdmin from './admin/NavigationAdmin';
 import UserAdmin from './admin/UserAdmin';
 import LayananAdmin from './admin/LayananAdmin';
+import MediaAdmin from './admin/MediaAdmin';
+import SettingsAdmin from './admin/SettingsAdmin';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -93,6 +95,7 @@ export default function AdminDashboard() {
 
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { name: 'Media', path: '/admin/media', icon: Folder },
     { name: 'Navigasi', path: '/admin/navigasi', icon: Navigation },
     { name: 'User Admin', path: '/admin/users', icon: Users },
     { name: 'Layanan Utama', path: '/admin/layanan', icon: Briefcase },
@@ -101,6 +104,7 @@ export default function AdminDashboard() {
     { name: 'Berita', path: '/admin/berita', icon: FileText },
     { name: 'Foto', path: '/admin/foto', icon: ImageIcon },
     { name: 'Video', path: '/admin/video', icon: Video },
+    { name: 'Pengaturan', path: '/admin/settings', icon: Settings },
   ];
 
   return (
@@ -249,6 +253,8 @@ export default function AdminDashboard() {
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           <Routes>
             <Route path="/" element={<DashboardHome />} />
+            <Route path="/media" element={<MediaAdmin />} />
+            <Route path="/settings" element={<SettingsAdmin />} />
             <Route path="/navigasi" element={<NavigationAdmin />} />
             <Route path="/pengumuman" element={<PengumumanAdmin />} />
             <Route path="/agenda" element={<AgendaAdmin />} />

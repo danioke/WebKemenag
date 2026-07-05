@@ -3,6 +3,7 @@ import { Menu, X, Phone, Mail, MapPin, ChevronDown, ChevronRight, Award, FileTex
 import { motion, AnimatePresence } from 'motion/react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useSettingsStore } from '../store/useSettingsStore';
 
 const iconMap: Record<string, any> = {
   Award,
@@ -69,6 +70,7 @@ const staticNavLinks: NavLink[] = [
 ];
 
 export default function Header() {
+  const { logoUrl, contactInfo } = useSettingsStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -224,8 +226,8 @@ export default function Header() {
           <div className="bg-green-50/50 p-4 rounded-xl border border-green-100 text-sm space-y-2">
             <p className="font-bold text-green-900">Alamat Lengkap:</p>
             <p>Jl. Letnan Muchtar Saleh No. 1, Kelurahan Sidakersa, Kecamatan Kayuagung, Kabupaten Ogan Komering Ilir, Sumatera Selatan, Kode Pos 30613.</p>
-            <p><strong>Telepon:</strong> (0711) 322123</p>
-            <p><strong>Email resmi:</strong> kaboki@kemenag.go.id</p>
+            <p><strong>Telepon:</strong> {contactInfo.phone}</p>
+            <p><strong>Email resmi:</strong> {contactInfo.email}</p>
           </div>
           <div className="w-full h-64 rounded-xl border border-gray-200 overflow-hidden relative shadow-inner bg-gray-100 flex flex-col justify-center items-center p-4 text-center">
             <MapPin size={36} className="text-green-700 animate-bounce mb-2" />
@@ -426,8 +428,8 @@ export default function Header() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <div className="flex space-x-6">
               <span className="flex items-center gap-1.5"><MapPin size={14} /> Jl. Letnan Muchtar Saleh No. 1, Kayuagung, OKI</span>
-              <span className="flex items-center gap-1.5"><Phone size={14} /> (0711) 322123</span>
-              <span className="flex items-center gap-1.5"><Mail size={14} /> kaboki@kemenag.go.id</span>
+              <span className="flex items-center gap-1.5"><Phone size={14} /> {contactInfo.phone}</span>
+              <span className="flex items-center gap-1.5"><Mail size={14} /> {contactInfo.email}</span>
             </div>
             <div className="flex space-x-4 font-medium">
               <a href="#" className="hover:text-green-200 transition-colors">Webmail</a>
@@ -443,7 +445,7 @@ export default function Header() {
               {/* Logo */}
               <div className="flex items-center gap-3">
                 <img 
-                  src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
+                  src={logoUrl} 
                   alt="Logo Kementerian Agama" 
                   className="w-11 h-11 object-contain shrink-0 filter drop-shadow-sm hover:scale-105 transition-transform"
                   referrerPolicy="no-referrer"
@@ -558,7 +560,7 @@ export default function Header() {
                 <div className="p-5 border-b border-green-100 flex items-center justify-between bg-green-50/50">
                   <div className="flex items-center gap-2.5">
                     <img 
-                      src="https://kuatelukgelam.kemenagoki.id/assets/img/logo.png" 
+                      src={logoUrl} 
                       alt="Logo Kemenag" 
                       className="w-10 h-10 object-contain shrink-0"
                       referrerPolicy="no-referrer"

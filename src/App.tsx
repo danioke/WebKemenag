@@ -6,7 +6,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { HelmetProvider } from 'react-helmet-async';
+import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { useSettingsStore } from './store/useSettingsStore';
 import { AnimatePresence } from 'motion/react';
 import HomePage from './pages/HomePage';
 import AdminDashboard from './pages/AdminDashboard';
@@ -26,6 +27,7 @@ import NotFound from './pages/NotFound';
 
 export default function App() {
   const [showLoader, setShowLoader] = useState(false);
+  const { siteName, metaDescription, faviconUrl } = useSettingsStore();
 
   useEffect(() => {
     const hasLoadedBefore = sessionStorage.getItem('kemenag_has_loaded');
@@ -36,6 +38,11 @@ export default function App() {
 
   return (
     <HelmetProvider>
+      <Helmet>
+        <title>{siteName}</title>
+        <meta name="description" content={metaDescription} />
+        {faviconUrl && <link rel="icon" href={faviconUrl} />}
+      </Helmet>
       <AnimatePresence mode="wait">
         {showLoader && (
           <Loader onComplete={() => {

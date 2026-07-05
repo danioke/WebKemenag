@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, FileText, X, CloudDownload } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DefaultEditor from 'react-simple-wysiwyg';
 
@@ -22,6 +22,7 @@ export default function BeritaAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', category: '', date: '', author: '', image: '', excerpt: '' });
   const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,6 +57,29 @@ export default function BeritaAdmin() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const form = new FormData();
+    form.append("file", file);
+    setUploading(true);
+    toast.info("Mengunggah gambar...");
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        const result = await res.json();
+        setFormData({ ...formData, image: result.url });
+        toast.success("Gambar berhasil diunggah");
+      } else {
+        toast.error("Gagal mengunggah gambar");
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan saat mengunggah");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,13 +307,24 @@ export default function BeritaAdmin() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">URL Gambar Header</label>
-                  <input
-                    type="url"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Header</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={formData.image}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      placeholder="https://... atau klik Upload"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700">
+                      {uploading ? (
+                        <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <><Upload size={18} className="mr-2" /> Upload</>
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                    </label>
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>

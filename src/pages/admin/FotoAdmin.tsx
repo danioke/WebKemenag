@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, X, Image as ImageIcon, HardDrive } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Image as ImageIcon, HardDrive, Upload } from 'lucide-react';
 import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
 
 interface Foto {
@@ -18,6 +18,7 @@ export default function FotoAdmin() {
   const [isDriveOpen, setIsDriveOpen] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', image: '' });
   const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -36,6 +37,29 @@ export default function FotoAdmin() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const form = new FormData();
+    form.append("file", file);
+    setUploading(true);
+    toast.info("Mengunggah gambar...");
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        const result = await res.json();
+        setFormData({ ...formData, image: result.url });
+        toast.success("Gambar berhasil diunggah");
+      } else {
+        toast.error("Gagal mengunggah gambar");
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan saat mengunggah");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,8 +190,16 @@ export default function FotoAdmin() {
                       value={formData.image}
                       onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                       placeholder="Masukkan URL atau gunakan Google Drive"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 min-w-0"
                     />
+                    <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap">
+                      {uploading ? (
+                        <div className="w-3 h-3 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <><Upload size={14} className="mr-1" /> Lokal</>
+                      )}
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                    </label>
                     <button
                       type="button"
                       onClick={() => setIsDriveOpen(true)}
