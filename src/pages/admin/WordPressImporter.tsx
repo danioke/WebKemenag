@@ -38,6 +38,7 @@ export default function WordPressImporter() {
   const [posts, setPosts] = useState<WPPost[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [customCategory, setCustomCategory] = useState('Berita');
+  const [useOriginalDate, setUseOriginalDate] = useState(true);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
 
@@ -153,8 +154,10 @@ export default function WordPressImporter() {
 
         // Parse date to clean YYYY-MM-DD
         let postDate = '';
+        let originalDateObj = new Date();
         try {
-          postDate = new Date(post.date).toISOString().split('T')[0];
+          originalDateObj = new Date(post.date);
+          postDate = originalDateObj.toISOString().split('T')[0];
         } catch {
           postDate = new Date().toISOString().split('T')[0];
         }
@@ -167,7 +170,7 @@ export default function WordPressImporter() {
           author: authorName,
           image: imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80',
           excerpt: fullContent,
-          createdAt: serverTimestamp()
+          createdAt: useOriginalDate ? originalDateObj : serverTimestamp()
         });
 
         successCount++;
@@ -267,6 +270,27 @@ export default function WordPressImporter() {
                 <option value="Artikel">Artikel</option>
                 <option value="Lainnya">Lainnya</option>
               </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-gray-50 pb-4">
+            <div>
+              <h3 className="font-bold text-gray-900">Pertahankan Tanggal & Waktu Asli</h3>
+              <p className="text-xs text-gray-500">Artikel diimpor menggunakan tanggal & waktu rilis aslinya di WordPress agar urutan berita tetap benar.</p>
+            </div>
+            <div className="flex items-center">
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={useOriginalDate}
+                  onChange={(e) => setUseOriginalDate(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-700"></div>
+                <span className="ml-3 text-sm font-semibold text-gray-700">
+                  {useOriginalDate ? 'Aktif (Urutan Sesuai Asli)' : 'Gunakan Waktu Sekarang'}
+                </span>
+              </label>
             </div>
           </div>
 

@@ -250,7 +250,7 @@ export default function LayananAdmin() {
   }, [activeTab]);
 
   const handleSave = async () => {
-    if (!auth.currentUser) {
+    if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
       toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
       return;
     }

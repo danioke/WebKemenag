@@ -87,7 +87,7 @@ export default function BeritaAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth.currentUser) {
+    if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
       toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
       return;
     }
@@ -135,7 +135,7 @@ export default function BeritaAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!auth.currentUser) {
+    if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
       toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menghapus.');
       return;
     }

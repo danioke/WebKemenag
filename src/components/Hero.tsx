@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, FileText, Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 interface CarouselItem {
   image: string;
@@ -33,23 +35,51 @@ const carouselItems: CarouselItem[] = [
 
 export default function Hero() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [banners, setBanners] = useState<any[]>([]);
+
+  // Fetch dynamic banners from Firestore in real-time
+  useEffect(() => {
+    const q = query(collection(db, 'banners'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      if (!snapshot.empty) {
+        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setBanners(items);
+      } else {
+        setBanners([]);
+      }
+    }, (error) => {
+      console.error("Failed to fetch dynamic banners for hero", error);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Merge Firestore banners with static fallback items
+  const activeItems = banners.length > 0 ? banners.map(b => ({
+    image: b.image || b.imageUrl || 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80',
+    category: 'Banner Kemenag',
+    title: b.title
+  })) : carouselItems;
+
+  const currentItem = activeItems[activeIndex] || activeItems[0] || carouselItems[0];
 
   // Auto-slide effect
   useEffect(() => {
+    if (activeItems.length <= 1) return;
     const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % carouselItems.length);
+      setActiveIndex((prev) => (prev + 1) % activeItems.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeItems.length]);
 
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveIndex((prev) => (prev + 1) % carouselItems.length);
+    setActiveIndex((prev) => (prev + 1) % activeItems.length);
   };
 
   const handlePrev = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveIndex((prev) => (prev - 1 + carouselItems.length) % carouselItems.length);
+    setActiveIndex((prev) => (prev - 1 + activeItems.length) % activeItems.length);
   };
 
   return (
@@ -124,60 +154,67 @@ export default function Hero() {
                   className="w-full h-full relative"
                 >
                   <img 
-                    src={carouselItems[activeIndex].image} 
-                    alt={carouselItems[activeIndex].title}
+                    src={currentItem.image} 
+                    alt={currentItem.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                  {/* Background overlay gradient: darken both top and bottom for great text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80"></div>
                   
-                  {/* Content Overlay */}
-                  <div className="absolute bottom-6 left-6 right-16 z-10">
+                  {/* Content Overlay - Placed at the top so it is never covered by the floating badge */}
+                  <div className="absolute top-6 left-6 right-16 z-10">
                     <motion.p 
-                      initial={{ y: 10, opacity: 0 }}
+                      initial={{ y: -10, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.2 }}
                       className="text-amber-400 text-xs font-bold tracking-widest uppercase mb-1"
                     >
-                      {carouselItems[activeIndex].category}
+                      {currentItem.category}
                     </motion.p>
                     <motion.h3 
-                      initial={{ y: 10, opacity: 0 }}
+                      initial={{ y: -10, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.3 }}
                       className="text-white font-extrabold text-xl leading-snug"
                     >
-                      {carouselItems[activeIndex].title}
+                      {currentItem.title}
                     </motion.h3>
                   </div>
                 </motion.div>
               </AnimatePresence>
 
               {/* Slider Arrows */}
-              <button 
-                onClick={handlePrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 border border-white/10 text-white rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button 
-                onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 border border-white/10 text-white rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
-              >
-                <ChevronRight size={18} />
-              </button>
+              {activeItems.length > 1 && (
+                <>
+                  <button 
+                    onClick={handlePrev}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 border border-white/10 text-white rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button 
+                    onClick={handleNext}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 border border-white/10 text-white rounded-full flex items-center justify-center backdrop-blur-sm opacity-0 group-hover/carousel:opacity-100 transition-opacity z-20"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </>
+              )}
 
               {/* Carousel Indicators */}
-              <div className="absolute bottom-6 right-6 flex gap-1.5 z-20">
-                {carouselItems.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveIndex(idx)}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      activeIndex === idx ? 'bg-amber-400 w-5' : 'bg-white/45 hover:bg-white/70'
-                    }`}
-                  />
-                ))}
-              </div>
+              {activeItems.length > 1 && (
+                <div className="absolute bottom-6 right-6 flex gap-1.5 z-20">
+                  {activeItems.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveIndex(idx)}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        activeIndex === idx ? 'bg-amber-400 w-5' : 'bg-white/45 hover:bg-white/70'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
             
             {/* Floating Badges */}
