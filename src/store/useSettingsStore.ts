@@ -22,7 +22,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      logoUrl: 'https://kemenagoki.id/wp-content/uploads/2023/12/logo-kemenag-kab-oki-copy.png',
+      logoUrl: 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
       faviconUrl: '',
       siteName: 'Kementerian Agama OKI',
       metaDescription: 'Website Resmi Kementerian Agama Kabupaten OKI',
