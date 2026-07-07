@@ -146,13 +146,7 @@ export default function BeritaDetail() {
       <main className="flex-grow py-6 sm:py-12">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-white sm:p-10 rounded-none sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 pb-10">
           
-          <div className="mb-4 mt-4 sm:mt-0">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
-              <Tag size={12} /> {berita.category}
-            </span>
-          </div>
-          
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight mt-4 sm:mt-0">
             {berita.title}
           </h1>
 
@@ -171,9 +165,20 @@ export default function BeritaDetail() {
             </div>
           </div>
 
-          {berita.image && (
-            <div className="mb-10 rounded-xl overflow-hidden shadow-sm aspect-video bg-gray-100">
+          {berita.image ? (
+            <div className="mb-10 rounded-xl overflow-hidden shadow-sm aspect-video bg-gray-100 relative">
               <img src={berita.image} alt={berita.title} className="w-full h-full object-cover" />
+              <div className="absolute top-4 left-4">
+                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white shadow-md rounded-full text-xs font-bold uppercase tracking-wide">
+                   <Tag size={12} /> {berita.category}
+                 </span>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
+                <Tag size={12} /> {berita.category}
+              </span>
             </div>
           )}
 
