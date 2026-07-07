@@ -27,7 +27,7 @@ export default function AdminDashboard() {
 
   const [profileName, setProfileName] = useState(() => localStorage.getItem('admin_profile_name') || 'Administrator');
   const [profileEmail, setProfileEmail] = useState(() => localStorage.getItem('admin_profile_email') || 'anisreza498@gmail.com');
-  const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem('admin_profile_photo') || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150');
+  const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem('admin_profile_photo') || 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=150');
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150';
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=150';
                     }}
                   />
                 </div>
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150';
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=150';
                           }}
                         />
                       </div>
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                     alt="Preview" 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150';
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=150';
                     }}
                   />
                 </div>

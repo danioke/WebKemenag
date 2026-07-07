@@ -36,12 +36,12 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'H. Syamsul Azhar, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Budi Santoso, S.E.', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250' },
-      { id: '4', name: 'Eka Lestari, S.Sos.', role: 'Admin EMIS & Keuangan', photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
+      { id: '3', name: 'Budi Santoso, S.E.', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
+      { id: '4', name: 'Eka Lestari, S.Sos.', role: 'Admin EMIS & Keuangan', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'bimas-islam': {
@@ -58,11 +58,11 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'H. Ismadi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1500048993953-d23a436266cf?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Muryadi, S.H.', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' },
+      { id: '3', name: 'Muryadi, S.H.', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'pondok-pesantren': {
@@ -79,10 +79,10 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'Drs. H. Mutiara',
-    kasiPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'sertifikasi-halal': {
@@ -182,10 +182,10 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'H. Junaidi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' }
     ]
   }
 };
@@ -449,7 +449,7 @@ export default function LayananDetail() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       // Fallback image
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=300';
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=300';
                     }}
                   />
                 </div>
@@ -501,7 +501,7 @@ export default function LayananDetail() {
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250';
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=250';
                             }}
                           />
                         </div>
@@ -529,7 +529,7 @@ export default function LayananDetail() {
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250';
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250';
                             }}
                           />
                         </div>

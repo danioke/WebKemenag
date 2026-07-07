@@ -271,7 +271,7 @@ const fallbackNews: NewsData[] = [
     category: "Berita Utama",
     date: "14 Okt 2023",
     author: "Humas OKI",
-    image: "https://images.unsplash.com/photo-1577900232427-18219b9166a0?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80",
     excerpt: "Peresmian gedung baru ini diharapkan dapat meningkatkan kualitas pelayanan keagamaan bagi masyarakat di tingkat kecamatan."
   },
   {
@@ -280,7 +280,7 @@ const fallbackNews: NewsData[] = [
     category: "Kepegawaian",
     date: "12 Okt 2023",
     author: "Admin Kepegawaian",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80",
     excerpt: "Kegiatan pembinaan ini bertujuan untuk memperkuat integritas dan profesionalitas aparatur sipil negara."
   },
   {
@@ -289,7 +289,7 @@ const fallbackNews: NewsData[] = [
     category: "Pendidikan",
     date: "08 Okt 2023",
     author: "Seksi Penmad",
-    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80",
     excerpt: "Sebanyak 45 siswa-siswi madrasah dari Kabupaten OKI siap bersaing di tingkat provinsi Sumatera Selatan."
   },
   {
@@ -298,7 +298,7 @@ const fallbackNews: NewsData[] = [
     category: "Bimas Islam",
     date: "05 Okt 2023",
     author: "Humas OKI",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80",
     excerpt: "Program bimbingan perkawinan ini diadakan guna membekali calon pengantin agar memiliki kesiapan mental dan spiritual dalam membina rumah tangga."
   },
   {
@@ -307,7 +307,7 @@ const fallbackNews: NewsData[] = [
     category: "Rapat",
     date: "01 Okt 2023",
     author: "Humas OKI",
-    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80",
     excerpt: "Seluruh jajaran kepala KUA dan madrasah mengikuti rapat persiapan rangkaian kegiatan memeriahkan Hari Amal Bakti."
   },
   {
@@ -316,7 +316,7 @@ const fallbackNews: NewsData[] = [
     category: "Zakat & Wakaf",
     date: "28 Sep 2023",
     author: "Humas OKI",
-    image: "https://images.unsplash.com/photo-1590407757780-33734dc8cb10?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80",
     excerpt: "Sebanyak puluhan pelaku usaha mikro menerima bantuan zakat produktif sebagai modal usaha demi peningkatan kesejahteraan keluarga."
   }
 ];

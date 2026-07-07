@@ -21,6 +21,7 @@ export default function PengumumanAdmin() {
   const [formData, setFormData] = useState({ id: '', title: '', date: '', size: '', fileUrl: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLocalUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -78,6 +79,7 @@ export default function PengumumanAdmin() {
       return;
     }
     
+    setIsSubmitting(true);
     try {
       if (isEditing) {
         const docRef = doc(db, 'announcements', formData.id);
@@ -103,6 +105,8 @@ export default function PengumumanAdmin() {
     } catch (error) {
       console.error(error);
       toast.error('Terjadi kesalahan saat menyimpan data');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -278,9 +282,14 @@ export default function PengumumanAdmin() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors flex items-center justify-center min-w-[90px] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  Simpan
+                  {isSubmitting ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    'Simpan'
+                  )}
                 </button>
               </div>
             </form>

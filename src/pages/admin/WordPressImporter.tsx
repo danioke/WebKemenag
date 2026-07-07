@@ -168,7 +168,7 @@ export default function WordPressImporter() {
           category: customCategory,
           date: postDate,
           author: authorName,
-          image: imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80',
+          image: imageUrl || 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80',
           excerpt: fullContent,
           createdAt: useOriginalDate ? originalDateObj : serverTimestamp()
         });

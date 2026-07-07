@@ -244,13 +244,13 @@ export default function MediaGallery() {
 }
 
 const fallbackPhotos: PhotoData[] = [
-  { id: '1', title: "Kegiatan Pembinaan Kerukunan Umat Beragama", image: "https://images.unsplash.com/photo-1590407727780-33734dc8cb10?auto=format&fit=crop&q=80" },
-  { id: '2', title: "Rapat Koordinasi KUA Kecamatan", image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" },
-  { id: '3', title: "Pembinaan Madrasah", image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80" },
-  { id: '4', title: "Peringatan Maulid Nabi", image: "https://images.unsplash.com/photo-1577900232427-18219b9166a0?auto=format&fit=crop&q=80" }
+  { id: '1', title: "Kegiatan Pembinaan Kerukunan Umat Beragama", image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80" },
+  { id: '2', title: "Rapat Koordinasi KUA Kecamatan", image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80" },
+  { id: '3', title: "Pembinaan Madrasah", image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80" },
+  { id: '4', title: "Peringatan Maulid Nabi", image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80" }
 ];
 
 const fallbackVideos: VideoData[] = [
-  { id: '1', title: "Profil Kementerian Agama Kabupaten OKI", thumbnail: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80", duration: "05:24" },
-  { id: '2', title: "Sosialisasi Layanan Sertifikasi Halal Gratis 2024", thumbnail: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80", duration: "12:10" }
+  { id: '1', title: "Profil Kementerian Agama Kabupaten OKI", thumbnail: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80", duration: "05:24" },
+  { id: '2', title: "Sosialisasi Layanan Sertifikasi Halal Gratis 2024", thumbnail: "https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80", duration: "12:10" }
 ];

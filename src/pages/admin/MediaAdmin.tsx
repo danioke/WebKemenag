@@ -22,6 +22,8 @@ export default function MediaAdmin() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingImage, setEditingImage] = useState("");
 
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
   const fetchFiles = async () => {
     setLoading(true);
     try {
@@ -91,8 +93,6 @@ export default function MediaAdmin() {
   };
 
   const handleDelete = async (url: string) => {
-    if (!window.confirm('Hapus file ini? File yang dihapus mungkin membuat gambar/file di artikel hilang.')) return;
-    
     // Extract category and filename from url (e.g. /uploads/foto/file.jpg)
     const parts = url.split('/');
     if (parts.length < 4) return;
@@ -107,6 +107,7 @@ export default function MediaAdmin() {
       
       if (res.ok) {
         toast.success('File berhasil dihapus');
+        setDeleteConfirm(null);
         fetchFiles();
       } else {
         toast.error('Gagal menghapus file');
@@ -142,7 +143,9 @@ export default function MediaAdmin() {
           <div className="flex bg-gray-100 p-1 rounded-lg">
             {[
               { id: 'all', label: 'Semua', icon: Folder },
-              { id: 'image', label: 'Foto', icon: ImageIcon },
+              { id: 'image', label: 'Foto Berita', icon: ImageIcon },
+              { id: 'foto_pejabat', label: 'Foto Pejabat', icon: ImageIcon },
+              { id: 'foto_staf', label: 'Foto Staf', icon: ImageIcon },
               { id: 'video', label: 'Video', icon: Video },
               { id: 'pdf', label: 'PDF / Dokumen', icon: FileText }
             ].map(cat => (
@@ -197,7 +200,7 @@ export default function MediaAdmin() {
                         <Copy size={16} />
                       </button>
                       <button onClick={() => { setEditingImage(file.url); setEditorOpen(true); }} className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white backdrop-blur-sm" title="Crop Gambar" style={{ display: file.mimeType.startsWith("image/") ? "block" : "none" }}><Crop size={16} /></button>
-                      <button onClick={() => handleDelete(file.url)} className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white backdrop-blur-sm" title="Hapus File">
+                      <button onClick={() => setDeleteConfirm(file.url)} className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white backdrop-blur-sm" title="Hapus File">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -212,6 +215,30 @@ export default function MediaAdmin() {
           )}
         </div>
       </div>
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Hapus File?</h3>
+            <p className="text-gray-600 text-sm mb-6">
+              Apakah Anda yakin ingin menghapus file ini? File yang dihapus mungkin membuat gambar/dokumen di artikel menjadi hilang.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm)}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

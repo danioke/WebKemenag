@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
-import DefaultEditor from 'react-simple-wysiwyg';
+import SummernoteEditor from '../../components/SummernoteEditor';
 import { 
   Plus, Trash2, Edit2, GraduationCap, BookOpen, Building2, Book, 
   User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award
@@ -24,12 +24,12 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'H. Syamsul Azhar, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Budi Santoso, S.E.', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250' },
-      { id: '4', name: 'Eka Lestari, S.Sos.', role: 'Admin EMIS & Keuangan', photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
+      { id: '3', name: 'Budi Santoso, S.E.', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' },
+      { id: '4', name: 'Eka Lestari, S.Sos.', role: 'Admin EMIS & Keuangan', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'bimas-islam': {
@@ -46,11 +46,11 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'H. Ismadi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1500048993953-d23a436266cf?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Muryadi, S.H.', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
+      { id: '3', name: 'Muryadi, S.H.', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'pondok-pesantren': {
@@ -67,10 +67,10 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'Drs. H. Mutiara',
-    kasiPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'sertifikasi-halal': {
@@ -170,10 +170,10 @@ const defaultLayananData: Record<string, any> = {
       </ul>
     `,
     kasiName: 'H. Junaidi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=400',
+    kasiPhoto: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' }
     ]
   }
 };
@@ -206,6 +206,73 @@ export default function LayananAdmin() {
     role: '',
     photo: ''
   });
+  
+  const [uploadingKasi, setUploadingKasi] = useState(false);
+  const [uploadingStaf, setUploadingStaf] = useState(false);
+
+  const handleUploadKasi = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', 'foto_pejabat');
+    
+    setUploadingKasi(true);
+    toast.info('Mengunggah foto pejabat...');
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setKasiPhoto(data.url);
+        toast.success('Foto pejabat berhasil diunggah');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Gagal mengunggah foto');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat mengunggah');
+    } finally {
+      setUploadingKasi(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleUploadStaf = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', 'foto_staf');
+    
+    setUploadingStaf(true);
+    toast.info('Mengunggah foto staf...');
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setStafFormData(prev => ({ ...prev, photo: data.url }));
+        toast.success('Foto staf berhasil diunggah');
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'Gagal mengunggah foto');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat mengunggah');
+    } finally {
+      setUploadingStaf(false);
+      e.target.value = '';
+    }
+  };
 
   const loadLayananData = async () => {
     setLoading(true);
@@ -312,7 +379,7 @@ export default function LayananAdmin() {
         id: Date.now().toString(),
         name: stafFormData.name.trim(),
         role: stafFormData.role.trim() || 'Staf Pelaksana',
-        photo: stafFormData.photo.trim() || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250'
+        photo: stafFormData.photo.trim() || 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250'
       };
       setStaf(prev => [...prev, newStaf]);
       toast.success("Staf baru ditambahkan");
@@ -420,9 +487,10 @@ export default function LayananAdmin() {
                   </span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '450px' }}>
-                  <DefaultEditor
+                  <SummernoteEditor
                     value={syarat}
-                    onChange={(e) => setSyarat(e.target.value)}
+                    onChange={(content) => setSyarat(content)}
+                    height={400}
                   />
                 </div>
               </div>
@@ -438,9 +506,10 @@ export default function LayananAdmin() {
                   </span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '400px' }}>
-                  <DefaultEditor
+                  <SummernoteEditor
                     value={tugasFungsi}
-                    onChange={(e) => setTugasFungsi(e.target.value)}
+                    onChange={(content) => setTugasFungsi(content)}
+                    height={350}
                   />
                 </div>
               </div>
@@ -485,7 +554,7 @@ export default function LayananAdmin() {
                               referrerPolicy="no-referrer"
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250';
+                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=250';
                               }}
                             />
                           </div>
@@ -544,17 +613,39 @@ export default function LayananAdmin() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 flex items-center gap-1">
-                      <ImageIcon size={12} /> URL Foto Kepala Seksi
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://..."
-                      value={kasiPhoto}
-                      onChange={(e) => setKasiPhoto(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
-                    />
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 flex items-center gap-1">
+                        <ImageIcon size={12} /> URL Foto Kepala Seksi / Pejabat
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={kasiPhoto}
+                        onChange={(e) => setKasiPhoto(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 flex items-center gap-1">
+                        &nbsp;
+                      </label>
+                      <label className={`flex items-center justify-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${uploadingKasi ? 'opacity-70 pointer-events-none' : ''}`}>
+                        {uploadingKasi ? (
+                           <div className="w-3.5 h-3.5 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                           <Upload size={14} />
+                        )}
+                        <span>Upload Foto</span>
+                        <input
+                           type="file"
+                           accept="image/*"
+                           className="hidden"
+                           onChange={handleUploadKasi}
+                           disabled={uploadingKasi}
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   <div className="border border-gray-100 rounded-xl p-3 bg-gray-50/50 flex flex-col items-center text-center">
@@ -566,7 +657,7 @@ export default function LayananAdmin() {
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=300';
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=300';
                         }}
                       />
                     </div>
@@ -640,18 +731,40 @@ export default function LayananAdmin() {
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
-                  <ImageIcon size={12} /> URL Foto Staf
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={stafFormData.photo}
-                  onChange={(e) => setStafFormData({ ...stafFormData, photo: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
-                />
-                <p className="text-[9px] text-gray-400 mt-0.5">Biarkan kosong jika ingin menggunakan foto ilustrasi default.</p>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <ImageIcon size={12} /> URL Foto Staf
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://..."
+                    value={stafFormData.photo}
+                    onChange={(e) => setStafFormData({ ...stafFormData, photo: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                  />
+                  <p className="text-[9px] text-gray-400 mt-0.5">Biarkan kosong untuk foto default.</p>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase mb-1 flex items-center gap-1">
+                    &nbsp;
+                  </label>
+                  <label className={`flex items-center justify-center gap-1.5 px-3 py-2 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${uploadingStaf ? 'opacity-70 pointer-events-none' : ''}`}>
+                    {uploadingStaf ? (
+                       <div className="w-3.5 h-3.5 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                       <Upload size={14} />
+                    )}
+                    <span>Upload</span>
+                    <input
+                       type="file"
+                       accept="image/*"
+                       className="hidden"
+                       onChange={handleUploadStaf}
+                       disabled={uploadingStaf}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">

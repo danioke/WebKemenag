@@ -322,10 +322,10 @@ export default function GaleriVideo() {
 }
 
 const fallbackVideos: VideoData[] = [
-  { id: '1', title: "Profil Kementerian Agama Kabupaten OKI", thumbnail: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80", duration: "05:24" },
-  { id: '2', title: "Sosialisasi Layanan Sertifikasi Halal Gratis 2024", thumbnail: "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&q=80", duration: "12:10" },
-  { id: '3', title: "Dokumentasi Manasik Haji Massal Kemenag OKI 2024", thumbnail: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80", duration: "08:15" },
-  { id: '4', title: "Rangkaian Peringatan Hari Santri Nasional Tingkat Kabupaten", thumbnail: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&q=80", duration: "15:45" },
-  { id: '5', title: "Penyuluhan Cegah Pernikahan Dini KUA Kayuagung", thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80", duration: "06:50" },
-  { id: '6', title: "Sosialisasi Penyaluran Zakat Fitrah BAZNAS & Kemenag", thumbnail: "https://images.unsplash.com/photo-1590407727780-33734dc8cb10?auto=format&fit=crop&q=80", duration: "10:30" }
+  { id: '1', title: "Profil Kementerian Agama Kabupaten OKI", thumbnail: "https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80", duration: "05:24" },
+  { id: '2', title: "Sosialisasi Layanan Sertifikasi Halal Gratis 2024", thumbnail: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80", duration: "12:10" },
+  { id: '3', title: "Dokumentasi Manasik Haji Massal Kemenag OKI 2024", thumbnail: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80", duration: "08:15" },
+  { id: '4', title: "Rangkaian Peringatan Hari Santri Nasional Tingkat Kabupaten", thumbnail: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80", duration: "15:45" },
+  { id: '5', title: "Penyuluhan Cegah Pernikahan Dini KUA Kayuagung", thumbnail: "https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80", duration: "06:50" },
+  { id: '6', title: "Sosialisasi Penyaluran Zakat Fitrah BAZNAS & Kemenag", thumbnail: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80", duration: "10:30" }
 ];

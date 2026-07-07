@@ -216,11 +216,11 @@ export default function GaleriFoto() {
 }
 
 const fallbackPhotos: PhotoData[] = [
-  { id: '1', title: "Kegiatan Pembinaan Kerukunan Umat Beragama", image: "https://images.unsplash.com/photo-1590407727780-33734dc8cb10?auto=format&fit=crop&q=80" },
-  { id: '2', title: "Rapat Koordinasi KUA Kecamatan", image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80" },
-  { id: '3', title: "Pembinaan Madrasah", image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80" },
-  { id: '4', title: "Peringatan Maulid Nabi", image: "https://images.unsplash.com/photo-1577900232427-18219b9166a0?auto=format&fit=crop&q=80" },
-  { id: '5', title: "Hari Santri Nasional", image: "https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&q=80" },
-  { id: '6', title: "Pelepasan Jamaah Haji", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80" },
-  { id: '7', title: "Peringatan Isra Mi'raj", image: "https://images.unsplash.com/photo-1617462497672-0043c2c12564?auto=format&fit=crop&q=80" },
+  { id: '1', title: "Kegiatan Pembinaan Kerukunan Umat Beragama", image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80" },
+  { id: '2', title: "Rapat Koordinasi KUA Kecamatan", image: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80" },
+  { id: '3', title: "Pembinaan Madrasah", image: "https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80" },
+  { id: '4', title: "Peringatan Maulid Nabi", image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80" },
+  { id: '5', title: "Hari Santri Nasional", image: "https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80" },
+  { id: '6', title: "Pelepasan Jamaah Haji", image: "https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80" },
+  { id: '7', title: "Peringatan Isra Mi'raj", image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80" },
 ];

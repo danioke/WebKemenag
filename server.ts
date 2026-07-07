@@ -11,7 +11,7 @@ async function startServer() {
   app.use(express.json());
 
   const uploadDir = path.join(process.cwd(), "uploads");
-  const categories = ["foto", "video", "pdf", "dokumen"];
+  const categories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf"];
 
   // Create upload directories if they don't exist
   if (!fs.existsSync(uploadDir)) {
@@ -36,13 +36,17 @@ async function startServer() {
   // Configure Multer storage
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      let category = "dokumen";
-      if (file.mimetype.startsWith("image/")) {
-        category = "foto";
-      } else if (file.mimetype.startsWith("video/")) {
-        category = "video";
-      } else if (file.mimetype === "application/pdf") {
-        category = "pdf";
+      let category = req.body.category || "";
+      if (!category || !categories.includes(category)) {
+        if (file.mimetype.startsWith("image/")) {
+          category = "foto";
+        } else if (file.mimetype.startsWith("video/")) {
+          category = "video";
+        } else if (file.mimetype === "application/pdf") {
+          category = "pdf";
+        } else {
+           category = "dokumen";
+        }
       }
       cb(null, path.join(uploadDir, category));
     },
@@ -69,14 +73,17 @@ async function startServer() {
       }
 
       const file = req.file;
-      let category = "dokumen";
-      
-      if (file.mimetype.startsWith("image/")) {
-        category = "foto";
-      } else if (file.mimetype.startsWith("video/")) {
-        category = "video";
-      } else if (file.mimetype === "application/pdf") {
-        category = "pdf";
+      let category = req.body.category || "";
+      if (!category || !categories.includes(category)) {
+        if (file.mimetype.startsWith("image/")) {
+          category = "foto";
+        } else if (file.mimetype.startsWith("video/")) {
+          category = "video";
+        } else if (file.mimetype === "application/pdf") {
+          category = "pdf";
+        } else {
+          category = "dokumen";
+        }
       }
 
       const relativeUrl = `/uploads/${category}/${file.filename}`;
@@ -107,9 +114,13 @@ async function startServer() {
       } else if (type === "video") {
         targetCategories = ["video"];
       } else if (type === "pdf") {
-        targetCategories = ["pdf"];
+        targetCategories = ["pdf", "dokumen"];
+      } else if (type === "foto_pejabat") {
+        targetCategories = ["foto_pejabat"];
+      } else if (type === "foto_staf") {
+        targetCategories = ["foto_staf"];
       } else {
-        targetCategories = ["foto", "video", "pdf", "dokumen"];
+        targetCategories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf"];
       }
 
       const results: any[] = [];
@@ -141,6 +152,16 @@ async function startServer() {
                   }
                 }
                 
+                let inferredMimeType = "application/octet-stream";
+                const extLower = path.extname(filename).toLowerCase();
+                if ([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"].includes(extLower)) {
+                  inferredMimeType = "image/jpeg";
+                } else if ([".mp4", ".webm", ".ogg"].includes(extLower)) {
+                  inferredMimeType = "video/mp4";
+                } else if (extLower === ".pdf") {
+                  inferredMimeType = "application/pdf";
+                }
+                
                 results.push({
                   id: filename,
                   name: originalName,
@@ -148,7 +169,7 @@ async function startServer() {
                   embedUrl: relativeUrl,
                   size: sizeStr,
                   createdTime: stat.birthtime,
-                  mimeType: cat === "foto" ? "image/jpeg" : cat === "video" ? "video/mp4" : cat === "pdf" ? "application/pdf" : "application/octet-stream"
+                  mimeType: inferredMimeType
                 });
               }
             } catch (e) {

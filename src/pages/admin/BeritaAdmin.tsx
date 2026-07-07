@@ -4,7 +4,7 @@ import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import DefaultEditor from 'react-simple-wysiwyg';
+import SummernoteEditor from '../../components/SummernoteEditor';
 
 interface Berita {
   id: string;
@@ -23,6 +23,7 @@ export default function BeritaAdmin() {
   const [formData, setFormData] = useState({ id: '', title: '', category: '', date: '', author: '', image: '', excerpt: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
 
   // Pagination states
@@ -96,6 +97,7 @@ export default function BeritaAdmin() {
       return;
     }
     
+    setIsSubmitting(true);
     try {
       if (isEditing) {
         const docRef = doc(db, 'news', formData.id);
@@ -125,6 +127,8 @@ export default function BeritaAdmin() {
     } catch (error) {
       console.error(error);
       toast.error('Terjadi kesalahan saat menyimpan data');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -345,9 +349,9 @@ export default function BeritaAdmin() {
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
                   <div className="bg-white border border-gray-300 rounded-md overflow-hidden" style={{ minHeight: '350px' }}>
-                    <DefaultEditor
+                    <SummernoteEditor
                       value={formData.excerpt}
-                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                      onChange={(content) => setFormData({ ...formData, excerpt: content })}
                     />
                   </div>
                 </div>
@@ -364,9 +368,14 @@ export default function BeritaAdmin() {
               <button
                 type="submit"
                 form="berita-form"
-                className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors flex items-center justify-center min-w-[90px] disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Simpan
+                {isSubmitting ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  'Simpan'
+                )}
               </button>
             </div>
           </div>

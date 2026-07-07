@@ -12,22 +12,22 @@ interface CarouselItem {
 
 const carouselItems: CarouselItem[] = [
   {
-    image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80",
     category: "Galeri OKI",
     title: "Masjid Agung Sholihin Kayuagung"
   },
   {
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80",
     category: "Fasilitas",
     title: "Pelayanan Terpadu Satu Pintu (PTSP) Kemenag OKI"
   },
   {
-    image: "https://images.unsplash.com/photo-1590407727780-33734dc8cb10?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80",
     category: "Kegiatan",
     title: "Pembinaan Kerukunan Umat Beragama Kab. OKI"
   },
   {
-    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80",
     category: "Pendidikan",
     title: "Pembinaan Siswa Madrasah Berprestasi"
   }
