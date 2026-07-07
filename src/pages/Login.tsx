@@ -1,82 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginWithGoogle, auth, logout, isEmailAllowed } from '../lib/firebase';
 import { toast } from 'sonner';
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Login() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-  const recaptchaRef = React.useRef<HTMLDivElement>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  
+  const siteKey = (import.meta as any).env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 
   useEffect(() => {
     // Clear any previous mock bypass sessions to strictly enforce Google Auth & reCAPTCHA
     localStorage.removeItem('mock_admin_session');
-
-    const renderRecaptcha = () => {
-      const container = recaptchaRef.current;
-      if (!container) return;
-
-      const grecaptcha = (window as any).grecaptcha;
-      if (grecaptcha && grecaptcha.render) {
-        try {
-          container.innerHTML = ''; // clear any loading placeholder
-          const siteKey = (import.meta as any).env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
-          
-          grecaptcha.render(container, {
-            sitekey: siteKey,
-            callback: (token: string) => {
-              setRecaptchaToken(token);
-              toast.success('Keamanan terverifikasi. Anda bukan robot!');
-            },
-            'expired-callback': () => {
-              setRecaptchaToken(null);
-              toast.warning('reCAPTCHA kedaluwarsa. Harap centang kembali.');
-            },
-            'error-callback': () => {
-              setRecaptchaToken(null);
-              toast.error('Gagal memuat reCAPTCHA. Hubungi Admin.');
-            }
-          });
-        } catch (err) {
-          console.error("grecaptcha rendering failed:", err);
-        }
-      }
-    };
-
-    // Set the global callback
-    (window as any).onRecaptchaLoad = () => {
-      renderRecaptcha();
-    };
-
-    // Only load reCAPTCHA when component mounts
-    const scriptId = 'recaptcha-script-tag';
-    let script = document.getElementById(scriptId) as HTMLScriptElement;
-
-    if (!script) {
-      script = document.createElement('script');
-      script.id = scriptId;
-      script.src = "https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit";
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    } else {
-      // If script is already in the document, wait for grecaptcha to be available and render
-      const grecaptcha = (window as any).grecaptcha;
-      if (grecaptcha && grecaptcha.render) {
-        setTimeout(renderRecaptcha, 100);
-      } else {
-        // Poll for grecaptcha to be available
-        const interval = setInterval(() => {
-          const gc = (window as any).grecaptcha;
-          if (gc && gc.render) {
-            renderRecaptcha();
-            clearInterval(interval);
-          }
-        }, 100);
-        return () => clearInterval(interval);
-      }
-    }
 
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user && user.email) {
@@ -120,6 +58,23 @@ export default function Login() {
     }
   };
 
+  const onRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+    if (token) {
+      toast.success('Keamanan terverifikasi. Anda bukan robot!');
+    }
+  };
+
+  const onRecaptchaErrored = () => {
+    setRecaptchaToken(null);
+    toast.error('Gagal memuat reCAPTCHA. Hubungi Admin.');
+  };
+
+  const onRecaptchaExpired = () => {
+    setRecaptchaToken(null);
+    toast.warning('reCAPTCHA kedaluwarsa. Harap centang kembali.');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
@@ -142,12 +97,13 @@ export default function Login() {
 
           {/* reCAPTCHA v2 Widget Container */}
           <div className="flex justify-center mb-6">
-            <div 
-              ref={recaptchaRef} 
-              className="bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner flex items-center justify-center min-h-[78px] min-w-[304px]"
-            >
-              <span className="text-xs text-gray-400">Memuat Google reCAPTCHA...</span>
-            </div>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={siteKey}
+              onChange={onRecaptchaChange}
+              onErrored={onRecaptchaErrored}
+              onExpired={onRecaptchaExpired}
+            />
           </div>
 
           <button

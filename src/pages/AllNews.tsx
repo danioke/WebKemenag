@@ -15,6 +15,7 @@ interface NewsData {
   author: string;
   image: string;
   excerpt: string;
+  views?: number;
 }
 
 const stripHtml = (html: string) => {

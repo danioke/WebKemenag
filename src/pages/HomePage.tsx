@@ -21,7 +21,7 @@ export default function HomePage() {
         <Hero />
         
         {/* Daily Widgets Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-20 mb-12">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-8 relative z-20 mb-2 sm:mb-6">
           <div className="w-full">
             <JadwalSholatWidget />
           </div>

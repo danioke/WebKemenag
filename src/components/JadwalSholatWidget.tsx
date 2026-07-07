@@ -86,16 +86,16 @@ export default function JadwalSholatWidget() {
 
   return (
     <div className="w-full font-sans">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 text-gray-600">
-        <div>{jadwal?.tanggal || 'Memuat jadwal...'}</div>
+      <div className="flex flex-row justify-between items-center mb-4 text-gray-600 gap-2">
+        <div className="text-xs sm:text-base whitespace-nowrap flex-shrink-0">{jadwal?.tanggal || 'Memuat jadwal...'}</div>
         
-        <div className="relative mt-2 sm:mt-0 min-w-[250px] z-30" ref={dropdownRef}>
+        <div className="relative z-30 flex-1 min-w-0 flex justify-end" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center justify-between w-full sm:justify-end gap-2 py-1 focus:outline-none hover:text-green-800 transition-colors bg-transparent cursor-pointer"
+            className="flex items-center justify-end w-full max-w-[250px] gap-1 sm:gap-2 py-1 focus:outline-none hover:text-green-800 transition-colors bg-transparent cursor-pointer text-xs sm:text-base text-right"
           >
             <span className="truncate">{selectedKotaObj ? selectedKotaObj.lokasi : 'Pilih Kota'}</span>
-            <ChevronDown size={16} className={`transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={14} className={`flex-shrink-0 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
           
           {dropdownOpen && (

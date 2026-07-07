@@ -73,10 +73,10 @@ export default function Services() {
   };
 
   return (
-    <section className="py-20 bg-gray-50 relative" id="layanan">
+    <section className="pt-6 pb-10 sm:pt-10 sm:pb-20 bg-gray-50 relative" id="layanan">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-16">
           <h2 className="text-green-700 font-semibold tracking-wide uppercase text-sm mb-2">Layanan Utama</h2>
           <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Akses Layanan Kementerian Agama</h3>
           <p className="text-gray-600 text-lg">
