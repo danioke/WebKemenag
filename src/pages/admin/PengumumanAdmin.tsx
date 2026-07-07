@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, FileText, X, HardDrive } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, X, HardDrive, Upload } from 'lucide-react';
 import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
 
 interface Pengumuman {
@@ -20,6 +20,34 @@ export default function PengumumanAdmin() {
   const [isDriveOpen, setIsDriveOpen] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', date: '', size: '', fileUrl: '' });
   const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleLocalUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const form = new FormData();
+    form.append("file", file);
+    setUploading(true);
+    toast.info("Mengunggah berkas...");
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        const result = await res.json();
+        setFormData({ 
+          ...formData, 
+          fileUrl: result.url,
+          size: result.size || '0 KB'
+        });
+        toast.success("Berkas berhasil diunggah");
+      } else {
+        toast.error("Gagal mengunggah berkas");
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan saat mengunggah");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -210,16 +238,30 @@ export default function PengumumanAdmin() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">URL File (PDF / Dokumen)</label>
                   <div className="flex gap-2">
                     <input
-                      type="url"
+                      type="text"
                       value={formData.fileUrl}
                       onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                      placeholder="Masukkan URL Berkas atau pilih dari Google Drive"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Masukkan URL Berkas, upload lokal, atau pilih dari Google Drive"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
+                    <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-xs font-semibold shadow-sm gap-1">
+                      {uploading ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <><Upload size={14} /> Upload</>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+                        className="hidden" 
+                        onChange={handleLocalUpload} 
+                        disabled={uploading} 
+                      />
+                    </label>
                     <button
                       type="button"
                       onClick={() => setIsDriveOpen(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-sm cursor-pointer"
                     >
                       <HardDrive size={14} /> Drive
                     </button>

@@ -194,6 +194,139 @@ async function startServer() {
     }
   });
 
+  // Local Database and Authentication APIs (Replacing Firebase/Google entirely)
+  const dbDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  function getCollectionPath(collection: string) {
+    return path.join(dbDir, `${collection}.json`);
+  }
+
+  function readCollection(collection: string): any[] {
+    const filePath = getCollectionPath(collection);
+    if (!fs.existsSync(filePath)) {
+      return [];
+    }
+    try {
+      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    } catch (e) {
+      console.error(`Error reading collection ${collection}:`, e);
+      return [];
+    }
+  }
+
+  function writeCollection(collection: string, data: any[]) {
+    const filePath = getCollectionPath(collection);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  }
+
+  // GET all documents in a collection
+  app.get("/api/db/:collection", (req, res) => {
+    try {
+      const { collection } = req.params;
+      const items = readCollection(collection);
+      res.json(items);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET a single document by ID
+  app.get("/api/db/:collection/:id", (req, res) => {
+    try {
+      const { collection, id } = req.params;
+      const items = readCollection(collection);
+      const item = items.find((i) => i.id === id);
+      if (item) {
+        res.json(item);
+      } else {
+        res.status(404).json({ error: "Document not found" });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST (add) a new document to a collection
+  app.post("/api/db/:collection", (req, res) => {
+    try {
+      const { collection } = req.params;
+      const data = req.body;
+      const items = readCollection(collection);
+      
+      const id = data.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const newItem = { 
+        ...data, 
+        id,
+        createdAt: data.createdAt || new Date().toISOString()
+      };
+      
+      items.push(newItem);
+      writeCollection(collection, items);
+      res.json({ id });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // PUT (update/set) a document by ID
+  app.put("/api/db/:collection/:id", (req, res) => {
+    try {
+      const { collection, id } = req.params;
+      const data = req.body;
+      const items = readCollection(collection);
+      const index = items.findIndex((i) => i.id === id);
+      
+      if (index !== -1) {
+        items[index] = { ...items[index], ...data, id };
+      } else {
+        items.push({ ...data, id });
+      }
+      
+      writeCollection(collection, items);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // DELETE a document by ID
+  app.delete("/api/db/:collection/:id", (req, res) => {
+    try {
+      const { collection, id } = req.params;
+      let items = readCollection(collection);
+      items = items.filter((i) => i.id !== id);
+      writeCollection(collection, items);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST local authentication login
+  app.post("/api/auth/login", (req, res) => {
+    try {
+      const { email, password } = req.body;
+      // Admin password is read from process.env.ADMIN_PASSWORD or defaults to a clean default
+      const adminPassword = process.env.ADMIN_PASSWORD || "kemenagoki123";
+      
+      if (password === adminPassword) {
+        res.json({
+          uid: "admin-uid",
+          email: email || "anisreza498@gmail.com",
+          displayName: "Super Admin (Anis Reza)",
+          role: "Super Admin",
+        });
+      } else {
+        res.status(401).json({ error: "Password administrator salah!" });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
