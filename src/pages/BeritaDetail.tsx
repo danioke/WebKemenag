@@ -146,14 +146,10 @@ export default function BeritaDetail() {
       <main className="flex-grow py-6 sm:py-12">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-white sm:p-10 rounded-none sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 pb-10">
           
-          <div className="flex items-center justify-between mb-4 mt-4 sm:mt-0 flex-wrap gap-3">
+          <div className="mb-4 mt-4 sm:mt-0">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
               <Tag size={12} /> {berita.category}
             </span>
-            <button onClick={handleShare} className="flex items-center gap-2 text-gray-500 hover:text-green-700 transition-colors py-1.5 px-4 bg-gray-50 hover:bg-green-50 rounded-full border border-gray-100 shadow-sm text-sm font-medium ml-auto">
-              <Share2 size={16} />
-              <span>Bagikan</span>
-            </button>
           </div>
           
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
