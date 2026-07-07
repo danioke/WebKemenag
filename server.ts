@@ -327,20 +327,171 @@ async function startServer() {
     }
   });
 
+  function createSlug(text: string) {
+    if (!text) return '';
+    return text
+      .toString()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+  }
+
+  async function injectOGTags(html: string, req: express.Request): Promise<string> {
+    const reqPath = req.path;
+    const host = req.headers.host || "kemenagoki.go.id";
+    const protocol = req.headers["x-forwarded-proto"] || "https";
+    const fullUrl = `${protocol}://${host}${req.originalUrl}`;
+    
+    // Default metadata
+    let title = "Kementerian Agama Kabupaten OKI";
+    let description = "Website Resmi Kantor Kementerian Agama Kabupaten Ogan Komering Ilir (OKI). Melayani masyarakat dengan ikhlas beramal.";
+    let image = `${protocol}://${host}/og-image.jpg`;
+
+    try {
+      // Match route
+      // 1. Berita / News
+      const beritaMatch = reqPath.match(/^\/(berita|news)\/([^/]+)/);
+      if (beritaMatch) {
+        const idOrSlug = beritaMatch[2];
+        const items = readCollection("news");
+        const item = items.find((i: any) => i.id === idOrSlug || (i.title && createSlug(i.title) === idOrSlug));
+        if (item) {
+          title = `${item.title} | Kementerian Agama Kabupaten OKI`;
+          description = item.excerpt || (item.content ? item.content.substring(0, 160).replace(/<[^>]*>/g, "") : "") || description;
+          if (item.image) {
+            if (item.image.startsWith("http")) {
+              image = item.image;
+            } else {
+              image = `${protocol}://${host}${item.image.startsWith("/") ? "" : "/"}${item.image}`;
+            }
+          }
+        }
+      }
+      // 2. Pengumuman
+      else if (reqPath.startsWith("/pengumuman/")) {
+        const idOrSlug = reqPath.split("/pengumuman/")[1]?.split("?")[0];
+        if (idOrSlug) {
+          const items = readCollection("announcements");
+          const item = items.find((i: any) => i.id === idOrSlug || (i.title && createSlug(i.title) === idOrSlug));
+          if (item) {
+            title = `${item.title} | Kementerian Agama Kabupaten OKI`;
+            description = `Pengumuman resmi Kantor Kementerian Agama Kabupaten Ogan Komering Ilir. Tanggal: ${item.date || "-"}. Ukuran file: ${item.size || "-"}.`;
+            image = `${protocol}://${host}/pdf-announcement.jpg`;
+          }
+        }
+      }
+      // 3. Agenda
+      else if (reqPath.startsWith("/agenda/")) {
+        const idOrSlug = reqPath.split("/agenda/")[1]?.split("?")[0];
+        if (idOrSlug) {
+          const items = readCollection("agendas");
+          const item = items.find((i: any) => i.id === idOrSlug || (i.title && createSlug(i.title) === idOrSlug));
+          if (item) {
+            title = `${item.title} | Kementerian Agama Kabupaten OKI`;
+            description = `Agenda Kegiatan: ${item.title}. Tanggal: ${item.date || ""} ${item.month || ""}, Waktu: ${item.time || ""}, Lokasi: ${item.location || ""}. Status: ${item.status || "-"}.`;
+            image = `${protocol}://${host}/calendar-agenda.jpg`;
+          }
+        }
+      }
+      // 4. Layanan
+      else if (reqPath.startsWith("/layanan/")) {
+        const id = reqPath.split("/layanan/")[1]?.split("?")[0];
+        const defaultLayananTitles: Record<string, string> = {
+          'pendidikan-madrasah': 'Pendidikan Madrasah',
+          'bimas-islam': 'Bimbingan Masyarakat Islam',
+          'pondok-pesantren': 'Pondok Pesantren',
+          'sertifikasi-halal': 'Sertifikasi Halal',
+          'urusan-agama-islam': 'Urusan Agama Islam',
+          'pendidikan-agama-islam': 'Pendidikan Agama Islam'
+        };
+        if (id && defaultLayananTitles[id]) {
+          title = `${defaultLayananTitles[id]} - Layanan Terpadu | Kementerian Agama Kabupaten OKI`;
+          description = `Informasi pelayanan, tugas, fungsi, dan struktural seksi ${defaultLayananTitles[id]} di Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.`;
+        }
+      }
+    } catch (e) {
+      console.error("Error reading metadata from collections for OG tags:", e);
+    }
+
+    // Replace in template
+    let result = html;
+    
+    // Replace titles
+    result = result.replace(/<title>.*?<\/title>/gi, `<title>${title}</title>`);
+    result = result.replace(/<meta\s+name="title"\s+content=".*?"\s*\/?>/gi, `<meta name="title" content="${title}" />`);
+    result = result.replace(/<meta\s+property="og:title"\s+content=".*?"\s*\/?>/gi, `<meta property="og:title" content="${title}" />`);
+    result = result.replace(/<meta\s+property="twitter:title"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:title" content="${title}" />`);
+    
+    // Replace descriptions
+    result = result.replace(/<meta\s+name="description"\s+content=".*?"\s*\/?>/gi, `<meta name="description" content="${description}" />`);
+    result = result.replace(/<meta\s+property="og:description"\s+content=".*?"\s*\/?>/gi, `<meta property="og:description" content="${description}" />`);
+    result = result.replace(/<meta\s+property="twitter:description"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:description" content="${description}" />`);
+    
+    // Replace images
+    result = result.replace(/<meta\s+property="og:image"\s+content=".*?"\s*\/?>/gi, `<meta property="og:image" content="${image}" />`);
+    result = result.replace(/<meta\s+property="twitter:image"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:image" content="${image}" />`);
+    
+    // Replace URLs
+    result = result.replace(/<meta\s+property="og:url"\s+content=".*?"\s*\/?>/gi, `<meta property="og:url" content="${fullUrl}" />`);
+    result = result.replace(/<meta\s+property="twitter:url"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:url" content="${fullUrl}" />`);
+    
+    return result;
+  }
+
+  let viteInstance: any = null;
+
+  // Intercept HTML pages requests to dynamically inject Open Graph (OG) meta tags
+  app.get("*", async (req, res, next) => {
+    // Skip if it is an API route, uploaded file, or standard static assets with extensions
+    if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/") || req.path.includes(".")) {
+      return next();
+    }
+
+    // Only intercept if Accept header contains text/html, or if it is a clean directory-style path
+    const acceptHeader = req.headers.accept || "";
+    const isHtmlRequest = acceptHeader.includes("text/html") || !req.path.includes(".");
+    
+    if (!isHtmlRequest) {
+      return next();
+    }
+
+    try {
+      let indexHtml = "";
+      if (process.env.NODE_ENV !== "production" && viteInstance) {
+        const template = fs.readFileSync(path.resolve(process.cwd(), "index.html"), "utf8");
+        indexHtml = await viteInstance.transformIndexHtml(req.url, template);
+      } else {
+        const indexPath = path.join(process.cwd(), "dist", "index.html");
+        if (fs.existsSync(indexPath)) {
+          indexHtml = fs.readFileSync(indexPath, "utf8");
+        } else {
+          indexHtml = fs.readFileSync(path.resolve(process.cwd(), "index.html"), "utf8");
+        }
+      }
+
+      // Inject the dynamic Open Graph (OG) tags for scrapers/social media bots
+      const modifiedHtml = await injectOGTags(indexHtml, req);
+      res.status(200).set({ "Content-Type": "text/html" }).end(modifiedHtml);
+    } catch (err) {
+      console.error("Error generating dynamic OG tags in HTML interceptor:", err);
+      next(err);
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+    viteInstance = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
-    app.use(vite.middlewares);
+    app.use(viteInstance.middlewares);
     console.log("Vite middleware mounted in development mode");
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
     console.log("Serving production build from dist/ folder");
   }
 

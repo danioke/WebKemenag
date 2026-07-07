@@ -14,218 +14,442 @@ function saveLocalCollection(collectionName: string, data: any[]) {
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
   
-  window.fetch = async function(input, init) {
-    const url = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
-    
-    // Only intercept relative or absolute /api/ routes
-    if (url.startsWith('/api/') || url.includes('/api/')) {
-      const handleFallback = async (): Promise<Response> => {
-        console.warn(`[API Fallback] Server not found or returned error for ${url}. Using local storage database.`);
-        
-        // 1. Auth Login Fallback
-        if (url.includes('/api/auth/login')) {
-          try {
-            const body = init?.body ? JSON.parse(init.body as string) : {};
-            const { email, password } = body;
-            const adminPassword = 'kemenagoki123';
-            
-            if (password === adminPassword) {
-              const user = {
-                uid: "admin-uid",
-                email: email || "anisreza498@gmail.com",
-                displayName: "Super Admin (Anis Reza)",
-                role: "Super Admin",
-              };
-              return new Response(JSON.stringify(user), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-              });
-            } else {
-              return new Response(JSON.stringify({ error: "Password administrator salah!" }), {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' }
-              });
-            }
-          } catch (e) {
-            return new Response(JSON.stringify({ error: "Gagal memproses autentikasi lokal" }), {
-              status: 500,
-              headers: { 'Content-Type': 'application/json' }
-            });
-          }
-        }
-        
-        // 2. Upload Fallback (convert file to Base64 to store in localStorage)
-        if (url.includes('/api/upload')) {
-          try {
-            const formData = init?.body as FormData;
-            const file = formData.get('file') as File;
-            if (file) {
-              const base64 = await new Promise<string>((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.readAsDataURL(file);
-              });
-              
-              const filename = file.name || "file_upload";
-              const sizeInKb = Math.round(file.size / 1024);
-              const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
-              
-              const mockResult = {
-                id: `local-${Date.now()}`,
-                name: filename,
-                url: base64,
-                embedUrl: base64,
-                size: sizeStr
-              };
-              
-              // Add to uploaded_files collection
-              const localFiles = getLocalCollection('uploaded_files');
-              localFiles.push({
-                id: mockResult.id,
-                name: filename,
-                url: base64,
-                createdTime: new Date().toISOString(),
-                size: file.size,
-                mimeType: file.type
-              });
-              saveLocalCollection('uploaded_files', localFiles);
-              
-              return new Response(JSON.stringify(mockResult), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-              });
-            }
-          } catch (e) {
-            console.error("[API Fallback] Local upload failed", e);
-          }
-          return new Response(JSON.stringify({ error: "Gagal mengunggah file ke penyimpanan lokal" }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        
-        // 3. Files Fallback
-        if (url.includes('/api/files')) {
-          const method = init?.method || 'GET';
-          if (method === 'DELETE') {
-            const parts = url.split('/');
-            const filename = parts[parts.length - 1];
-            let localFiles = getLocalCollection('uploaded_files');
-            localFiles = localFiles.filter((f: any) => f.id !== filename);
-            saveLocalCollection('uploaded_files', localFiles);
-            return new Response(JSON.stringify({ success: true, message: "File berhasil dihapus" }), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            });
-          } else {
-            const localFiles = getLocalCollection('uploaded_files');
-            return new Response(JSON.stringify(localFiles), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            });
-          }
-        }
-        
-        // 4. Database CRUD Fallback
-        if (url.includes('/api/db/')) {
-          const pathPart = url.split('/api/db/')[1];
-          const parts = pathPart.split('?')[0].split('/');
-          const collectionName = parts[0];
-          const docId = parts[1];
+  try {
+    window.fetch = async function(input, init) {
+      const url = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
+      
+      // Only intercept relative or absolute /api/ routes
+      if (url.startsWith('/api/') || url.includes('/api/')) {
+        const handleFallback = async (): Promise<Response> => {
+          console.warn(`[API Fallback] Server not found or returned error for ${url}. Using local storage database.`);
           
-          const method = init?.method || 'GET';
-          
-          if (method === 'GET') {
-            if (docId) {
-              const localItems = getLocalCollection(collectionName);
-              const found = localItems.find((item: any) => item.id === docId);
-              if (found) {
-                return new Response(JSON.stringify(found), {
+          // 1. Auth Login Fallback
+          if (url.includes('/api/auth/login')) {
+            try {
+              const body = init?.body ? JSON.parse(init.body as string) : {};
+              const { email, password } = body;
+              const adminPassword = 'kemenagoki123';
+              
+              if (password === adminPassword) {
+                const user = {
+                  uid: "admin-uid",
+                  email: email || "anisreza498@gmail.com",
+                  displayName: "Super Admin (Anis Reza)",
+                  role: "Super Admin",
+                };
+                return new Response(JSON.stringify(user), {
                   status: 200,
                   headers: { 'Content-Type': 'application/json' }
                 });
               } else {
-                return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), {
-                  status: 404,
+                return new Response(JSON.stringify({ error: "Password administrator salah!" }), {
+                  status: 401,
                   headers: { 'Content-Type': 'application/json' }
                 });
               }
-            } else {
-              const localItems = getLocalCollection(collectionName);
-              return new Response(JSON.stringify(localItems), {
-                status: 200,
+            } catch (e) {
+              return new Response(JSON.stringify({ error: "Gagal memproses autentikasi lokal" }), {
+                status: 500,
                 headers: { 'Content-Type': 'application/json' }
               });
             }
-          } else if (method === 'POST') {
-            const body = init?.body ? JSON.parse(init.body as string) : {};
-            const localItems = getLocalCollection(collectionName);
-            const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            const newItem = {
-              ...body,
-              id,
-              createdAt: body.createdAt || new Date().toISOString()
-            };
-            localItems.push(newItem);
-            saveLocalCollection(collectionName, localItems);
-            return new Response(JSON.stringify({ id }), {
-              status: 200,
+          }
+          
+          // 2. Upload Fallback (convert file to Base64 to store in localStorage)
+          if (url.includes('/api/upload')) {
+            try {
+              const formData = init?.body as FormData;
+              const file = formData.get('file') as File;
+              if (file) {
+                const base64 = await new Promise<string>((resolve) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result as string);
+                  reader.readAsDataURL(file);
+                });
+                
+                const filename = file.name || "file_upload";
+                const sizeInKb = Math.round(file.size / 1024);
+                const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
+                
+                const mockResult = {
+                  id: `local-${Date.now()}`,
+                  name: filename,
+                  url: base64,
+                  embedUrl: base64,
+                  size: sizeStr
+                };
+                
+                // Add to uploaded_files collection
+                const localFiles = getLocalCollection('uploaded_files');
+                localFiles.push({
+                  id: mockResult.id,
+                  name: filename,
+                  url: base64,
+                  createdTime: new Date().toISOString(),
+                  size: file.size,
+                  mimeType: file.type
+                });
+                saveLocalCollection('uploaded_files', localFiles);
+                
+                return new Response(JSON.stringify(mockResult), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+            } catch (e) {
+              console.error("[API Fallback] Local upload failed", e);
+            }
+            return new Response(JSON.stringify({ error: "Gagal mengunggah file ke penyimpanan lokal" }), {
+              status: 500,
               headers: { 'Content-Type': 'application/json' }
             });
-          } else if (method === 'PUT') {
-            if (docId) {
-              const body = init?.body ? JSON.parse(init.body as string) : {};
-              const localItems = getLocalCollection(collectionName);
-              const index = localItems.findIndex((i: any) => i.id === docId);
-              if (index !== -1) {
-                localItems[index] = { ...localItems[index], ...body, id: docId };
-              } else {
-                localItems.push({ ...body, id: docId });
-              }
-              saveLocalCollection(collectionName, localItems);
-              return new Response(JSON.stringify({ success: true }), {
+          }
+          
+          // 3. Files Fallback
+          if (url.includes('/api/files')) {
+            const method = init?.method || 'GET';
+            if (method === 'DELETE') {
+              const parts = url.split('/');
+              const filename = parts[parts.length - 1];
+              let localFiles = getLocalCollection('uploaded_files');
+              localFiles = localFiles.filter((f: any) => f.id !== filename);
+              saveLocalCollection('uploaded_files', localFiles);
+              return new Response(JSON.stringify({ success: true, message: "File berhasil dihapus" }), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
               });
-            }
-          } else if (method === 'DELETE') {
-            if (docId) {
-              let localItems = getLocalCollection(collectionName);
-              localItems = localItems.filter((i: any) => i.id !== docId);
-              saveLocalCollection(collectionName, localItems);
-              return new Response(JSON.stringify({ success: true }), {
+            } else {
+              const localFiles = getLocalCollection('uploaded_files');
+              return new Response(JSON.stringify(localFiles), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
               });
             }
           }
+          
+          // 4. Database CRUD Fallback
+          if (url.includes('/api/db/')) {
+            const pathPart = url.split('/api/db/')[1];
+            const parts = pathPart.split('?')[0].split('/');
+            const collectionName = parts[0];
+            const docId = parts[1];
+            
+            const method = init?.method || 'GET';
+            
+            if (method === 'GET') {
+              if (docId) {
+                const localItems = getLocalCollection(collectionName);
+                const found = localItems.find((item: any) => item.id === docId);
+                if (found) {
+                  return new Response(JSON.stringify(found), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                } else {
+                  return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                }
+              } else {
+                const localItems = getLocalCollection(collectionName);
+                return new Response(JSON.stringify(localItems), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+            } else if (method === 'POST') {
+              const body = init?.body ? JSON.parse(init.body as string) : {};
+              const localItems = getLocalCollection(collectionName);
+              const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+              const newItem = {
+                ...body,
+                id,
+                createdAt: body.createdAt || new Date().toISOString()
+              };
+              localItems.push(newItem);
+              saveLocalCollection(collectionName, localItems);
+              return new Response(JSON.stringify({ id }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            } else if (method === 'PUT') {
+              if (docId) {
+                const body = init?.body ? JSON.parse(init.body as string) : {};
+                const localItems = getLocalCollection(collectionName);
+                const index = localItems.findIndex((i: any) => i.id === docId);
+                if (index !== -1) {
+                  localItems[index] = { ...localItems[index], ...body, id: docId };
+                } else {
+                  localItems.push({ ...body, id: docId });
+                }
+                saveLocalCollection(collectionName, localItems);
+                return new Response(JSON.stringify({ success: true }), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+            } else if (method === 'DELETE') {
+              if (docId) {
+                let localItems = getLocalCollection(collectionName);
+                localItems = localItems.filter((i: any) => i.id !== docId);
+                saveLocalCollection(collectionName, localItems);
+                return new Response(JSON.stringify({ success: true }), {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+            }
+          }
+          
+          // Default generic JSON response for anything else
+          return new Response(JSON.stringify({}), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        };
+  
+        try {
+          const res = await originalFetch(input, init);
+          const contentType = res.headers.get("content-type") || "";
+          
+          // If the request is successful and NOT an HTML document (SPA routing fallback)
+          if (res.ok && !contentType.includes("text/html")) {
+            return res;
+          }
+          
+          // If it returns HTML or standard non-200 error, trigger local storage fallback
+          return await handleFallback();
+        } catch (error) {
+          return await handleFallback();
         }
-        
-        // Default generic JSON response for anything else
-        return new Response(JSON.stringify({}), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      };
-
-      try {
-        const res = await originalFetch(input, init);
-        const contentType = res.headers.get("content-type") || "";
-        
-        // If the request is successful and NOT an HTML document (SPA routing fallback)
-        if (res.ok && !contentType.includes("text/html")) {
-          return res;
-        }
-        
-        // If it returns HTML or standard non-200 error, trigger local storage fallback
-        return await handleFallback();
-      } catch (error) {
-        return await handleFallback();
       }
+      
+      return originalFetch(input, init);
+    };
+  } catch (err) {
+    console.warn("Direct window.fetch assignment failed, falling back to Object.defineProperty strategy", err);
+    try {
+      Object.defineProperty(window, 'fetch', {
+        value: async function(input: any, init?: any) {
+          const url = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
+          
+          // Only intercept relative or absolute /api/ routes
+          if (url.startsWith('/api/') || url.includes('/api/')) {
+            const handleFallback = async (): Promise<Response> => {
+              console.warn(`[API Fallback] Server not found or returned error for ${url}. Using local storage database.`);
+              
+              // 1. Auth Login Fallback
+              if (url.includes('/api/auth/login')) {
+                try {
+                  const body = init?.body ? JSON.parse(init.body as string) : {};
+                  const { email, password } = body;
+                  const adminPassword = 'kemenagoki123';
+                  
+                  if (password === adminPassword) {
+                    const user = {
+                      uid: "admin-uid",
+                      email: email || "anisreza498@gmail.com",
+                      displayName: "Super Admin (Anis Reza)",
+                      role: "Super Admin",
+                    };
+                    return new Response(JSON.stringify(user), {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                  } else {
+                    return new Response(JSON.stringify({ error: "Password administrator salah!" }), {
+                      status: 401,
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                  }
+                } catch (e) {
+                  return new Response(JSON.stringify({ error: "Gagal memproses autentikasi lokal" }), {
+                    status: 500,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                }
+              }
+              
+              // 2. Upload Fallback (convert file to Base64 to store in localStorage)
+              if (url.includes('/api/upload')) {
+                try {
+                  const formData = init?.body as FormData;
+                  const file = formData.get('file') as File;
+                  if (file) {
+                    const base64 = await new Promise<string>((resolve) => {
+                      const reader = new FileReader();
+                      reader.onloadend = () => resolve(reader.result as string);
+                      reader.readAsDataURL(file);
+                    });
+                    
+                    const filename = file.name || "file_upload";
+                    const sizeInKb = Math.round(file.size / 1024);
+                    const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
+                    
+                    const mockResult = {
+                      id: `local-${Date.now()}`,
+                      name: filename,
+                      url: base64,
+                      embedUrl: base64,
+                      size: sizeStr
+                    };
+                    
+                    // Add to uploaded_files collection
+                    const localFiles = getLocalCollection('uploaded_files');
+                    localFiles.push({
+                      id: mockResult.id,
+                      name: filename,
+                      url: base64,
+                      createdTime: new Date().toISOString(),
+                      size: file.size,
+                      mimeType: file.type
+                    });
+                    saveLocalCollection('uploaded_files', localFiles);
+                    
+                    return new Response(JSON.stringify(mockResult), {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                  }
+                } catch (e) {
+                  console.error("[API Fallback] Local upload failed", e);
+                }
+                return new Response(JSON.stringify({ error: "Gagal mengunggah file ke penyimpanan lokal" }), {
+                  status: 500,
+                  headers: { 'Content-Type': 'application/json' }
+                });
+              }
+              
+              // 3. Files Fallback
+              if (url.includes('/api/files')) {
+                const method = init?.method || 'GET';
+                if (method === 'DELETE') {
+                  const parts = url.split('/');
+                  const filename = parts[parts.length - 1];
+                  let localFiles = getLocalCollection('uploaded_files');
+                  localFiles = localFiles.filter((f: any) => f.id !== filename);
+                  saveLocalCollection('uploaded_files', localFiles);
+                  return new Response(JSON.stringify({ success: true, message: "File berhasil dihapus" }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                } else {
+                  const localFiles = getLocalCollection('uploaded_files');
+                  return new Response(JSON.stringify(localFiles), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                }
+              }
+              
+              // 4. Database CRUD Fallback
+              if (url.includes('/api/db/')) {
+                const pathPart = url.split('/api/db/')[1];
+                const parts = pathPart.split('?')[0].split('/');
+                const collectionName = parts[0];
+                const docId = parts[1];
+                
+                const method = init?.method || 'GET';
+                
+                if (method === 'GET') {
+                  if (docId) {
+                    const localItems = getLocalCollection(collectionName);
+                    const found = localItems.find((item: any) => item.id === docId);
+                    if (found) {
+                      return new Response(JSON.stringify(found), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
+                      });
+                    } else {
+                      return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), {
+                        status: 404,
+                        headers: { 'Content-Type': 'application/json' }
+                      });
+                    }
+                  } else {
+                    const localItems = getLocalCollection(collectionName);
+                    return new Response(JSON.stringify(localItems), {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                  }
+                } else if (method === 'POST') {
+                  const body = init?.body ? JSON.parse(init.body as string) : {};
+                  const localItems = getLocalCollection(collectionName);
+                  const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                  const newItem = {
+                    ...body,
+                    id,
+                    createdAt: body.createdAt || new Date().toISOString()
+                  };
+                  localItems.push(newItem);
+                  saveLocalCollection(collectionName, localItems);
+                  return new Response(JSON.stringify({ id }), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                  });
+                } else if (method === 'PUT') {
+                  if (docId) {
+                    const body = init?.body ? JSON.parse(init.body as string) : {};
+                    const localItems = getLocalCollection(collectionName);
+                    const index = localItems.findIndex((i: any) => i.id === docId);
+                    if (index !== -1) {
+                      localItems[index] = { ...localItems[index], ...body, id: docId };
+                    } else {
+                      localItems.push({ ...body, id: docId });
+                    }
+                    saveLocalCollection(collectionName, localItems);
+                    return new Response(JSON.stringify({ success: true }), {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                  }
+                } else if (method === 'DELETE') {
+                  if (docId) {
+                    let localItems = getLocalCollection(collectionName);
+                    localItems = localItems.filter((i: any) => i.id !== docId);
+                    saveLocalCollection(collectionName, localItems);
+                    return new Response(JSON.stringify({ success: true }), {
+                      status: 200,
+                      headers: { 'Content-Type': 'application/json' }
+                    });
+                  }
+                }
+              }
+              
+              // Default generic JSON response for anything else
+              return new Response(JSON.stringify({}), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+              });
+            };
+
+            try {
+              const res = await originalFetch(input, init);
+              const contentType = res.headers.get("content-type") || "";
+              
+              // If the request is successful and NOT an HTML document (SPA routing fallback)
+              if (res.ok && !contentType.includes("text/html")) {
+                return res;
+              }
+              
+              // If it returns HTML or standard non-200 error, trigger local storage fallback
+              return await handleFallback();
+            } catch (error) {
+              return await handleFallback();
+            }
+          }
+          
+          return originalFetch(input, init);
+        },
+        writable: true,
+        configurable: true
+      });
+    } catch (defineErr) {
+      console.warn("Global window.fetch interception totally blocked by browser environment.", defineErr);
     }
-    
-    return originalFetch(input, init);
-  };
+  }
 }
 
 // Mock types
