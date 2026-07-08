@@ -16,7 +16,11 @@ interface VideoData {
   title: string;
   thumbnail: string;
   duration: string;
+  videoUrl?: string;
 }
+
+import ReactPlayer from 'react-player';
+const Player = ReactPlayer as any;
 
 export default function MediaGallery() {
   const [activeTab, setActiveTab] = useState<'foto' | 'video'>('foto');
@@ -214,17 +218,77 @@ export default function MediaGallery() {
                     className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl"
                   />
                 ) : (
-                  <div className="relative w-full aspect-video max-h-[85vh] bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center shadow-2xl">
-                    <img 
-                      src={(activeMediaArray[currentIndex] as VideoData).thumbnail} 
-                      alt={activeMediaArray[currentIndex].title}
-                      className="w-full h-full object-contain opacity-50"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-20 h-20 bg-green-600/90 hover:bg-green-600 cursor-pointer backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-xl transition-transform hover:scale-110">
-                        <Play size={32} className="ml-2" fill="currentColor" />
-                      </div>
-                    </div>
+                  <div className="relative w-full max-w-4xl aspect-video max-h-[85vh] bg-black rounded-lg overflow-hidden flex items-center justify-center shadow-2xl">
+                    {(() => {
+                      const video = activeMediaArray[currentIndex] as VideoData;
+                      const url = video.videoUrl || '';
+                      
+                      // Google Drive
+                      const gDriveMatch = url.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
+                      if (gDriveMatch && gDriveMatch[1]) {
+                        return (
+                          <iframe 
+                            src={`https://drive.google.com/file/d/${gDriveMatch[1]}/preview`} 
+                            className="w-full h-full border-0 pointer-events-auto" 
+                            allowFullScreen
+                          />
+                        );
+                      }
+
+                      // TikTok
+                      if (url.includes('tiktok.com')) {
+                        const videoIdMatch = url.match(/\/video\/(\d+)/);
+                        if (videoIdMatch && videoIdMatch[1]) {
+                          return (
+                            <div className="w-full h-full relative flex items-center justify-center bg-black">
+                              <iframe 
+                                src={`https://www.tiktok.com/embed/v2/${videoIdMatch[1]}`}
+                                className="w-full h-[100%] max-w-[500px] border-0 pointer-events-auto"
+                                allowFullScreen
+                              />
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="w-full h-full relative flex items-center justify-center bg-black/80 text-white p-6 text-center text-sm">
+                            Untuk memutar video TikTok, mohon gunakan link lengkap (misalnya: https://www.tiktok.com/@user/video/123456789). Link pendek (vt.tiktok.com) tidak dapat diputar langsung.
+                          </div>
+                        );
+                      }
+
+                      // Generic Player (YouTube, Facebook, etc)
+                      if (url) {
+                        return (
+                          <Player 
+                            url={url}
+                            width="100%"
+                            height="100%"
+                            playing={true}
+                            controls={true}
+                            config={{
+                              youtube: {
+                                playerVars: { showinfo: 0, rel: 0, modestbranding: 1 }
+                              }
+                            }}
+                          />
+                        );
+                      }
+
+                      // Fallback if no URL
+                      return (
+                        <div className="w-full h-full relative flex items-center justify-center bg-black">
+                          <img 
+                            src={video.thumbnail} 
+                            alt={video.title}
+                            className="w-full h-full object-contain opacity-50"
+                          />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4 text-center">
+                            <Video size={48} className="mb-4 text-gray-500" />
+                            <p className="text-gray-400">Video tidak memiliki tautan (URL) untuk diputar.</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
                 

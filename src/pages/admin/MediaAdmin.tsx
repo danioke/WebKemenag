@@ -23,14 +23,16 @@ export default function MediaAdmin() {
   const [editingImage, setEditingImage] = useState("");
 
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [appUrl, setAppUrl] = useState('');
 
   const fetchFiles = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/files?type=${category}`);
+      const res = await fetch(`/api/files?type=${category}&t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        setFiles(data);
+        setFiles(data.files || (Array.isArray(data) ? data : []));
+        if (data.appUrl) setAppUrl(data.appUrl);
       } else {
         toast.error('Gagal memuat media');
       }
@@ -118,7 +120,11 @@ export default function MediaAdmin() {
   };
 
   const copyUrl = (url: string) => {
-    const fullUrl = window.location.origin + url;
+    let baseUrl = appUrl || window.location.origin;
+    if (baseUrl.endsWith('/')) {
+      baseUrl = baseUrl.slice(0, -1);
+    }
+    const fullUrl = baseUrl + url;
     navigator.clipboard.writeText(fullUrl);
     toast.success('URL disalin!');
   };

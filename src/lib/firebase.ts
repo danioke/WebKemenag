@@ -120,7 +120,7 @@ if (typeof window !== 'undefined') {
               });
             } else {
               const localFiles = getLocalCollection('uploaded_files');
-              return new Response(JSON.stringify(localFiles), {
+              return new Response(JSON.stringify({ files: localFiles, appUrl: window.location.origin }), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
               });
@@ -336,7 +336,7 @@ if (typeof window !== 'undefined') {
                   });
                 } else {
                   const localFiles = getLocalCollection('uploaded_files');
-                  return new Response(JSON.stringify(localFiles), {
+                  return new Response(JSON.stringify({ files: localFiles, appUrl: window.location.origin }), {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' }
                   });

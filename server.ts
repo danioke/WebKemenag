@@ -180,7 +180,7 @@ async function startServer() {
       });
 
       results.sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime());
-      res.json(results);
+      res.json({ files: results, appUrl: process.env.APP_URL || "" });
     } catch (err: any) {
       console.error("Error in /api/files:", err);
       res.status(500).json({ error: "Gagal mengambil daftar file", details: err.message });
