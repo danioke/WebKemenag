@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import SummernoteEditor from '../../components/SummernoteEditor';
 import { 
   Plus, Trash2, Edit2, GraduationCap, BookOpen, Building2, Book, 
-  User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award
+  User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award, Upload
 } from 'lucide-react';
 
 // Default values for fallbacks

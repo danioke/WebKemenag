@@ -467,7 +467,7 @@ async function startServer() {
   // Intercept HTML pages requests to dynamically inject Open Graph (OG) meta tags
   app.get("*", async (req, res, next) => {
     // Skip if it is an API route, uploaded file, or standard static assets with extensions
-    if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/") || req.path.includes(".")) {
+    if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/") || req.path.startsWith("/@") || req.path.includes(".")) {
       return next();
     }
 

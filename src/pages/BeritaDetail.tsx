@@ -127,7 +127,7 @@ export default function BeritaDetail() {
         <meta name="description" content={berita.title} />
         <meta property="og:title" content={berita.title} />
         <meta property="og:description" content={berita.title} />
-        {berita.image && <meta property="og:image" content={berita.image} />}
+        {berita.image && <meta property="og:image" content={berita.image?.startsWith('http') ? berita.image : `${window.location.origin}${berita.image?.startsWith('/') ? '' : '/'}${berita.image}`} />}
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
       </Helmet>
