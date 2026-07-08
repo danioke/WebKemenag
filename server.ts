@@ -28,9 +28,28 @@ async function startServer() {
   // Serve static files from uploads
   app.use("/uploads", express.static(uploadDir));
 
+  // Initialize Firebase/Firestore if config exists on the backend
+  let firestoreDb: any = null;
+  try {
+    const firebaseConfigPath = path.join(process.cwd(), "firebase-applet-config.json");
+    if (fs.existsSync(firebaseConfigPath)) {
+      const firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf8"));
+      const { initializeApp } = await import("@firebase/app");
+      const { getFirestore } = await import("@firebase/firestore");
+      const firebaseApp = initializeApp(firebaseConfig);
+      firestoreDb = getFirestore(firebaseApp);
+      console.log("Firebase Firestore initialized successfully on Express backend.");
+    }
+  } catch (e) {
+    console.error("Failed to initialize Firestore on backend, falling back to local files:", e);
+  }
+
   // Health check endpoint
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", storage: "local_hosting_active" });
+    res.json({ 
+      status: "ok", 
+      storage: firestoreDb ? "cloud_firestore_active" : "local_hosting_active" 
+    });
   });
 
   // Configure Multer storage
@@ -244,21 +263,61 @@ async function startServer() {
   }
 
   // GET all documents in a collection
-  app.get("/api/db/:collection", (req, res) => {
+  app.get("/api/db/:collection", async (req, res) => {
     try {
-      const { collection } = req.params;
-      const items = readCollection(collection);
+      const { collection: collectionName } = req.params;
+      if (firestoreDb) {
+        const { collection: getCol, getDocs: fetchDocs } = await import("@firebase/firestore");
+        const colRef = getCol(firestoreDb, collectionName);
+        const snapshot = await fetchDocs(colRef);
+        const items = snapshot.docs.map(doc => {
+          const docData = doc.data();
+          // Convert Timestamp objects to serialize correctly
+          const processedData = { ...docData };
+          Object.keys(processedData).forEach(key => {
+            const val = processedData[key];
+            if (val && typeof val === 'object' && typeof val.toDate === 'function') {
+              processedData[key] = val.toDate().toISOString();
+            }
+          });
+          return {
+            id: doc.id,
+            ...processedData
+          };
+        });
+        return res.json(items);
+      }
+      const items = readCollection(collectionName);
       res.json(items);
     } catch (err: any) {
+      console.error(`Error in GET /api/db/${req.params.collection}:`, err);
       res.status(500).json({ error: err.message });
     }
   });
 
   // GET a single document by ID
-  app.get("/api/db/:collection/:id", (req, res) => {
+  app.get("/api/db/:collection/:id", async (req, res) => {
     try {
-      const { collection, id } = req.params;
-      const items = readCollection(collection);
+      const { collection: collectionName, id } = req.params;
+      if (firestoreDb) {
+        const { doc: getDocRef, getDoc: fetchDoc } = await import("@firebase/firestore");
+        const docRef = getDocRef(firestoreDb, collectionName, id);
+        const docSnap = await fetchDoc(docRef);
+        if (docSnap.exists()) {
+          const docData = docSnap.data();
+          const processedData = { ...docData };
+          Object.keys(processedData).forEach(key => {
+            const val = processedData[key];
+            if (val && typeof val === 'object' && typeof val.toDate === 'function') {
+              processedData[key] = val.toDate().toISOString();
+            }
+          });
+          return res.json({ id: docSnap.id, ...processedData });
+        } else {
+          return res.status(404).json({ error: "Document not found" });
+        }
+      }
+      const items = readCollection(collectionName);
       const item = items.find((i) => i.id === id);
       if (item) {
         res.json(item);
@@ -271,21 +330,27 @@ async function startServer() {
   });
 
   // POST (add) a new document to a collection
-  app.post("/api/db/:collection", (req, res) => {
+  app.post("/api/db/:collection", async (req, res) => {
     try {
-      const { collection } = req.params;
+      const { collection: collectionName } = req.params;
       const data = req.body;
-      const items = readCollection(collection);
-      
       const id = data.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       const newItem = { 
         ...data, 
         id,
         createdAt: data.createdAt || new Date().toISOString()
       };
-      
+
+      if (firestoreDb) {
+        const { doc: getDocRef, setDoc: createDoc } = await import("@firebase/firestore");
+        const docRef = getDocRef(firestoreDb, collectionName, id);
+        await createDoc(docRef, newItem);
+        return res.json({ id });
+      }
+
+      const items = readCollection(collectionName);
       items.push(newItem);
-      writeCollection(collection, items);
+      writeCollection(collectionName, items);
       res.json({ id });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -293,11 +358,19 @@ async function startServer() {
   });
 
   // PUT (update/set) a document by ID
-  app.put("/api/db/:collection/:id", (req, res) => {
+  app.put("/api/db/:collection/:id", async (req, res) => {
     try {
-      const { collection, id } = req.params;
+      const { collection: collectionName, id } = req.params;
       const data = req.body;
-      const items = readCollection(collection);
+
+      if (firestoreDb) {
+        const { doc: getDocRef, setDoc: createDoc } = await import("@firebase/firestore");
+        const docRef = getDocRef(firestoreDb, collectionName, id);
+        await createDoc(docRef, { ...data, id }, { merge: true });
+        return res.json({ success: true });
+      }
+
+      const items = readCollection(collectionName);
       const index = items.findIndex((i) => i.id === id);
       
       if (index !== -1) {
@@ -306,7 +379,7 @@ async function startServer() {
         items.push({ ...data, id });
       }
       
-      writeCollection(collection, items);
+      writeCollection(collectionName, items);
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -314,12 +387,20 @@ async function startServer() {
   });
 
   // DELETE a document by ID
-  app.delete("/api/db/:collection/:id", (req, res) => {
+  app.delete("/api/db/:collection/:id", async (req, res) => {
     try {
-      const { collection, id } = req.params;
-      let items = readCollection(collection);
+      const { collection: collectionName, id } = req.params;
+
+      if (firestoreDb) {
+        const { doc: getDocRef, deleteDoc: removeDoc } = await import("@firebase/firestore");
+        const docRef = getDocRef(firestoreDb, collectionName, id);
+        await removeDoc(docRef);
+        return res.json({ success: true });
+      }
+
+      let items = readCollection(collectionName);
       items = items.filter((i) => i.id !== id);
-      writeCollection(collection, items);
+      writeCollection(collectionName, items);
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });

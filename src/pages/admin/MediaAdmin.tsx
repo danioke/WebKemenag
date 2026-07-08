@@ -95,9 +95,30 @@ export default function MediaAdmin() {
   };
 
   const handleDelete = async (url: string) => {
+    // If it's a data URL or absolute external URL
+    if (url.startsWith('data:') || (url.startsWith('http') && !url.includes('/uploads/'))) {
+      try {
+        let localFilesStr = localStorage.getItem('mock_db_uploaded_files');
+        if (localFilesStr) {
+          let parsed = JSON.parse(localFilesStr);
+          parsed = parsed.filter((f: any) => f.url !== url && f.id !== url);
+          localStorage.setItem('mock_db_uploaded_files', JSON.stringify(parsed));
+        }
+        toast.success('File berhasil dihapus');
+        setDeleteConfirm(null);
+        fetchFiles();
+      } catch (e) {
+        toast.error('Gagal menghapus file dari penyimpanan lokal');
+      }
+      return;
+    }
+
     // Extract category and filename from url (e.g. /uploads/foto/file.jpg)
     const parts = url.split('/');
-    if (parts.length < 4) return;
+    if (parts.length < 4) {
+      toast.error('Gagal mengurai URL file untuk dihapus');
+      return;
+    }
     
     const cat = parts[2];
     const filename = parts[parts.length - 1];
@@ -120,6 +141,11 @@ export default function MediaAdmin() {
   };
 
   const copyUrl = (url: string) => {
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+      navigator.clipboard.writeText(url);
+      toast.success('URL disalin!');
+      return;
+    }
     let baseUrl = appUrl || window.location.origin;
     if (baseUrl.endsWith('/')) {
       baseUrl = baseUrl.slice(0, -1);
