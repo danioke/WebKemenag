@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, loginWithPassword, logout } from '../lib/firebase';
 import { toast } from 'sonner';
-import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('anisreza498@gmail.com');
   const [password, setPassword] = useState('');
   const [checking, setChecking] = useState(false);
-  const [captchaValue, setCaptchaValue] = useState<string | null>(null);
 
   useEffect(() => {
     // Clear any previous mock bypass sessions
@@ -31,11 +29,6 @@ export default function Login() {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       toast.error('Email dan password wajib diisi');
-      return;
-    }
-
-    if (!captchaValue) {
-      toast.error('Silakan verifikasi reCAPTCHA terlebih dahulu');
       return;
     }
 
@@ -65,9 +58,9 @@ export default function Login() {
           />
         </div>
         <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-          Admin Kantor Kemenag OKI
+          Log In
         </h2>
-        <p className="mt-1 text-sm text-gray-500">Panel Autentikasi Mandiri Pengelola Portal</p>
+        // <p className="mt-1 text-sm text-gray-500">Panel Autentikasi Mandiri Pengelola Portal</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -81,7 +74,7 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                Alamat Email Admin
+                Alamat Email
               </label>
               <input
                 type="email"
@@ -95,7 +88,7 @@ export default function Login() {
 
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                Password Administrator
+                Password
               </label>
               <input
                 type="password"
@@ -107,16 +100,9 @@ export default function Login() {
               />
             </div>
 
-            <div className="mb-6 flex justify-center">
-              <ReCAPTCHA
-                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
-                onChange={(value) => setCaptchaValue(value)}
-              />
-            </div>
-
             <button
               type="submit"
-              disabled={checking || !captchaValue}
+              disabled={checking}
               className="w-full flex justify-center items-center py-3 px-4 bg-green-700 hover:bg-green-800 text-white rounded-xl shadow-md text-sm font-semibold transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {checking ? (
