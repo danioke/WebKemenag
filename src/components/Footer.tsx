@@ -1,12 +1,14 @@
 import React from 'react';
 import { useSettingsStore } from "../store/useSettingsStore";
 import { MapPin, Phone, Mail, Facebook, Instagram, Youtube, ExternalLink, Clock } from 'lucide-react';
+import NewsletterForm from './NewsletterForm';
 
 export default function Footer() {
   const { logoUrl, contactInfo, socialMedia } = useSettingsStore();
   return (
     <footer className="bg-gray-900 text-gray-300 pt-16 pb-8 border-t-4 border-green-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <NewsletterForm />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
           
           {/* Brand */}

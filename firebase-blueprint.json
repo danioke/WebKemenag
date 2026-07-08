@@ -83,6 +83,13 @@
         "syarat": { "type": "string" },
         "updatedAt": { "type": "timestamp" }
       }
+    },
+    {
+      "name": "newsletter_subscribers",
+      "fields": {
+        "email": { "type": "string" },
+        "createdAt": { "type": "timestamp" }
+      }
     }
   ]
 }
