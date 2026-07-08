@@ -51,8 +51,7 @@ export default function AdminDashboard() {
         return;
       }
       if (!user) {
-        toast.error('Anda harus login terlebih dahulu.');
-        navigate('/hmsoke');
+        navigate('/404', { replace: true });
       } else if (user.email) {
         try {
           const allowed = await isEmailAllowed(user.email);
