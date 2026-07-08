@@ -3,7 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Save, MoveUp, MoveDown, RefreshCw, X, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle, MapPin, Mail, Phone, PlusCircle } from 'lucide-react';
-import SummernoteEditor from '../../components/SummernoteEditor';
+import DefaultEditor from 'react-simple-wysiwyg';
 
 // Define the Icon map
 const iconMap: Record<string, any> = {
@@ -1080,10 +1080,10 @@ export default function NavigationAdmin() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Konten Detail (Modal Popup HTML)</label>
                   <p className="text-xs text-gray-400 mb-1.5">Tulis penjelasan detail yang akan muncul dalam popup modal ketika sub-menu diklik oleh publik.</p>
                   <div className="bg-white border border-gray-200 rounded-md overflow-hidden min-h-[180px]">
-                    <SummernoteEditor
+                    <DefaultEditor
                       value={subForm.content}
-                      onChange={(content) => setSubForm({ ...subForm, content: content })}
-                      height={200}
+                      onChange={(e) => setSubForm({ ...subForm, content: e.target.value })}
+                      className="min-h-[180px]"
                     />
                   </div>
                 </div>

@@ -4,7 +4,7 @@ import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import SummernoteEditor from '../../components/SummernoteEditor';
+import DefaultEditor from 'react-simple-wysiwyg';
 
 interface Berita {
   id: string;
@@ -349,9 +349,9 @@ export default function BeritaAdmin() {
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
                   <div className="bg-white border border-gray-300 rounded-md overflow-hidden" style={{ minHeight: '350px' }}>
-                    <SummernoteEditor
+                    <DefaultEditor
                       value={formData.excerpt}
-                      onChange={(content) => setFormData({ ...formData, excerpt: content })}
+                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                     />
                   </div>
                 </div>

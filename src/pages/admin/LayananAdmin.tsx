@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
-import SummernoteEditor from '../../components/SummernoteEditor';
+import DefaultEditor from 'react-simple-wysiwyg';
 import { 
   Plus, Trash2, Edit2, GraduationCap, BookOpen, Building2, Book, 
-  User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award, Upload
+  User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award
 } from 'lucide-react';
 
 // Default values for fallbacks
@@ -487,10 +487,9 @@ export default function LayananAdmin() {
                   </span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '450px' }}>
-                  <SummernoteEditor
+                  <DefaultEditor
                     value={syarat}
-                    onChange={(content) => setSyarat(content)}
-                    height={400}
+                    onChange={(e) => setSyarat(e.target.value)}
                   />
                 </div>
               </div>
@@ -506,10 +505,9 @@ export default function LayananAdmin() {
                   </span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '400px' }}>
-                  <SummernoteEditor
+                  <DefaultEditor
                     value={tugasFungsi}
-                    onChange={(content) => setTugasFungsi(content)}
-                    height={350}
+                    onChange={(e) => setTugasFungsi(e.target.value)}
                   />
                 </div>
               </div>
