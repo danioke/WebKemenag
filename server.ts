@@ -1,4 +1,8 @@
 import express from "express";
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+dotenv.config();
+
 import path from "path";
 import fs from "fs";
 import multer from "multer";
@@ -219,38 +223,83 @@ async function startServer() {
   });
 
   // Local Database and Authentication APIs (Replacing Firebase/Google entirely)
-  const dbDir = path.join(process.cwd(), "data");
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
-  }
+  
+  let pool: mysql.Pool;
 
-  function getCollectionPath(collection: string) {
-    return path.join(dbDir, `${collection}.json`);
-  }
+  async function initDB() {
+    pool = mysql.createPool({
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_NAME || 'my_database',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0
+    });
 
-  function readCollection(collection: string): any[] {
-    const filePath = getCollectionPath(collection);
-    if (!fs.existsSync(filePath)) {
-      return [];
-    }
     try {
-      return JSON.parse(fs.readFileSync(filePath, "utf8"));
-    } catch (e) {
-      console.error(`Error reading collection ${collection}:`, e);
+      const connection = await pool.getConnection();
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS collections (
+          id VARCHAR(255) NOT NULL,
+          collection_name VARCHAR(255) NOT NULL,
+          data JSON NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (collection_name, id)
+        )
+      `);
+      connection.release();
+      console.log("Connected to MySQL database and verified collections table.");
+    } catch (err) {
+      console.error("MySQL connection error:", err);
+    }
+  }
+
+  // Initialize DB asynchronously but don't block server startup
+  initDB();
+
+  async function readCollection(collection: string): Promise<any[]> {
+    if (!pool) return [];
+    try {
+      const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ?', [collection]);
+      return (rows as any[]).map(r => r.data);
+    } catch (err) {
+      console.error(`Error reading collection ${collection}:`, err);
       return [];
     }
   }
 
-  function writeCollection(collection: string, data: any[]) {
-    const filePath = getCollectionPath(collection);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+  async function writeCollection(collection: string, data: any[]) {
+    if (!pool) return;
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      await connection.query('DELETE FROM collections WHERE collection_name = ?', [collection]);
+      
+      if (data.length > 0) {
+        for (const item of data) {
+          const id = item.id || Math.random().toString(36).substring(2, 15);
+          await connection.query(
+            'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+            [id, collection, JSON.stringify(item)]
+          );
+        }
+      }
+      
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      console.error(`Error writing collection ${collection}:`, err);
+    } finally {
+      connection.release();
+    }
   }
 
   // GET all documents in a collection
   app.get("/api/db/:collection", async (req, res) => {
     try {
       const { collection: collectionName } = req.params;
-      const items = readCollection(collectionName);
+      const items = await readCollection(collectionName);
       res.json(items);
     } catch (err: any) {
       console.error(`Error in GET /api/db/${req.params.collection}:`, err);
@@ -262,7 +311,7 @@ async function startServer() {
   app.get("/api/db/:collection/:id", async (req, res) => {
     try {
       const { collection: collectionName, id } = req.params;
-      const items = readCollection(collectionName);
+      const items = await readCollection(collectionName);
       const item = items.find((i) => i.id === id);
       if (item) {
         res.json(item);
@@ -286,9 +335,9 @@ async function startServer() {
         createdAt: data.createdAt || new Date().toISOString()
       };
 
-      const items = readCollection(collectionName);
+      const items = await readCollection(collectionName);
       items.push(newItem);
-      writeCollection(collectionName, items);
+      await writeCollection(collectionName, items);
       res.json({ id });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -301,7 +350,7 @@ async function startServer() {
       const { collection: collectionName, id } = req.params;
       const data = req.body;
 
-      const items = readCollection(collectionName);
+      const items = await readCollection(collectionName);
       const index = items.findIndex((i) => i.id === id);
       
       if (index !== -1) {
@@ -310,7 +359,7 @@ async function startServer() {
         items.push({ ...data, id });
       }
       
-      writeCollection(collectionName, items);
+      await writeCollection(collectionName, items);
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -322,9 +371,9 @@ async function startServer() {
     try {
       const { collection: collectionName, id } = req.params;
 
-      let items = readCollection(collectionName);
+      let items = await readCollection(collectionName);
       items = items.filter((i) => i.id !== id);
-      writeCollection(collectionName, items);
+      await writeCollection(collectionName, items);
       res.json({ success: true });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
@@ -382,7 +431,7 @@ async function startServer() {
       const beritaMatch = reqPath.match(/^\/(berita|news)\/([^/]+)/);
       if (beritaMatch) {
         const idOrSlug = beritaMatch[2];
-        const items = readCollection("news");
+        const items = await readCollection("news");
         const item = items.find((i: any) => i.id === idOrSlug || (i.title && createSlug(i.title) === idOrSlug));
         if (item) {
           title = `${item.title} | Kementerian Agama Kabupaten OKI`;
@@ -400,7 +449,7 @@ async function startServer() {
       else if (reqPath.startsWith("/pengumuman/")) {
         const idOrSlug = reqPath.split("/pengumuman/")[1]?.split("?")[0];
         if (idOrSlug) {
-          const items = readCollection("announcements");
+          const items = await readCollection("announcements");
           const item = items.find((i: any) => i.id === idOrSlug || (i.title && createSlug(i.title) === idOrSlug));
           if (item) {
             title = `${item.title} | Kementerian Agama Kabupaten OKI`;
@@ -413,7 +462,7 @@ async function startServer() {
       else if (reqPath.startsWith("/agenda/")) {
         const idOrSlug = reqPath.split("/agenda/")[1]?.split("?")[0];
         if (idOrSlug) {
-          const items = readCollection("agendas");
+          const items = await readCollection("agendas");
           const item = items.find((i: any) => i.id === idOrSlug || (i.title && createSlug(i.title) === idOrSlug));
           if (item) {
             title = `${item.title} | Kementerian Agama Kabupaten OKI`;
