@@ -8,7 +8,7 @@ const PORT = 3000;
 
 async function startServer() {
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: "100mb" }));
 
   const uploadDir = path.join(process.cwd(), "uploads");
   const categories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf"];
@@ -64,7 +64,7 @@ async function startServer() {
   const upload = multer({
     storage,
     limits: {
-      fileSize: 150 * 1024 * 1024 // 150MB
+      fileSize: 2 * 1024 * 1024 // 2MB
     }
   });
 
