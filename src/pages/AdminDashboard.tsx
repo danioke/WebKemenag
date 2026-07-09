@@ -124,7 +124,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row relative">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-green-900 text-white transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} overflow-y-auto`}>
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-green-900 text-white transform transition-transform duration-300 ease-in-out md:fixed md:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} overflow-y-auto`}>
         <div className="flex items-center justify-between p-4 border-b border-green-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-green-900 font-bold">K</div>
@@ -183,9 +183,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden md:ml-64">
         {/* Unified Topbar */}
-        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-30 shadow-sm">
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 md:px-8 shrink-0 fixed top-0 right-0 left-0 md:left-64 z-30 shadow-sm">
           <div className="flex items-center gap-4">
             <button onClick={() => setMobileMenuOpen(true)} className="md:hidden text-gray-500 hover:text-gray-900 transition-colors">
               <Menu size={24} />
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Content area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="flex-1 overflow-y-auto pt-20 pb-4 px-4 md:pt-24 md:pb-8 md:px-8">
           <Routes>
             <Route path="/" element={<DashboardHome />} />
             <Route path="/media" element={<MediaAdmin />} />
