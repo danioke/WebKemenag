@@ -1,7 +1,7 @@
 import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, orderBy, limit } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { Clock, MapPin, ArrowLeft, Calendar as CalendarIcon, Tag, Share2, ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';

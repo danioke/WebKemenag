@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/firebase';
 import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, X, Image as ImageIcon, Upload, HardDrive } from 'lucide-react';
-import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
+import { Plus, Edit, Trash2, X, Image as ImageIcon, Upload } from 'lucide-react';
 
 interface Infografis {
   id: string;
@@ -18,7 +17,6 @@ export default function InfografisAdmin() {
   const [formData, setFormData] = useState({ id: '', title: '', image: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [isDriveOpen, setIsDriveOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -188,7 +186,7 @@ export default function InfografisAdmin() {
                       type="url"
                       value={formData.image}
                       onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      placeholder="Masukkan URL Gambar, upload lokal, atau pilih dari Google Drive"
+                      placeholder="Masukkan URL Gambar, upload lokal,  "
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
                     <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap">
@@ -201,10 +199,8 @@ export default function InfografisAdmin() {
                     </label>
                     <button
                       type="button"
-                      onClick={() => setIsDriveOpen(true)}
                       className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
                     >
-                      <HardDrive size={14} /> Drive
                     </button>
                   </div>
                   {formData.image && (
@@ -235,17 +231,6 @@ export default function InfografisAdmin() {
         </div>
       )}
 
-      <GoogleDrivePickerModal
-        isOpen={isDriveOpen}
-        onClose={() => setIsDriveOpen(false)}
-        fileType="image"
-        onSelect={(file) => {
-          setFormData((prev) => ({
-            ...prev,
-            image: file.url
-          }));
-        }}
-      />
     </div>
   );
 }

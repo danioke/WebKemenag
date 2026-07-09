@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/firebase';
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, FileText, X, HardDrive, Upload } from 'lucide-react';
-import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
+import { Plus, Edit, Trash2, FileText, X, Upload } from 'lucide-react';
 
 interface Pengumuman {
   id: string;
@@ -17,7 +16,6 @@ export default function PengumumanAdmin() {
   const [data, setData] = useState<Pengumuman[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDriveOpen, setIsDriveOpen] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', date: '', size: '', fileUrl: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -245,7 +243,7 @@ export default function PengumumanAdmin() {
                       type="text"
                       value={formData.fileUrl}
                       onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                      placeholder="Masukkan URL Berkas, upload lokal, atau pilih dari Google Drive"
+                      placeholder="Masukkan URL Berkas, upload lokal,  "
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
                     <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-xs font-semibold shadow-sm gap-1">
@@ -264,10 +262,8 @@ export default function PengumumanAdmin() {
                     </label>
                     <button
                       type="button"
-                      onClick={() => setIsDriveOpen(true)}
                       className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-sm cursor-pointer"
                     >
-                      <HardDrive size={14} /> Drive
                     </button>
                   </div>
                 </div>
@@ -297,19 +293,6 @@ export default function PengumumanAdmin() {
         </div>
       )}
 
-      <GoogleDrivePickerModal
-        isOpen={isDriveOpen}
-        onClose={() => setIsDriveOpen(false)}
-        fileType="pdf"
-        onSelect={(file) => {
-          setFormData((prev) => ({
-            ...prev,
-            fileUrl: file.url,
-            size: file.size || prev.size || '0 KB',
-            title: prev.title || file.name.split('.').slice(0, -1).join('.'), // Auto fill title if empty
-          }));
-        }}
-      />
     </div>
   );
 }

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/firebase';
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload, HardDrive } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import GoogleDrivePickerModal from '../../components/GoogleDrivePickerModal';
 import DefaultEditor from 'react-simple-wysiwyg';
 
 interface Berita {
@@ -25,7 +24,6 @@ export default function BeritaAdmin() {
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDriveOpen, setIsDriveOpen] = useState(false);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
 
   // Pagination states
@@ -330,7 +328,7 @@ export default function BeritaAdmin() {
                       type="url"
                       value={formData.image}
                       onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                      placeholder="Masukkan URL Gambar, upload lokal, atau pilih dari Google Drive"
+                      placeholder="Masukkan URL Gambar, upload lokal,  "
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
                     <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-sm">
@@ -343,10 +341,8 @@ export default function BeritaAdmin() {
                     </label>
                     <button
                       type="button"
-                      onClick={() => setIsDriveOpen(true)}
                       className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors shadow-sm cursor-pointer"
                     >
-                      <HardDrive size={16} /> Drive
                     </button>
                   </div>
                   {formData.image && (
@@ -391,17 +387,6 @@ export default function BeritaAdmin() {
         </div>
       )}
 
-      <GoogleDrivePickerModal
-        isOpen={isDriveOpen}
-        onClose={() => setIsDriveOpen(false)}
-        fileType="image"
-        onSelect={(file) => {
-          setFormData((prev) => ({
-            ...prev,
-            image: file.url
-          }));
-        }}
-      />
     </div>
   );
 }

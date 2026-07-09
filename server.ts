@@ -28,27 +28,11 @@ async function startServer() {
   // Serve static files from uploads
   app.use("/uploads", express.static(uploadDir));
 
-  // Initialize Firebase/Firestore if config exists on the backend
-  let firestoreDb: any = null;
-  try {
-    const firebaseConfigPath = path.join(process.cwd(), "firebase-applet-config.json");
-    if (fs.existsSync(firebaseConfigPath)) {
-      const firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf8"));
-      const { initializeApp } = await import("@firebase/app");
-      const { getFirestore } = await import("@firebase/firestore");
-      const firebaseApp = initializeApp(firebaseConfig);
-      firestoreDb = getFirestore(firebaseApp);
-      console.log("Firebase Firestore initialized successfully on Express backend.");
-    }
-  } catch (e) {
-    console.error("Failed to initialize Firestore on backend, falling back to local files:", e);
-  }
-
   // Health check endpoint
   app.get("/api/health", (req, res) => {
     res.json({ 
       status: "ok", 
-      storage: firestoreDb ? "cloud_firestore_active" : "local_hosting_active" 
+      storage: "local_hosting_active"
     });
   });
 
@@ -266,27 +250,6 @@ async function startServer() {
   app.get("/api/db/:collection", async (req, res) => {
     try {
       const { collection: collectionName } = req.params;
-      if (firestoreDb) {
-        const { collection: getCol, getDocs: fetchDocs } = await import("@firebase/firestore");
-        const colRef = getCol(firestoreDb, collectionName);
-        const snapshot = await fetchDocs(colRef);
-        const items = snapshot.docs.map(doc => {
-          const docData = doc.data();
-          // Convert Timestamp objects to serialize correctly
-          const processedData = { ...docData };
-          Object.keys(processedData).forEach(key => {
-            const val = processedData[key];
-            if (val && typeof val === 'object' && typeof val.toDate === 'function') {
-              processedData[key] = val.toDate().toISOString();
-            }
-          });
-          return {
-            id: doc.id,
-            ...processedData
-          };
-        });
-        return res.json(items);
-      }
       const items = readCollection(collectionName);
       res.json(items);
     } catch (err: any) {
@@ -299,24 +262,6 @@ async function startServer() {
   app.get("/api/db/:collection/:id", async (req, res) => {
     try {
       const { collection: collectionName, id } = req.params;
-      if (firestoreDb) {
-        const { doc: getDocRef, getDoc: fetchDoc } = await import("@firebase/firestore");
-        const docRef = getDocRef(firestoreDb, collectionName, id);
-        const docSnap = await fetchDoc(docRef);
-        if (docSnap.exists()) {
-          const docData = docSnap.data();
-          const processedData = { ...docData };
-          Object.keys(processedData).forEach(key => {
-            const val = processedData[key];
-            if (val && typeof val === 'object' && typeof val.toDate === 'function') {
-              processedData[key] = val.toDate().toISOString();
-            }
-          });
-          return res.json({ id: docSnap.id, ...processedData });
-        } else {
-          return res.status(404).json({ error: "Document not found" });
-        }
-      }
       const items = readCollection(collectionName);
       const item = items.find((i) => i.id === id);
       if (item) {
@@ -341,13 +286,6 @@ async function startServer() {
         createdAt: data.createdAt || new Date().toISOString()
       };
 
-      if (firestoreDb) {
-        const { doc: getDocRef, setDoc: createDoc } = await import("@firebase/firestore");
-        const docRef = getDocRef(firestoreDb, collectionName, id);
-        await createDoc(docRef, newItem);
-        return res.json({ id });
-      }
-
       const items = readCollection(collectionName);
       items.push(newItem);
       writeCollection(collectionName, items);
@@ -362,13 +300,6 @@ async function startServer() {
     try {
       const { collection: collectionName, id } = req.params;
       const data = req.body;
-
-      if (firestoreDb) {
-        const { doc: getDocRef, setDoc: createDoc } = await import("@firebase/firestore");
-        const docRef = getDocRef(firestoreDb, collectionName, id);
-        await createDoc(docRef, { ...data, id }, { merge: true });
-        return res.json({ success: true });
-      }
 
       const items = readCollection(collectionName);
       const index = items.findIndex((i) => i.id === id);
@@ -390,13 +321,6 @@ async function startServer() {
   app.delete("/api/db/:collection/:id", async (req, res) => {
     try {
       const { collection: collectionName, id } = req.params;
-
-      if (firestoreDb) {
-        const { doc: getDocRef, deleteDoc: removeDoc } = await import("@firebase/firestore");
-        const docRef = getDocRef(firestoreDb, collectionName, id);
-        await removeDoc(docRef);
-        return res.json({ success: true });
-      }
 
       let items = readCollection(collectionName);
       items = items.filter((i) => i.id !== id);

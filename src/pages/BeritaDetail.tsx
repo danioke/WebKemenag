@@ -1,7 +1,7 @@
 import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { doc, getDoc, collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
+import { doc, getDoc, collection, query, orderBy, limit, getDocs, where } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { Calendar, User, Share2, ArrowLeft, Tag, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -43,7 +43,7 @@ export default function BeritaDetail() {
         
         if (foundDoc) {
           setBerita(foundDoc);
-          import('firebase/firestore').then(({ updateDoc, doc }) => {
+          import('../lib/firebase').then(({ updateDoc, doc }) => {
             updateDoc(doc(db, 'news', foundDoc.id), {
               views: (foundDoc.views || 0) + 1
             }).catch(e => console.error("Error updating views", e));

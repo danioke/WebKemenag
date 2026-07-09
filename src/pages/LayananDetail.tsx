@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { db } from '../lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from '../lib/firebase';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, GraduationCap, BookOpen, Building2, Book, Heart, 

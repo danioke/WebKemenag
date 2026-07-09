@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, getDocs, orderBy, query, doc, setDoc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, doc, setDoc, deleteDoc, Timestamp } from '../../lib/firebase';
 import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { 

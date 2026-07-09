@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Image as ImageIcon, Video, ArrowRight, X, ChevronUp, ChevronDown } from 'lucide-react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { Link } from 'react-router-dom';
 

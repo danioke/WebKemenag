@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where } from '../../lib/firebase';
 import { db } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { ArrowLeft, CloudDownload, RefreshCw, CheckSquare, Square, Globe, ShieldAlert, CheckCircle2 } from 'lucide-react';

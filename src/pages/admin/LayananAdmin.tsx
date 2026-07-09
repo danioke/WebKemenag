@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../lib/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from '../../lib/firebase';
 import { toast } from 'sonner';
 import DefaultEditor from 'react-simple-wysiwyg';
 import { 

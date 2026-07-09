@@ -1,7 +1,7 @@
 import { createSlug } from "../lib/helpers";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { ArrowLeft, Calendar, User, Search, Tag, Eye } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';

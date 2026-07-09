@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Facebook, Instagram, Youtube, Phone, Mail, MapPin, ChevronDown, ChevronRight, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy } from '../lib/firebase';
 import { db } from '../lib/firebase';
 import { useSettingsStore } from '../store/useSettingsStore';
 import { useNavigate } from 'react-router-dom';
