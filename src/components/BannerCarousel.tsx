@@ -36,7 +36,7 @@ export default function BannerCarousel() {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 sm:mb-8 relative">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 sm:mb-8 relative md:hidden">
       {banners.length > 2 && (
         <>
           <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md text-gray-800 hover:text-green-700 -ml-4">

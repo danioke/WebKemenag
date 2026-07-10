@@ -40,40 +40,52 @@ async function startServer() {
     });
   });
 
-  // Configure Multer storage
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      let category = req.body.category || "";
-      if (!category || !categories.includes(category)) {
-        if (file.mimetype.startsWith("image/")) {
-          category = "foto";
-        } else if (file.mimetype.startsWith("video/")) {
-          category = "video";
-        } else if (file.mimetype === "application/pdf") {
-          category = "pdf";
-        } else {
-           category = "dokumen";
-        }
-      }
-      cb(null, path.join(uploadDir, category));
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      const ext = path.extname(file.originalname);
-      const baseName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, "_");
-      cb(null, `${baseName}-${uniqueSuffix}${ext}`);
-    }
-  });
+  // Configure Multer storage using memory storage to avoid read-only filesystem issues
+  const storage = multer.memoryStorage();
 
   const upload = multer({
     storage,
     limits: {
-      fileSize: 2 * 1024 * 1024 // 2MB
+      fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+  });
+
+  // Dynamic route to serve uploaded files from either disk or MySQL database
+  app.get("/uploads/:category/:filename", async (req, res) => {
+    try {
+      const { category, filename } = req.params;
+      const localFilePath = path.join(uploadDir, category, filename);
+
+      // 1. If file exists on local disk, serve it directly (cache)
+      if (fs.existsSync(localFilePath)) {
+        return res.sendFile(localFilePath);
+      }
+
+      // 2. If it does not exist on disk, read it from the "uploaded_files" database collection
+      const files = await readCollection("uploaded_files");
+      const foundFile = files.find(f => f.id === filename);
+
+      if (foundFile && foundFile.base64) {
+        const parts = foundFile.base64.split(",");
+        const base64Data = parts[1] || parts[0];
+        if (base64Data) {
+          const buffer = Buffer.from(base64Data, "base64");
+          res.setHeader("Content-Type", foundFile.mimetype || "application/octet-stream");
+          res.setHeader("Cache-Control", "public, max-age=31536000"); // cache for 1 year
+          return res.send(buffer);
+        }
+      }
+
+      // 3. File not found
+      res.status(404).send("File tidak ditemukan");
+    } catch (err) {
+      console.error("Error serving uploaded file:", err);
+      res.status(500).send("Gagal memuat file");
     }
   });
 
   // Upload endpoint
-  app.post("/api/upload", upload.single("file"), (req, res) => {
+  app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "Tidak ada file yang diunggah" });
@@ -93,12 +105,46 @@ async function startServer() {
         }
       }
 
-      const relativeUrl = `/uploads/${category}/${file.filename}`;
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const ext = path.extname(file.originalname);
+      const baseName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9]/g, "_");
+      const filename = `${baseName}-${uniqueSuffix}${ext}`;
+      const relativeUrl = `/uploads/${category}/${filename}`;
+
+      // Write to local disk in background/non-blocking as a cache
+      try {
+        const catPath = path.join(uploadDir, category);
+        if (!fs.existsSync(catPath)) {
+          fs.mkdirSync(catPath, { recursive: true });
+        }
+        fs.writeFileSync(path.join(catPath, filename), file.buffer);
+      } catch (writeErr) {
+        console.warn("Local disk cache write failed (probably read-only filesystem):", writeErr);
+      }
+
+      // Save file data and base64 to database "uploaded_files" collection
       const sizeInKb = Math.round(file.size / 1024);
       const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
 
+      const fileBase64 = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+
+      const fileDoc = {
+        id: filename,
+        name: file.originalname,
+        url: relativeUrl,
+        base64: fileBase64,
+        category: category,
+        mimetype: file.mimetype,
+        size: sizeStr,
+        createdAt: new Date().toISOString()
+      };
+
+      const files = await readCollection("uploaded_files");
+      files.push(fileDoc);
+      await writeCollection("uploaded_files", files);
+
       res.json({
-        id: file.filename,
+        id: filename,
         name: file.originalname,
         url: relativeUrl,
         embedUrl: relativeUrl,
@@ -106,12 +152,12 @@ async function startServer() {
       });
     } catch (err: any) {
       console.error("Error in /api/upload:", err);
-      res.status(500).json({ error: "Gagal mengunggah file ke penyimpanan hosting", details: err.message });
+      res.status(500).json({ error: "Gagal mengunggah file ke penyimpanan", details: err.message });
     }
   });
 
   // Get files endpoint
-  app.get("/api/files", (req, res) => {
+  app.get("/api/files", async (req, res) => {
     try {
       const type = req.query.type || "all";
       let targetCategories: string[] = [];
@@ -130,62 +176,84 @@ async function startServer() {
         targetCategories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf"];
       }
 
-      const results: any[] = [];
+      // Read from database first
+      const dbFiles = await readCollection("uploaded_files");
+      const resultsMap = new Map<string, any>();
 
-      targetCategories.forEach((cat) => {
-        const catPath = path.join(uploadDir, cat);
-        if (fs.existsSync(catPath)) {
-          const files = fs.readdirSync(catPath);
-          
-          files.forEach((filename) => {
-            if (filename.startsWith(".")) return;
-            
-            const filePath = path.join(catPath, filename);
-            try {
-              const stat = fs.statSync(filePath);
-              
-              if (stat.isFile()) {
-                const sizeInKb = Math.round(stat.size / 1024);
-                const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
-                const relativeUrl = `/uploads/${cat}/${filename}`;
-                
-                const nameParts = filename.split("-");
-                let originalName = filename;
-                if (nameParts.length > 1) {
-                  const ext = path.extname(filename);
-                  originalName = nameParts.slice(0, -2).join("-") + ext;
-                  if (originalName.startsWith("_") || originalName === ext) {
-                    originalName = filename;
-                  }
-                }
-                
-                let inferredMimeType = "application/octet-stream";
-                const extLower = path.extname(filename).toLowerCase();
-                if ([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"].includes(extLower)) {
-                  inferredMimeType = "image/jpeg";
-                } else if ([".mp4", ".webm", ".ogg"].includes(extLower)) {
-                  inferredMimeType = "video/mp4";
-                } else if (extLower === ".pdf") {
-                  inferredMimeType = "application/pdf";
-                }
-                
-                results.push({
-                  id: filename,
-                  name: originalName,
-                  url: relativeUrl,
-                  embedUrl: relativeUrl,
-                  size: sizeStr,
-                  createdTime: stat.birthtime,
-                  mimeType: inferredMimeType
-                });
-              }
-            } catch (e) {
-              console.error(`Error reading stat for file ${filePath}:`, e);
-            }
+      dbFiles.forEach((f) => {
+        const cat = f.category || "foto";
+        if (targetCategories.includes(cat)) {
+          resultsMap.set(f.id, {
+            id: f.id,
+            name: f.name || f.id,
+            url: f.url,
+            embedUrl: f.url,
+            size: f.size || "0 KB",
+            createdTime: f.createdAt || new Date().toISOString(),
+            mimeType: f.mimetype || "application/octet-stream"
           });
         }
       });
 
+      // Also read from local disk, merging in anything that is not in DB
+      targetCategories.forEach((cat) => {
+        const catPath = path.join(uploadDir, cat);
+        if (fs.existsSync(catPath)) {
+          try {
+            const files = fs.readdirSync(catPath);
+            files.forEach((filename) => {
+              if (filename.startsWith(".")) return;
+              if (resultsMap.has(filename)) return; // already in DB, skip
+
+              const filePath = path.join(catPath, filename);
+              try {
+                const stat = fs.statSync(filePath);
+                if (stat.isFile()) {
+                  const sizeInKb = Math.round(stat.size / 1024);
+                  const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
+                  const relativeUrl = `/uploads/${cat}/${filename}`;
+                  
+                  const nameParts = filename.split("-");
+                  let originalName = filename;
+                  if (nameParts.length > 1) {
+                    const ext = path.extname(filename);
+                    originalName = nameParts.slice(0, -2).join("-") + ext;
+                    if (originalName.startsWith("_") || originalName === ext) {
+                      originalName = filename;
+                    }
+                  }
+                  
+                  let inferredMimeType = "application/octet-stream";
+                  const extLower = path.extname(filename).toLowerCase();
+                  if ([".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"].includes(extLower)) {
+                    inferredMimeType = "image/jpeg";
+                  } else if ([".mp4", ".webm", ".ogg"].includes(extLower)) {
+                    inferredMimeType = "video/mp4";
+                  } else if (extLower === ".pdf") {
+                    inferredMimeType = "application/pdf";
+                  }
+                  
+                  resultsMap.set(filename, {
+                    id: filename,
+                    name: originalName,
+                    url: relativeUrl,
+                    embedUrl: relativeUrl,
+                    size: sizeStr,
+                    createdTime: stat.birthtime || new Date().toISOString(),
+                    mimeType: inferredMimeType
+                  });
+                }
+              } catch (e) {
+                console.error(`Error reading stat for file ${filePath}:`, e);
+              }
+            });
+          } catch (readdirErr) {
+            console.error(`Error reading directory ${catPath}:`, readdirErr);
+          }
+        }
+      });
+
+      const results = Array.from(resultsMap.values());
       results.sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime());
       res.json({ files: results, appUrl: process.env.APP_URL || "" });
     } catch (err: any) {
@@ -195,7 +263,7 @@ async function startServer() {
   });
 
   // Delete file endpoint
-  app.delete("/api/files/:category/:filename", (req, res) => {
+  app.delete("/api/files/:category/:filename", async (req, res) => {
     try {
       const { category, filename } = req.params;
       
@@ -210,12 +278,21 @@ async function startServer() {
         return res.status(403).json({ error: "Akses ditolak" });
       }
 
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        res.json({ success: true, message: "File berhasil dihapus dari hosting" });
-      } else {
-        res.status(404).json({ error: "File tidak ditemukan" });
+      // Delete from local disk if exists
+      try {
+        if (fs.existsSync(resolvedPath)) {
+          fs.unlinkSync(resolvedPath);
+        }
+      } catch (e) {
+        console.warn("Failed to delete from local disk (probably read-only):", e);
       }
+
+      // Delete from database
+      const files = await readCollection("uploaded_files");
+      const filtered = files.filter(f => f.id !== filename);
+      await writeCollection("uploaded_files", filtered);
+
+      res.json({ success: true, message: "File berhasil dihapus dari hosting" });
     } catch (err: any) {
       console.error("Error in delete file:", err);
       res.status(500).json({ error: "Gagal menghapus file", details: err.message });
@@ -284,7 +361,7 @@ async function startServer() {
         return (rows as any[]).map(r => r.data);
       } catch (err: any) {
         console.error(`Error reading collection ${collection} from MySQL:`, err.message);
-        return [];
+        throw err;
       }
     } else {
       const filePath = getCollectionPath(collection);
@@ -295,7 +372,7 @@ async function startServer() {
         return JSON.parse(fs.readFileSync(filePath, "utf8"));
       } catch (e) {
         console.error(`Error reading collection ${collection} from JSON:`, e);
-        return [];
+        throw e;
       }
     }
   }
@@ -322,12 +399,18 @@ async function startServer() {
       } catch (err: any) {
         if (connection) await connection.rollback();
         console.error(`Error writing collection ${collection} to MySQL:`, err.message);
+        throw err;
       } finally {
         if (connection) connection.release();
       }
     } else {
       const filePath = getCollectionPath(collection);
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+      try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+      } catch (err) {
+        console.error(`Error writing collection ${collection} to JSON file:`, err);
+        throw err;
+      }
     }
   }
 
