@@ -139,9 +139,16 @@ async function startServer() {
         createdAt: new Date().toISOString()
       };
 
-      const files = await readCollection("uploaded_files");
-      files.push(fileDoc);
-      await writeCollection("uploaded_files", files);
+      if (useMySQL && pool) {
+        await pool.query(
+          'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+          [filename, 'uploaded_files', JSON.stringify(fileDoc)]
+        );
+      } else {
+        const files = await readCollection("uploaded_files");
+        files.push(fileDoc);
+        await writeCollection("uploaded_files", files);
+      }
 
       res.json({
         id: filename,
@@ -288,9 +295,13 @@ async function startServer() {
       }
 
       // Delete from database
-      const files = await readCollection("uploaded_files");
-      const filtered = files.filter(f => f.id !== filename);
-      await writeCollection("uploaded_files", filtered);
+      if (useMySQL && pool) {
+        await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', ['uploaded_files', filename]);
+      } else {
+        const files = await readCollection("uploaded_files");
+        const filtered = files.filter(f => f.id !== filename);
+        await writeCollection("uploaded_files", filtered);
+      }
 
       res.json({ success: true, message: "File berhasil dihapus dari hosting" });
     } catch (err: any) {
@@ -313,10 +324,12 @@ async function startServer() {
 
   let pool: mysql.Pool | null = null;
   let useMySQL = false;
+  let dbConnectionError: string | null = null;
 
   async function initDB() {
     if (!process.env.DB_HOST || !process.env.DB_USER) {
       console.log("MySQL credentials not provided, using local JSON fallback.");
+      dbConnectionError = "Kredensial MySQL tidak lengkap di pengaturan";
       return;
     }
 
@@ -345,14 +358,24 @@ async function startServer() {
       console.log("Connected to MySQL database and verified collections table.");
       pool = testPool;
       useMySQL = true;
+      dbConnectionError = null;
     } catch (err: any) {
       console.error("MySQL connection error:", err.message);
+      dbConnectionError = err.message;
       console.log("Falling back to local JSON file storage.");
     }
   }
 
   // Initialize DB asynchronously but don't block server startup
   initDB();
+
+  app.get("/api/db-status", (req, res) => {
+    res.json({
+      useMySQL,
+      error: dbConnectionError,
+      host: process.env.DB_HOST
+    });
+  });
 
   async function readCollection(collection: string): Promise<any[]> {
     if (useMySQL && pool) {
@@ -455,11 +478,19 @@ async function startServer() {
         createdAt: data.createdAt || new Date().toISOString()
       };
 
-      const items = await readCollection(collectionName);
-      items.push(newItem);
-      await writeCollection(collectionName, items);
+      if (useMySQL && pool) {
+        await pool.query(
+          'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+          [id, collectionName, JSON.stringify(newItem)]
+        );
+      } else {
+        const items = await readCollection(collectionName);
+        items.push(newItem);
+        await writeCollection(collectionName, items);
+      }
       res.json({ id });
     } catch (err: any) {
+      console.error(`Error POST /api/db/${req.params.collection}:`, err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -470,18 +501,34 @@ async function startServer() {
       const { collection: collectionName, id } = req.params;
       const data = req.body;
 
-      const items = await readCollection(collectionName);
-      const index = items.findIndex((i) => i.id === id);
-      
-      if (index !== -1) {
-        items[index] = { ...items[index], ...data, id };
+      if (useMySQL && pool) {
+        // Read existing first
+        const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
+        let existingData = {};
+        if (Array.isArray(rows) && rows.length > 0) {
+          existingData = (rows as any[])[0].data;
+        }
+        const updatedItem = { ...existingData, ...data, id };
+        
+        await pool.query(
+          'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE data = VALUES(data)',
+          [id, collectionName, JSON.stringify(updatedItem)]
+        );
       } else {
-        items.push({ ...data, id });
+        const items = await readCollection(collectionName);
+        const index = items.findIndex((i) => i.id === id);
+        
+        if (index !== -1) {
+          items[index] = { ...items[index], ...data, id };
+        } else {
+          items.push({ ...data, id });
+        }
+        await writeCollection(collectionName, items);
       }
       
-      await writeCollection(collectionName, items);
       res.json({ success: true });
     } catch (err: any) {
+      console.error(`Error PUT /api/db/${req.params.collection}/${req.params.id}:`, err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -491,11 +538,16 @@ async function startServer() {
     try {
       const { collection: collectionName, id } = req.params;
 
-      let items = await readCollection(collectionName);
-      items = items.filter((i) => i.id !== id);
-      await writeCollection(collectionName, items);
+      if (useMySQL && pool) {
+        await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
+      } else {
+        let items = await readCollection(collectionName);
+        items = items.filter((i) => i.id !== id);
+        await writeCollection(collectionName, items);
+      }
       res.json({ success: true });
     } catch (err: any) {
+      console.error(`Error DELETE /api/db/${req.params.collection}/${req.params.id}:`, err);
       res.status(500).json({ error: err.message });
     }
   });

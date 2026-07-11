@@ -145,17 +145,17 @@ export default function FotoAdmin() {
             <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group">
               <div className="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                  <button onClick={() => handleEdit(item)} className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition-colors">
-                    <Edit size={18} />
+              </div>
+              <div className="p-4 border-t border-gray-100">
+                <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm mb-3">{item.title}</h3>
+                <div className="flex gap-2">
+                  <button onClick={() => handleEdit(item)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-xs font-semibold">
+                    <Edit size={14} /> Edit
                   </button>
-                  <button onClick={() => handleDelete(item.id)} className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50 transition-colors">
-                    <Trash2 size={18} />
+                  <button onClick={() => handleDelete(item.id)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs font-semibold">
+                    <Trash2 size={14} /> Hapus
                   </button>
                 </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm">{item.title}</h3>
               </div>
             </div>
           ))
@@ -201,11 +201,6 @@ export default function FotoAdmin() {
                       )}
                       <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                     </label>
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
-                    >
-                    </button>
                   </div>
                   {formData.image && (
                     <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">

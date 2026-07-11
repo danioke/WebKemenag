@@ -420,9 +420,44 @@ export default function AdminDashboard() {
 }
 
 function DashboardHome() {
+  const [dbStatus, setDbStatus] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/db-status')
+      .then(res => res.json())
+      .then(data => setDbStatus(data))
+      .catch(err => console.error("Error fetching db status:", err));
+  }, []);
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      
+      {dbStatus && (
+        <div className={`mb-6 p-4 rounded-xl border ${dbStatus.useMySQL ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+          <h2 className={`font-semibold ${dbStatus.useMySQL ? 'text-green-800' : 'text-amber-800'} flex items-center gap-2`}>
+            <div className={`w-3 h-3 rounded-full ${dbStatus.useMySQL ? 'bg-green-500' : 'bg-amber-500 animate-pulse'}`}></div>
+            Status Database
+          </h2>
+          {dbStatus.useMySQL ? (
+            <p className="text-sm text-green-700 mt-1">Terhubung ke MySQL ({dbStatus.host})</p>
+          ) : (
+            <div className="mt-2 text-sm">
+              <p className="text-amber-700 font-medium mb-1">Peringatan: Menggunakan penyimpanan sementara (JSON)</p>
+              <p className="text-amber-600 mb-2">Data Anda akan hilang saat server di-restart! Website belum menggunakan database hosting.</p>
+              {dbStatus.error && (
+                <div className="bg-white/60 p-3 rounded-md font-mono text-xs text-red-600 break-all border border-amber-100">
+                  <strong>Error MySQL:</strong> {dbStatus.error}
+                </div>
+              )}
+              <p className="text-amber-700 mt-2 text-xs">
+                <strong>Solusi:</strong> Pastikan password benar dan IP server ini <code>34.34.254.242</code> sudah diizinkan (Remote MySQL / IP Whitelist) di cPanel/hPanel Anda.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <div className="text-gray-500 text-sm font-medium mb-1">Total Pengumuman</div>

@@ -180,12 +180,6 @@ export default function BeritaAdmin() {
           >
             <CloudDownload size={16} /> Import WordPress
           </Link>
-          <button
-            onClick={openAddModal}
-            className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            <Plus size={16} /> Tambah Data
-          </button>
         </div>
       </div>
 
@@ -213,12 +207,14 @@ export default function BeritaAdmin() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 mx-2">
-                      <Edit size={18} />
-                    </button>
-                    <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900 mx-2">
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1.5 rounded-md">
+                        <Edit size={16} />
+                      </button>
+                      <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900 bg-red-50 p-1.5 rounded-md">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -232,35 +228,19 @@ export default function BeritaAdmin() {
               Menampilkan <span className="font-semibold">{startIndex + 1}</span> - <span className="font-semibold">{Math.min(startIndex + itemsPerPage, data.length)}</span> dari <span className="font-semibold">{data.length}</span> berita
             </p>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                Sebelumnya
-              </button>
               <div className="flex gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all ${
-                      currentPage === page
-                        ? 'bg-green-700 text-white shadow-sm'
-                        : 'border border-gray-200 text-gray-700 bg-white hover:bg-gray-50'
+                    className={`w-8 h-8 rounded-md flex items-center justify-center text-sm font-medium transition-colors ${
+                      currentPage === page ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     {page}
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                Selanjutnya
-              </button>
             </div>
           </div>
         )}
@@ -271,7 +251,7 @@ export default function BeritaAdmin() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div className="flex justify-between items-center p-5 border-b border-gray-100 shrink-0">
               <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Berita' : 'Tambah Berita'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-500">
                 <X size={20} />
               </button>
             </div>
@@ -343,11 +323,6 @@ export default function BeritaAdmin() {
                       )}
                       <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                     </label>
-                    <button
-                      type="button"
-                      className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors shadow-sm cursor-pointer"
-                    >
-                    </button>
                   </div>
                   {formData.image && (
                     <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
@@ -378,13 +353,10 @@ export default function BeritaAdmin() {
                 type="submit"
                 form="berita-form"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors flex items-center justify-center min-w-[90px] disabled:opacity-70 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                {isSubmitting ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  'Simpan'
-                )}
+                {isSubmitting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : null}
+                Simpan
               </button>
             </div>
           </div>
