@@ -3,7 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Save, MoveUp, MoveDown, RefreshCw, X, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle, MapPin, Mail, Phone, PlusCircle } from 'lucide-react';
-import DefaultEditor from 'react-simple-wysiwyg';
+import RichTextEditor from '../../components/RichTextEditor';
 
 // Define the Icon map
 const iconMap: Record<string, any> = {

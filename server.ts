@@ -693,13 +693,13 @@ async function startServer() {
   // Intercept HTML pages requests to dynamically inject Open Graph (OG) meta tags
   app.get("*", async (req, res, next) => {
     // Skip if it is an API route, uploaded file, or standard static assets with extensions
-    if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/") || req.path.includes(".")) {
+    if (req.path.startsWith("/api/") || req.path.startsWith("/uploads/") || req.path.startsWith("/@") || req.path.includes(".")) {
       return next();
     }
 
-    // Only intercept if Accept header contains text/html, or if it is a clean directory-style path
+    // Only intercept if Accept header contains text/html
     const acceptHeader = req.headers.accept || "";
-    const isHtmlRequest = acceptHeader.includes("text/html") || !req.path.includes(".");
+    const isHtmlRequest = acceptHeader.includes("text/html");
     
     if (!isHtmlRequest) {
       return next();

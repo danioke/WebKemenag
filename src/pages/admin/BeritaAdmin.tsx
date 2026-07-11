@@ -1,32 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/firebase';
 import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
-
-const modules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-    ['link', 'image', 'video'],
-    ['clean'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'align': [] }]
-  ],
-};
-
-const formats = [
-  'header',
-  'bold', 'italic', 'underline', 'strike', 'blockquote',
-  'list', 'bullet', 'indent',
-  'link', 'image', 'video',
-  'color', 'background', 'align'
-];
-
+import RichTextEditor from '../../components/RichTextEditor';
 interface Berita {
   id: string;
   title: string;
@@ -38,7 +16,7 @@ interface Berita {
 }
 
 export default function BeritaAdmin() {
-  const [data, setData] = useState<Berita[]>([]);
+const [data, setData] = useState<Berita[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ id: '', title: '', category: '', date: '', author: '', image: '', excerpt: '' });
@@ -83,8 +61,7 @@ export default function BeritaAdmin() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     if (file.size > 10 * 1024 * 1024) {
@@ -360,14 +337,7 @@ export default function BeritaAdmin() {
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
                   <div className="bg-white border border-gray-300 rounded-md overflow-hidden quill-editor-container">
-                    <ReactQuill
-                      theme="snow"
-                      value={formData.excerpt}
-                      onChange={(content) => setFormData({ ...formData, excerpt: content })}
-                      modules={modules}
-                      formats={formats}
-                      style={{ minHeight: '350px' }}
-                    />
+                    <RichTextEditor value={formData.excerpt} onChange={(content) => setFormData({ ...formData, excerpt: content })} minHeight="350px" />
                   </div>
                 </div>
               </form>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from '../../lib/firebase';
 import { toast } from 'sonner';
-import DefaultEditor from 'react-simple-wysiwyg';
+import RichTextEditor from '../../components/RichTextEditor';
 import { 
   Plus, Trash2, Edit2, GraduationCap, BookOpen, Building2, Book, 
   User, Image as ImageIcon, Briefcase, FileText, Loader2, Save, X, Award, Upload
@@ -495,10 +495,7 @@ export default function LayananAdmin() {
                   </span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '450px' }}>
-                  <DefaultEditor
-                    value={syarat}
-                    onChange={(e) => setSyarat(e.target.value)}
-                  />
+                  <RichTextEditor value={syarat} onChange={setSyarat} />
                 </div>
               </div>
             ) : (
@@ -513,10 +510,7 @@ export default function LayananAdmin() {
                   </span>
                 </div>
                 <div className="border border-gray-200 rounded-xl overflow-hidden" style={{ minHeight: '400px' }}>
-                  <DefaultEditor
-                    value={tugasFungsi}
-                    onChange={(e) => setTugasFungsi(e.target.value)}
-                  />
+                  <RichTextEditor value={tugasFungsi} onChange={setTugasFungsi} />
                 </div>
               </div>
             )}
