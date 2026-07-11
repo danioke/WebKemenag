@@ -313,7 +313,7 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Header</label>
                   <div className="flex gap-2">
                     <input
-                      type="url"
+                      type="text"
                       value={formData.image}
                       onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                       placeholder="Masukkan URL Gambar, upload lokal,  "

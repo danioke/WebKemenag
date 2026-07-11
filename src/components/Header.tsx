@@ -90,18 +90,30 @@ export default function Header() {
   }, []);
 
   const [navLinks, setNavLinks] = useState<NavLink[]>(staticNavLinks);
+  console.log('Rendering navLinks:', navLinks);
 
   useEffect(() => {
     const q = query(collection(db, 'navigation'), orderBy('order', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      if (!snapshot.empty) {
-        const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
-        setNavLinks(items);
-      } else {
+      try {
+        if (snapshot && !snapshot.empty && snapshot.docs && snapshot.docs.length > 0) {
+          const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as any));
+          // Pastikan item tidak kosong
+          if (items.length > 0 && items[0].name) {
+            setNavLinks(items);
+          } else {
+            setNavLinks(staticNavLinks);
+          }
+        } else {
+          setNavLinks(staticNavLinks);
+        }
+      } catch (err) {
+        console.error("Error processing navigation snapshot", err);
         setNavLinks(staticNavLinks);
       }
     }, (error) => {
       console.error("Failed to fetch dynamic navigation", error);
+      setNavLinks(staticNavLinks);
     });
 
     return () => unsubscribe();

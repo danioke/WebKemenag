@@ -219,7 +219,7 @@ export default function VideoAdmin() {
                       <Video size={16} />
                     </div>
                     <input
-                      type="url"
+                      type="text"
                       required
                       value={formData.videoUrl}
                       onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}

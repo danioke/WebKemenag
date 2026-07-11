@@ -619,7 +619,7 @@ export default function LayananAdmin() {
                         <ImageIcon size={12} /> URL Foto Kepala Seksi / Pejabat
                       </label>
                       <input
-                        type="url"
+                        type="text"
                         placeholder="https://..."
                         value={kasiPhoto}
                         onChange={(e) => setKasiPhoto(e.target.value)}
@@ -737,7 +737,7 @@ export default function LayananAdmin() {
                     <ImageIcon size={12} /> URL Foto Staf
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     placeholder="https://..."
                     value={stafFormData.photo}
                     onChange={(e) => setStafFormData({ ...stafFormData, photo: e.target.value })}
