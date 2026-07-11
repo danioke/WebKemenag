@@ -4,7 +4,8 @@ import { db, auth } from '../../lib/firebase';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import DefaultEditor from 'react-simple-wysiwyg';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface Berita {
   id: string;
@@ -25,6 +26,26 @@ export default function BeritaAdmin() {
   const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+      ['link', 'image', 'video'],
+      ['clean'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'align': [] }]
+    ],
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video',
+    'color', 'background', 'align'
+  ];
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,8 +87,8 @@ export default function BeritaAdmin() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Ukuran file maksimal 2MB");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 10MB");
       return;
     }
     const form = new FormData();
@@ -174,6 +195,12 @@ export default function BeritaAdmin() {
       <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Kelola Berita</h1>
         <div className="flex items-center gap-3">
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Plus size={16} /> Tambah Berita
+          </button>
           <Link
             to="/admin/berita/import"
             className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -332,10 +359,14 @@ export default function BeritaAdmin() {
                 </div>
                 <div className="flex flex-col">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
-                  <div className="bg-white border border-gray-300 rounded-md overflow-hidden" style={{ minHeight: '350px' }}>
-                    <DefaultEditor
+                  <div className="bg-white border border-gray-300 rounded-md overflow-hidden quill-editor-container">
+                    <ReactQuill
+                      theme="snow"
                       value={formData.excerpt}
-                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                      onChange={(content) => setFormData({ ...formData, excerpt: content })}
+                      modules={modules}
+                      formats={formats}
+                      style={{ minHeight: '350px' }}
                     />
                   </div>
                 </div>
