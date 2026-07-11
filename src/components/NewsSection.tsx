@@ -171,7 +171,7 @@ export default function NewsSection() {
             <div className="lg:col-span-5 flex flex-col gap-4">
               {news.slice(1).map((item, idx) => (
                 <motion.div
-                  key={item.id}
+                  key={item.id || `news-${idx}`}
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
