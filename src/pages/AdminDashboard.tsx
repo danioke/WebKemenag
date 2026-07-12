@@ -451,7 +451,7 @@ function DashboardHome() {
                 </div>
               )}
               <p className="text-amber-700 mt-2 text-xs">
-                <strong>Solusi:</strong> Pastikan password benar dan IP server ini <code>34.34.254.242</code> sudah diizinkan (Remote MySQL / IP Whitelist) di cPanel/hPanel Anda.
+                <strong>Solusi:</strong> Pastikan password benar dan IP server aplikasi ini (tertera pada pesan error di atas) sudah diizinkan (Remote MySQL / IP Whitelist) di cPanel/hPanel Anda. Sangat disarankan untuk mengizinkan semua IP (<code>%</code>) karena IP server aplikasi dapat berubah-ubah.
               </p>
             </div>
           )}
