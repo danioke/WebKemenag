@@ -139,15 +139,20 @@ async function startServer() {
         createdAt: new Date().toISOString()
       };
 
-      if (useMySQL && pool) {
-        await pool.query(
-          'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
-          [filename, 'uploaded_files', JSON.stringify(fileDoc)]
-        );
-      } else {
-        const files = await readCollection("uploaded_files");
-        files.push(fileDoc);
-        await writeCollection("uploaded_files", files);
+      const release = await acquireLock("uploaded_files");
+      try {
+        if (useMySQL && pool) {
+          await pool.query(
+            'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+            [filename, 'uploaded_files', JSON.stringify(fileDoc)]
+          );
+        } else {
+          const files = await readCollection("uploaded_files");
+          files.push(fileDoc);
+          await writeCollection("uploaded_files", files);
+        }
+      } finally {
+        release();
       }
 
       res.json({
@@ -295,12 +300,17 @@ async function startServer() {
       }
 
       // Delete from database
-      if (useMySQL && pool) {
-        await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', ['uploaded_files', filename]);
-      } else {
-        const files = await readCollection("uploaded_files");
-        const filtered = files.filter(f => f.id !== filename);
-        await writeCollection("uploaded_files", filtered);
+      const release = await acquireLock("uploaded_files");
+      try {
+        if (useMySQL && pool) {
+          await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', ['uploaded_files', filename]);
+        } else {
+          const files = await readCollection("uploaded_files");
+          const filtered = files.filter(f => f.id !== filename);
+          await writeCollection("uploaded_files", filtered);
+        }
+      } finally {
+        release();
       }
 
       res.json({ success: true, message: "File berhasil dihapus dari hosting" });
@@ -377,11 +387,76 @@ async function startServer() {
     });
   });
 
+  
+  function parseDBData(dataRaw: any) {
+    if (dataRaw === null || dataRaw === undefined) {
+      return {};
+    }
+    
+    // Handle Buffer
+    if (Buffer.isBuffer(dataRaw)) {
+      try {
+        const str = dataRaw.toString('utf8');
+        const parsed = JSON.parse(str);
+        if (typeof parsed === 'string') {
+          return JSON.parse(parsed);
+        }
+        return parsed;
+      } catch (e) {
+        console.error("Error parsing Buffer data:", e);
+        return {};
+      }
+    }
+    
+    // Handle string
+    if (typeof dataRaw === 'string') {
+      try {
+        const parsed = JSON.parse(dataRaw);
+        if (typeof parsed === 'string') {
+          return JSON.parse(parsed);
+        }
+        return parsed;
+      } catch (e) {
+        console.error("Error parsing string data:", e);
+        return {};
+      }
+    }
+    
+    // Handle already-parsed object/array (if mysql2 does auto-deserialization)
+    if (typeof dataRaw === 'object') {
+      // In case mysql2 parsed it but it is actually still double-stringified inside the object
+      if (typeof dataRaw.data === 'string') {
+        try {
+          return JSON.parse(dataRaw.data);
+        } catch (e) {}
+      }
+      return dataRaw;
+    }
+    
+    return dataRaw;
+  }
+
+  // Active lock/queue dictionary per collection to prevent concurrent write race conditions
+  const collectionLocks: Record<string, Promise<any>> = {};
+
+  async function acquireLock(collection: string): Promise<() => void> {
+    let release: () => void;
+    const nextPromise = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    
+    const currentPromise = collectionLocks[collection] || Promise.resolve();
+    collectionLocks[collection] = currentPromise.then(() => nextPromise);
+    
+    await currentPromise;
+    return release!;
+  }
+
   async function readCollection(collection: string): Promise<any[]> {
     if (useMySQL && pool) {
       try {
         const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ?', [collection]);
-        return (rows as any[]).map(r => r.data);
+        return (rows as any[]).map(r => parseDBData(r.data));
       } catch (err: any) {
         console.error(`Error reading collection ${collection} from MySQL:`, err.message);
         throw err;
@@ -468,8 +543,9 @@ async function startServer() {
 
   // POST (add) a new document to a collection
   app.post("/api/db/:collection", async (req, res) => {
+    const { collection: collectionName } = req.params;
+    const release = await acquireLock(collectionName);
     try {
-      const { collection: collectionName } = req.params;
       const data = req.body;
       const id = data.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
       const newItem = { 
@@ -490,15 +566,18 @@ async function startServer() {
       }
       res.json({ id });
     } catch (err: any) {
-      console.error(`Error POST /api/db/${req.params.collection}:`, err);
+      console.error(`Error POST /api/db/${collectionName}:`, err);
       res.status(500).json({ error: err.message });
+    } finally {
+      release();
     }
   });
 
   // PUT (update/set) a document by ID
   app.put("/api/db/:collection/:id", async (req, res) => {
+    const { collection: collectionName, id } = req.params;
+    const release = await acquireLock(collectionName);
     try {
-      const { collection: collectionName, id } = req.params;
       const data = req.body;
 
       if (useMySQL && pool) {
@@ -506,7 +585,7 @@ async function startServer() {
         const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
         let existingData = {};
         if (Array.isArray(rows) && rows.length > 0) {
-          existingData = (rows as any[])[0].data;
+          existingData = parseDBData((rows as any[])[0].data);
         }
         const updatedItem = { ...existingData, ...data, id };
         
@@ -528,16 +607,18 @@ async function startServer() {
       
       res.json({ success: true });
     } catch (err: any) {
-      console.error(`Error PUT /api/db/${req.params.collection}/${req.params.id}:`, err);
+      console.error(`Error PUT /api/db/${collectionName}/${id}:`, err);
       res.status(500).json({ error: err.message });
+    } finally {
+      release();
     }
   });
 
   // DELETE a document by ID
   app.delete("/api/db/:collection/:id", async (req, res) => {
+    const { collection: collectionName, id } = req.params;
+    const release = await acquireLock(collectionName);
     try {
-      const { collection: collectionName, id } = req.params;
-
       if (useMySQL && pool) {
         await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
       } else {
@@ -547,8 +628,10 @@ async function startServer() {
       }
       res.json({ success: true });
     } catch (err: any) {
-      console.error(`Error DELETE /api/db/${req.params.collection}/${req.params.id}:`, err);
+      console.error(`Error DELETE /api/db/${collectionName}/${id}:`, err);
       res.status(500).json({ error: err.message });
+    } finally {
+      release();
     }
   });
 

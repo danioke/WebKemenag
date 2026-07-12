@@ -118,6 +118,19 @@ export default function NavigationAdmin() {
   const [isEditingSub, setIsEditingSub] = useState(false);
   const [editingSubIndex, setEditingSubIndex] = useState<number | null>(null);
 
+  // Reusable iframe-safe modal confirmation state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
   const fetchData = async () => {
     setLoading(true);
     const pathForList = 'navigation';
@@ -126,8 +139,8 @@ export default function NavigationAdmin() {
       const querySnapshot = await getDocs(q);
       let docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NavLink));
       
-      if (docs.length === 0) {
-        console.log("Navigation collection is empty. Auto-seeding default menu and rich data...");
+      if (docs.length === 0 || !docs[0].name) {
+        console.log("Navigation collection is empty or invalid. Auto-seeding default menu and rich data...");
         await runSilentSeed();
         const refetchSnapshot = await getDocs(q);
         docs = refetchSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NavLink));
@@ -556,33 +569,36 @@ export default function NavigationAdmin() {
   };
 
   // Seeding default initial menu helper
-  const seedDefaultNavigation = async () => {
-    if (!window.confirm('Apakah Anda yakin ingin mengatur ulang navigasi ke setelan bawaan? Seluruh perubahan kustom akan hilang.')) {
-      return;
-    }
+  const seedDefaultNavigation = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Atur Ulang Navigasi',
+      message: 'Apakah Anda yakin ingin mengatur ulang navigasi ke setelan bawaan? Seluruh perubahan kustom akan hilang.',
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          // 1. Delete all existing navigation
+          const q = query(collection(db, 'navigation'));
+          const snapshot = await getDocs(q);
+          const deletePromises = snapshot.docs.map(docSnapshot => deleteDoc(doc(db, 'navigation', docSnapshot.id)));
+          await Promise.all(deletePromises);
 
-    setLoading(true);
-    try {
-      // 1. Delete all existing navigation
-      const q = query(collection(db, 'navigation'));
-      const snapshot = await getDocs(q);
-      const deletePromises = snapshot.docs.map(docSnapshot => deleteDoc(doc(db, 'navigation', docSnapshot.id)));
-      await Promise.all(deletePromises);
+          // 2. Add defaults
+          const defaults = getDefaultsList();
+          for (const item of defaults) {
+            await addDoc(collection(db, 'navigation'), item);
+          }
 
-      // 2. Add defaults
-      const defaults = getDefaultsList();
-      for (const item of defaults) {
-        await addDoc(collection(db, 'navigation'), item);
+          toast.success('Navigasi berhasil diatur ulang ke setelan bawaan');
+          fetchData();
+        } catch (error) {
+          toast.error('Gagal mengatur ulang navigasi');
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
       }
-
-      toast.success('Navigasi berhasil diatur ulang ke setelan bawaan');
-      fetchData();
-    } catch (error) {
-      toast.error('Gagal mengatur ulang navigasi');
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   // Main Nav item handlers
@@ -634,16 +650,21 @@ export default function NavigationAdmin() {
     setIsMainModalOpen(true);
   };
 
-  const handleDeleteMain = async (id: string) => {
-    if (window.confirm('Hapus menu navigasi ini? Seluruh sub-menu di dalamnya juga akan terhapus.')) {
-      try {
-        await deleteDoc(doc(db, 'navigation', id));
-        toast.success('Menu navigasi berhasil dihapus');
-        fetchData();
-      } catch (error) {
-        toast.error('Gagal menghapus menu navigasi');
+  const handleDeleteMain = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Menu Navigasi',
+      message: 'Hapus menu navigasi ini? Seluruh sub-menu di dalamnya juga akan terhapus.',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'navigation', id));
+          toast.success('Menu navigasi berhasil dihapus');
+          fetchData();
+        } catch (error) {
+          toast.error('Gagal menghapus menu navigasi');
+        }
       }
-    }
+    });
   };
 
   const openAddMainModal = () => {
@@ -749,21 +770,26 @@ export default function NavigationAdmin() {
     }
   };
 
-  const handleDeleteSub = async (parent: NavLink, index: number) => {
-    if (window.confirm('Hapus sub-menu ini?')) {
-      try {
-        const currentSubItems = [...(parent.subItems || [])];
-        currentSubItems.splice(index, 1);
+  const handleDeleteSub = (parent: NavLink, index: number) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Sub-Menu',
+      message: 'Hapus sub-menu ini?',
+      onConfirm: async () => {
+        try {
+          const currentSubItems = [...(parent.subItems || [])];
+          currentSubItems.splice(index, 1);
 
-        const docRef = doc(db, 'navigation', parent.id);
-        await updateDoc(docRef, { subItems: currentSubItems });
+          const docRef = doc(db, 'navigation', parent.id);
+          await updateDoc(docRef, { subItems: currentSubItems });
 
-        toast.success('Sub-menu berhasil dihapus');
-        fetchData();
-      } catch (error) {
-        toast.error('Gagal menghapus sub-menu');
+          toast.success('Sub-menu berhasil dihapus');
+          fetchData();
+        } catch (error) {
+          toast.error('Gagal menghapus sub-menu');
+        }
       }
-    }
+    });
   };
 
   if (loading && data.length === 0) {
@@ -1080,10 +1106,10 @@ export default function NavigationAdmin() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Isi Konten Detail (Modal Popup HTML)</label>
                   <p className="text-xs text-gray-400 mb-1.5">Tulis penjelasan detail yang akan muncul dalam popup modal ketika sub-menu diklik oleh publik.</p>
                   <div className="bg-white border border-gray-200 rounded-md overflow-hidden min-h-[180px]">
-                    <DefaultEditor
+                    <RichTextEditor
                       value={subForm.content}
-                      onChange={(e) => setSubForm({ ...subForm, content: e.target.value })}
-                      className="min-h-[180px]"
+                      onChange={(val) => setSubForm({ ...subForm, content: val })}
+                      minHeight="180px"
                     />
                   </div>
                 </div>
@@ -1103,6 +1129,35 @@ export default function NavigationAdmin() {
                 className="px-4 py-2 bg-green-700 hover:bg-green-800 text-white rounded-md text-sm font-medium transition-colors"
               >
                 Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{confirmModal.title}</h3>
+            <p className="text-sm text-gray-600 mb-6">{confirmModal.message}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal({ ...confirmModal, isOpen: false });
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-700 hover:bg-green-800 rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                Ya, Lanjutkan
               </button>
             </div>
           </div>

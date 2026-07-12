@@ -25,6 +25,19 @@ const [data, setData] = useState<Berita[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
 
+  // Reusable iframe-safe modal confirmation state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -140,21 +153,26 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
       toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menghapus.');
       return;
     }
-    if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-      try {
-        await deleteDoc(doc(db, 'news', id));
-        toast.success('Berita berhasil dihapus');
-        fetchData();
-      } catch (error) {
-        console.error(error);
-        toast.error('Gagal menghapus berita');
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Berita',
+      message: 'Apakah Anda yakin ingin menghapus berita ini?',
+      onConfirm: async () => {
+        try {
+          await deleteDoc(doc(db, 'news', id));
+          toast.success('Berita berhasil dihapus');
+          fetchData();
+        } catch (error) {
+          console.error(error);
+          toast.error('Gagal menghapus berita');
+        }
       }
-    }
+    });
   };
 
   const openAddModal = () => {
@@ -364,6 +382,34 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         </div>
       )}
 
+      {/* Custom Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{confirmModal.title}</h3>
+            <p className="text-sm text-gray-600 mb-6">{confirmModal.message}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  confirmModal.onConfirm();
+                  setConfirmModal({ ...confirmModal, isOpen: false });
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-700 hover:bg-green-800 rounded-lg shadow-sm transition-colors cursor-pointer"
+              >
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
