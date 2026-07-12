@@ -19,13 +19,13 @@ async function startServer() {
 
   // Create upload directories if they don't exist
   if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+    try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) { console.warn("Could not create uploadDir", e); }
   }
   
   categories.forEach((cat) => {
     const catPath = path.join(uploadDir, cat);
     if (!fs.existsSync(catPath)) {
-      fs.mkdirSync(catPath, { recursive: true });
+      try { fs.mkdirSync(catPath, { recursive: true }); } catch (e) { console.warn("Could not create catPath", e); }
     }
   });
 
@@ -115,7 +115,7 @@ async function startServer() {
       try {
         const catPath = path.join(uploadDir, category);
         if (!fs.existsSync(catPath)) {
-          fs.mkdirSync(catPath, { recursive: true });
+          try { fs.mkdirSync(catPath, { recursive: true }); } catch (e) { console.warn("Could not create catPath", e); }
         }
         fs.writeFileSync(path.join(catPath, filename), file.buffer);
       } catch (writeErr) {
@@ -325,7 +325,7 @@ async function startServer() {
   
   const dbDir = path.join(process.cwd(), "data");
   if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+    try { fs.mkdirSync(dbDir, { recursive: true }); } catch (e) { console.warn("Could not create dbDir", e); }
   }
 
   function getCollectionPath(collection: string) {
