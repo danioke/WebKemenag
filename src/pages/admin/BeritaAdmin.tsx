@@ -224,7 +224,18 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               currentItems.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    <span className="line-clamp-1">{item.title}</span>
+                    <div className="flex items-center gap-4">
+                      {item.image ? (
+                        <div className="w-16 h-12 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden border border-gray-200">
+                          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-12 flex-shrink-0 bg-gray-100 rounded-md flex items-center justify-center border border-gray-200">
+                          <FileText className="w-5 h-5 text-gray-400" />
+                        </div>
+                      )}
+                      <span className="line-clamp-2">{item.title}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
