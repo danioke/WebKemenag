@@ -574,7 +574,9 @@ async function startServer() {
   });
 
   // PUT (update/set) a document by ID
-  app.put("/api/db/:collection/:id", async (req, res) => {
+
+
+  const updateHandler = async (req: any, res: any) => {
     const { collection: collectionName, id } = req.params;
     const release = await acquireLock(collectionName);
     try {
@@ -612,10 +614,14 @@ async function startServer() {
     } finally {
       release();
     }
-  });
+  };
 
   // DELETE a document by ID
-  app.delete("/api/db/:collection/:id", async (req, res) => {
+  // Route definitions using POST to bypass strict hosting web servers that block PUT/DELETE
+  app.put("/api/db/:collection/:id", updateHandler);
+  app.post("/api/db/:collection/:id", updateHandler);
+
+  const deleteDbHandler = async (req: any, res: any) => {
     const { collection: collectionName, id } = req.params;
     const release = await acquireLock(collectionName);
     try {
@@ -633,9 +639,12 @@ async function startServer() {
     } finally {
       release();
     }
-  });
+  };
 
   // POST local authentication login
+  app.delete("/api/db/:collection/:id", deleteDbHandler);
+  app.post("/api/db/:collection/:id/delete", deleteDbHandler);
+
   app.post("/api/auth/login", (req, res) => {
     try {
       const { email, password } = req.body;

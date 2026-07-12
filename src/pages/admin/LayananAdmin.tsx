@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from '../../lib/firebase';
-import { doc, getDoc, setDoc } from '../../lib/firebase';
+import { db, auth } from '../../lib/db';
+import { doc, getDoc, setDoc } from '../../lib/db';
 import { toast } from 'sonner';
 import RichTextEditor from '../../components/RichTextEditor';
 import { 
@@ -326,7 +326,7 @@ export default function LayananAdmin() {
 
   const handleSave = async () => {
     if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
-      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login untuk menyimpan perubahan.');
       return;
     }
     

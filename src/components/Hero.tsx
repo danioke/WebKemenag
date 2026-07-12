@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, FileText, Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy } from '../lib/firebase';
-import { db } from '../lib/firebase';
+import { collection, onSnapshot, query, orderBy } from '../lib/db';
+import { db } from '../lib/db';
 
 interface CarouselItem {
   image: string;

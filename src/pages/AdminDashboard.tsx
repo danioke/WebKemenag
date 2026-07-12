@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { auth, logout, isEmailAllowed } from '../lib/firebase';
+import { auth, logout, isEmailAllowed } from '../lib/db';
 import { toast } from 'sonner';
 import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, ChevronRight, User, Save, Folder, Settings } from 'lucide-react';
 import PengumumanAdmin from './admin/PengumumanAdmin';

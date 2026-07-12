@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from '../../lib/firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from '../../lib/firebase';
+import { db, auth } from '../../lib/db';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from '../../lib/db';
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, Users, Search, Mail, UserCheck, Shield, X, Check, Loader2 } from 'lucide-react';
 
@@ -174,7 +174,7 @@ export default function UserAdmin() {
             Pengaturan User / Hak Akses
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Kelola email akun Google mana saja yang diperbolehkan masuk ke dalam dashboard administrator ini.
+            Kelola email akun mana saja yang diperbolehkan masuk ke dalam dashboard administrator ini.
           </p>
         </div>
         <button
@@ -192,10 +192,10 @@ export default function UserAdmin() {
         <Shield size={20} className="shrink-0 mt-0.5 text-amber-600" />
         <div className="text-xs space-y-1">
           <p className="font-bold">Perhatian Keamanan:</p>
-          <p>Hanya pengguna dengan email yang terdaftar di bawah ini yang dapat login menggunakan Google Auth.</p>
+          <p>Hanya pengguna dengan email yang terdaftar di bawah ini yang dapat login melalui form login.</p>
           {!auth.currentUser && (
             <p className="mt-2 p-2 bg-amber-100 rounded text-amber-900 font-medium">
-              ⚠️ Anda saat ini menggunakan Mode Akses Instan (Bypass). Fitur tambah/hapus user dimatikan karena Anda tidak terautentikasi ke database. Silakan logout dan login menggunakan Google Auth untuk menggunakan fitur ini.
+              ⚠️ Anda saat ini menggunakan Mode Akses Instan (Bypass). Fitur tambah/hapus user dimatikan karena Anda tidak terautentikasi ke database. Silakan logout dan login melalui form login untuk menggunakan fitur ini.
             </p>
           )}
         </div>
@@ -330,7 +330,7 @@ export default function UserAdmin() {
 
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                  Alamat Email Google
+                  Alamat Email
                 </label>
                 <input
                   type="email"
@@ -342,7 +342,7 @@ export default function UserAdmin() {
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all disabled:bg-gray-100 disabled:text-gray-500"
                 />
                 <p className="text-[10px] text-gray-400 mt-1">
-                  Harus berupa email Google aktif yang akan digunakan pengguna saat mengklik tombol Google Login.
+                  Harus berupa email aktif yang akan digunakan pengguna saat mengklik tombol Login.
                 </p>
               </div>
 

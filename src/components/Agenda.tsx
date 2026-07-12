@@ -2,9 +2,9 @@ import { createSlug } from "../lib/helpers";
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Calendar, MapPin, Clock, ArrowRight } from 'lucide-react';
-import { collection, getDocs, query, orderBy, limit } from '../lib/firebase';
+import { collection, getDocs, query, orderBy, limit } from '../lib/db';
 import { Link } from 'react-router-dom';
-import { db } from '../lib/firebase';
+import { db } from '../lib/db';
 
 interface AgendaData {
   id: string;

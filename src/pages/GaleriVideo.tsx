@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Play, VolumeX, Volume2, Search } from 'lucide-react';
-import { db, collection, getDocs, orderBy, query } from '../lib/firebase';
+import { db, collection, getDocs, orderBy, query } from '../lib/db';
 import ReactPlayer from 'react-player';
 const Player = ReactPlayer as any;
 

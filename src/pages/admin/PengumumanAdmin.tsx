@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/firebase';
-import { db, auth } from '../../lib/firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
+import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, FileText, X, Upload } from 'lucide-react';
 
@@ -73,7 +73,7 @@ export default function PengumumanAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
-      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menyimpan perubahan.');
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login untuk menyimpan perubahan.');
       return;
     }
     if (!formData.title || !formData.date) {
@@ -120,7 +120,7 @@ export default function PengumumanAdmin() {
 
   const handleDelete = async (id: string) => {
     if (!auth.currentUser && localStorage.getItem('mock_admin_session') !== 'true') {
-      toast.error('Anda sedang menggunakan Mode Akses Instan. Login dengan Google untuk menghapus.');
+      toast.error('Anda sedang menggunakan Mode Akses Instan. Login untuk menghapus.');
       return;
     }
     if (window.confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {

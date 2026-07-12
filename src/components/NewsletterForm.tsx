@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { db, collection, addDoc, serverTimestamp } from '../lib/firebase';
+import { db, collection, addDoc, serverTimestamp } from '../lib/db';
 import { toast } from 'sonner';
 
 export default function NewsletterForm() {

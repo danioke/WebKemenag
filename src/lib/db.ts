@@ -133,6 +133,7 @@ if (typeof window !== 'undefined') {
             const parts = pathPart.split('?')[0].split('/');
             const collectionName = parts[0];
             const docId = parts[1];
+            const isDelete = parts[2] === 'delete';
             
             const method = init?.method || 'GET';
             
@@ -141,40 +142,22 @@ if (typeof window !== 'undefined') {
                 const localItems = getLocalCollection(collectionName);
                 const found = localItems.find((item: any) => item.id === docId);
                 if (found) {
-                  return new Response(JSON.stringify(found), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' }
-                  });
+                  return new Response(JSON.stringify(found), { status: 200, headers: { 'Content-Type': 'application/json' } });
                 } else {
-                  return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), {
-                    status: 404,
-                    headers: { 'Content-Type': 'application/json' }
-                  });
+                  return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), { status: 404, headers: { 'Content-Type': 'application/json' } });
                 }
               } else {
                 const localItems = getLocalCollection(collectionName);
-                return new Response(JSON.stringify(localItems), {
-                  status: 200,
-                  headers: { 'Content-Type': 'application/json' }
-                });
+                return new Response(JSON.stringify(localItems), { status: 200, headers: { 'Content-Type': 'application/json' } });
               }
             } else if (method === 'POST') {
-              const body = init?.body ? JSON.parse(init.body as string) : {};
-              const localItems = getLocalCollection(collectionName);
-              const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-              const newItem = {
-                ...body,
-                id,
-                createdAt: body.createdAt || new Date().toISOString()
-              };
-              localItems.push(newItem);
-              saveLocalCollection(collectionName, localItems);
-              return new Response(JSON.stringify({ id }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-              });
-            } else if (method === 'PUT') {
-              if (docId) {
+              if (isDelete && docId) {
+                let localItems = getLocalCollection(collectionName);
+                localItems = localItems.filter((i: any) => i.id !== docId);
+                saveLocalCollection(collectionName, localItems);
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              } else if (docId) {
+                // Update
                 const body = init?.body ? JSON.parse(init.body as string) : {};
                 const localItems = getLocalCollection(collectionName);
                 const index = localItems.findIndex((i: any) => i.id === docId);
@@ -184,20 +167,16 @@ if (typeof window !== 'undefined') {
                   localItems.push({ ...body, id: docId });
                 }
                 saveLocalCollection(collectionName, localItems);
-                return new Response(JSON.stringify({ success: true }), {
-                  status: 200,
-                  headers: { 'Content-Type': 'application/json' }
-                });
-              }
-            } else if (method === 'DELETE') {
-              if (docId) {
-                let localItems = getLocalCollection(collectionName);
-                localItems = localItems.filter((i: any) => i.id !== docId);
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              } else {
+                // Create
+                const body = init?.body ? JSON.parse(init.body as string) : {};
+                const localItems = getLocalCollection(collectionName);
+                const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                const newItem = { ...body, id, createdAt: body.createdAt || new Date().toISOString() };
+                localItems.push(newItem);
                 saveLocalCollection(collectionName, localItems);
-                return new Response(JSON.stringify({ success: true }), {
-                  status: 200,
-                  headers: { 'Content-Type': 'application/json' }
-                });
+                return new Response(JSON.stringify({ id }), { status: 200, headers: { 'Content-Type': 'application/json' } });
               }
             }
           }
@@ -345,80 +324,59 @@ if (typeof window !== 'undefined') {
               
               // 4. Database CRUD Fallback
               if (url.includes('/api/db/')) {
-                const pathPart = url.split('/api/db/')[1];
-                const parts = pathPart.split('?')[0].split('/');
-                const collectionName = parts[0];
-                const docId = parts[1];
-                
-                const method = init?.method || 'GET';
-                
-                if (method === 'GET') {
-                  if (docId) {
-                    const localItems = getLocalCollection(collectionName);
-                    const found = localItems.find((item: any) => item.id === docId);
-                    if (found) {
-                      return new Response(JSON.stringify(found), {
-                        status: 200,
-                        headers: { 'Content-Type': 'application/json' }
-                      });
-                    } else {
-                      return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), {
-                        status: 404,
-                        headers: { 'Content-Type': 'application/json' }
-                      });
-                    }
-                  } else {
-                    const localItems = getLocalCollection(collectionName);
-                    return new Response(JSON.stringify(localItems), {
-                      status: 200,
-                      headers: { 'Content-Type': 'application/json' }
-                    });
-                  }
-                } else if (method === 'POST') {
-                  const body = init?.body ? JSON.parse(init.body as string) : {};
-                  const localItems = getLocalCollection(collectionName);
-                  const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                  const newItem = {
-                    ...body,
-                    id,
-                    createdAt: body.createdAt || new Date().toISOString()
-                  };
-                  localItems.push(newItem);
-                  saveLocalCollection(collectionName, localItems);
-                  return new Response(JSON.stringify({ id }), {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' }
-                  });
-                } else if (method === 'PUT') {
-                  if (docId) {
-                    const body = init?.body ? JSON.parse(init.body as string) : {};
-                    const localItems = getLocalCollection(collectionName);
-                    const index = localItems.findIndex((i: any) => i.id === docId);
-                    if (index !== -1) {
-                      localItems[index] = { ...localItems[index], ...body, id: docId };
-                    } else {
-                      localItems.push({ ...body, id: docId });
-                    }
-                    saveLocalCollection(collectionName, localItems);
-                    return new Response(JSON.stringify({ success: true }), {
-                      status: 200,
-                      headers: { 'Content-Type': 'application/json' }
-                    });
-                  }
-                } else if (method === 'DELETE') {
-                  if (docId) {
-                    let localItems = getLocalCollection(collectionName);
-                    localItems = localItems.filter((i: any) => i.id !== docId);
-                    saveLocalCollection(collectionName, localItems);
-                    return new Response(JSON.stringify({ success: true }), {
-                      status: 200,
-                      headers: { 'Content-Type': 'application/json' }
-                    });
-                  }
+            const pathPart = url.split('/api/db/')[1];
+            const parts = pathPart.split('?')[0].split('/');
+            const collectionName = parts[0];
+            const docId = parts[1];
+            const isDelete = parts[2] === 'delete';
+            
+            const method = init?.method || 'GET';
+            
+            if (method === 'GET') {
+              if (docId) {
+                const localItems = getLocalCollection(collectionName);
+                const found = localItems.find((item: any) => item.id === docId);
+                if (found) {
+                  return new Response(JSON.stringify(found), { status: 200, headers: { 'Content-Type': 'application/json' } });
+                } else {
+                  return new Response(JSON.stringify({ error: "Dokumen tidak ditemukan" }), { status: 404, headers: { 'Content-Type': 'application/json' } });
                 }
+              } else {
+                const localItems = getLocalCollection(collectionName);
+                return new Response(JSON.stringify(localItems), { status: 200, headers: { 'Content-Type': 'application/json' } });
               }
-              
-              // Default generic JSON response for anything else
+            } else if (method === 'POST') {
+              if (isDelete && docId) {
+                let localItems = getLocalCollection(collectionName);
+                localItems = localItems.filter((i: any) => i.id !== docId);
+                saveLocalCollection(collectionName, localItems);
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              } else if (docId) {
+                // Update
+                const body = init?.body ? JSON.parse(init.body as string) : {};
+                const localItems = getLocalCollection(collectionName);
+                const index = localItems.findIndex((i: any) => i.id === docId);
+                if (index !== -1) {
+                  localItems[index] = { ...localItems[index], ...body, id: docId };
+                } else {
+                  localItems.push({ ...body, id: docId });
+                }
+                saveLocalCollection(collectionName, localItems);
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              } else {
+                // Create
+                const body = init?.body ? JSON.parse(init.body as string) : {};
+                const localItems = getLocalCollection(collectionName);
+                const id = body.id || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                const newItem = { ...body, id, createdAt: body.createdAt || new Date().toISOString() };
+                localItems.push(newItem);
+                saveLocalCollection(collectionName, localItems);
+                return new Response(JSON.stringify({ id }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              }
+            }
+          }
+          
+          // Default generic JSON response for anything else
               return new Response(JSON.stringify({}), {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
@@ -461,20 +419,20 @@ export interface User {
   emailVerified?: boolean;
 }
 
-// 1. firebase/app mock
+// 1. db mock
 export const initializeApp = (config?: any) => {
   return {};
 };
 
 // 2. Auth State Management
-const storedUser = localStorage.getItem('firebase_mock_user');
+const storedUser = localStorage.getItem('app_mock_user');
 let currentUser: User | null = storedUser ? JSON.parse(storedUser) : null;
 let authListener: ((user: User | null) => void) | null = null;
 
 export const logout = async () => {
   try {
     currentUser = null;
-    localStorage.removeItem('firebase_mock_user');
+    localStorage.removeItem('app_mock_user');
     localStorage.removeItem('mock_admin_session');
     if (authListener) {
       authListener(null);
@@ -491,7 +449,7 @@ export const auth = {
   },
   onAuthStateChanged(callback: (user: User | null) => void) {
     authListener = callback;
-    // Delay slightly to match firebase async lifecycle
+    // Delay slightly to match db async lifecycle
     setTimeout(() => {
       callback(currentUser);
     }, 10);
@@ -508,14 +466,14 @@ export const getAuth = (app?: any) => {
   return auth;
 };
 
-export class GoogleAuthProvider {
+export class AuthProvider {
   addScope(scope: string) {}
   static credentialFromResult(result: any) {
     return { accessToken: 'mock-access-token' };
   }
 }
 
-// Modified login function to use password instead of Google login
+// Modified login function to use password instead of login
 export const loginWithPassword = async (email: string, password: string): Promise<boolean> => {
   try {
     const res = await fetch('/api/auth/login', {
@@ -529,7 +487,7 @@ export const loginWithPassword = async (email: string, password: string): Promis
     if (res.ok) {
       const user = await res.json();
       currentUser = { ...user, emailVerified: true };
-      localStorage.setItem('firebase_mock_user', JSON.stringify(currentUser));
+      localStorage.setItem('app_mock_user', JSON.stringify(currentUser));
       localStorage.setItem('mock_admin_session', 'true');
       if (authListener) {
         authListener(currentUser);
@@ -546,7 +504,7 @@ export const loginWithPassword = async (email: string, password: string): Promis
 };
 
 // Kept for backward compatibility
-export const loginWithGoogle = async () => {
+export const login = async () => {
   currentUser = {
     uid: "admin-uid",
     email: "anisreza498@gmail.com",
@@ -554,7 +512,7 @@ export const loginWithGoogle = async () => {
     role: "Super Admin",
     emailVerified: true
   };
-  localStorage.setItem('firebase_mock_user', JSON.stringify(currentUser));
+  localStorage.setItem('app_mock_user', JSON.stringify(currentUser));
   localStorage.setItem('mock_admin_session', 'true');
   if (authListener) {
     authListener(currentUser);
@@ -562,7 +520,7 @@ export const loginWithGoogle = async () => {
 };
 
 export const signInWithPopup = async (authObj?: any, provider?: any) => {
-  await loginWithGoogle();
+  await login();
   return { user: currentUser };
 };
 
@@ -733,7 +691,7 @@ export async function getDocs(queryOrCol: any): Promise<any> {
 export async function getDoc(docRef: any): Promise<any> {
   const { collectionPath, id } = docRef;
   try {
-    const res = await fetch(`/api/db/${collectionPath}/${id}`);
+    const res = await fetch(`/api/db/${collectionPath}/${id}/delete`);
     if (res.status === 404) {
       return {
         id,
@@ -809,7 +767,7 @@ export async function updateDoc(docRef: any, data: any): Promise<any> {
 
   try {
     const res = await fetch(`/api/db/${collectionPath}/${id}`, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -830,8 +788,8 @@ export async function setDoc(docRef: any, data: any, options?: any): Promise<any
 export async function deleteDoc(docRef: any): Promise<any> {
   const { collectionPath, id } = docRef;
   try {
-    const res = await fetch(`/api/db/${collectionPath}/${id}`, {
-      method: 'DELETE'
+    const res = await fetch(`/api/db/${collectionPath}/${id}/delete`, {
+      method: 'POST'
     });
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     return await res.json();

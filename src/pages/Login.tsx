@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, loginWithPassword, logout } from '../lib/firebase';
+import { auth, loginWithPassword, logout } from '../lib/db';
 import { toast } from 'sonner';
 
 export default function Login() {

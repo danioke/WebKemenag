@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/firebase';
-import { db } from '../../lib/firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
+import { db } from '../../lib/db';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, X, Image as ImageIcon, Upload } from 'lucide-react';
 

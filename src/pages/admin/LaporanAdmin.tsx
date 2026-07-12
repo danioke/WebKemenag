@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, getDocs, orderBy, query, doc, setDoc, deleteDoc, Timestamp } from '../../lib/firebase';
-import { db } from '../../lib/firebase';
+import { collection, getDocs, orderBy, query, doc, setDoc, deleteDoc, Timestamp } from '../../lib/db';
+import { db } from '../../lib/db';
 import { toast } from 'sonner';
 import { 
   Printer, FileText, Calendar, Image as ImageIcon, Download, 

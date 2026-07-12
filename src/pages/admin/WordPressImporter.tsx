@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from '../../lib/firebase';
-import { db } from '../../lib/firebase';
+import { collection, addDoc, serverTimestamp, getDocs, query, where } from '../../lib/db';
+import { db } from '../../lib/db';
 import { toast } from 'sonner';
 import { ArrowLeft, CloudDownload, RefreshCw, CheckSquare, Square, Globe, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

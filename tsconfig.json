@@ -20,13 +20,13 @@
         "./*"
       ],
       "firebase/app": [
-        "./src/lib/firebase.ts"
+        "./src/lib/db.ts"
       ],
       "firebase/auth": [
-        "./src/lib/firebase.ts"
+        "./src/lib/db.ts"
       ],
       "firebase/firestore": [
-        "./src/lib/firebase.ts"
+        "./src/lib/db.ts"
       ]
     },
     "allowImportingTsExtensions": true,
