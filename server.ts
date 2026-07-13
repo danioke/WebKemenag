@@ -690,6 +690,22 @@ async function startServer() {
     let image = `${protocol}://${host}/og-image.jpg`;
 
     try {
+      const settingsColl = await readCollection("settings");
+      if (settingsColl && settingsColl.length > 0) {
+        const settings = settingsColl[0];
+        if (settings.siteName) title = settings.siteName;
+        if (settings.metaDescription) description = settings.metaDescription;
+        if (settings.ogImageUrl) {
+          image = settings.ogImageUrl;
+        } else if (settings.logoUrl) {
+          image = settings.logoUrl;
+        }
+      }
+    } catch (e) {
+      console.error("Error reading settings for OG tags:", e);
+    }
+
+    try {
       // Match route
       // 1. Berita / News
       const beritaMatch = reqPath.match(/^\/(berita|news)\/([^/]+)/);

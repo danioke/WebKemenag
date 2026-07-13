@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
 export default function SettingsAdmin() {
   const { 
-    logoUrl, faviconUrl, siteName, metaDescription, socialMedia, contactInfo, updateSettings 
+    logoUrl, faviconUrl, ogImageUrl, siteName, metaDescription, socialMedia, contactInfo, updateSettings, fetchSettings 
   } = useSettingsStore();
 
   const [formData, setFormData] = useState({
     logoUrl,
     faviconUrl,
+    ogImageUrl,
     siteName,
     metaDescription,
     socialMedia: { ...socialMedia },
@@ -19,14 +20,28 @@ export default function SettingsAdmin() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchSettings().then(() => {
+      // Data will be updated in store, need to resync form
+      const store = useSettingsStore.getState();
+      setFormData({
+        logoUrl: store.logoUrl,
+        faviconUrl: store.faviconUrl,
+        ogImageUrl: store.ogImageUrl,
+        siteName: store.siteName,
+        metaDescription: store.metaDescription,
+        socialMedia: { ...store.socialMedia },
+        contactInfo: { ...store.contactInfo }
+      });
+    });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     
-    // Simulate network delay for effect
-    setTimeout(() => {
-      updateSettings(formData);
-      setIsSaving(false);
+    try {
+      await updateSettings(formData);
       toast.success('Pengaturan berhasil disimpan');
       
       // Update document title and favicon
@@ -38,7 +53,11 @@ export default function SettingsAdmin() {
         link.href = formData.faviconUrl;
         document.getElementsByTagName('head')[0].appendChild(link);
       }
-    }, 500);
+    } catch (error) {
+      toast.error('Gagal menyimpan pengaturan');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -116,6 +135,29 @@ export default function SettingsAdmin() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                   placeholder="https://.../favicon.ico"
                 />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL OG:Image (Gambar Default untuk Share Sosial Media)</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={formData.ogImageUrl || ''}
+                    onChange={(e) => setFormData({...formData, ogImageUrl: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    placeholder="https://.../og-image.jpg"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Gambar yang muncul ketika link website dibagikan (WhatsApp, FB, dll).</p>
+              </div>
+              <div className="w-32 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
+                {formData.ogImageUrl ? (
+                  <img src={formData.ogImageUrl} alt="OG Image Preview" className="max-w-full max-h-full object-cover" />
+                ) : (
+                  <span className="text-xs text-center text-gray-400">OG Preview</span>
+                )}
               </div>
             </div>
           </div>

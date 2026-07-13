@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 interface SettingsState {
   logoUrl: string;
   faviconUrl: string;
+  ogImageUrl: string;
   siteName: string;
   metaDescription: string;
   socialMedia: {
@@ -16,14 +17,16 @@ interface SettingsState {
     phone: string;
     email: string;
   };
-  updateSettings: (newSettings: Partial<Omit<SettingsState, 'updateSettings'>>) => void;
+  updateSettings: (newSettings: Partial<Omit<SettingsState, 'updateSettings' | 'fetchSettings'>>) => Promise<void>;
+  fetchSettings: () => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       logoUrl: 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
       faviconUrl: '',
+      ogImageUrl: '',
       siteName: 'Kementerian Agama OKI',
       metaDescription: 'Website Resmi Kementerian Agama Kabupaten OKI',
       socialMedia: {
@@ -36,7 +39,36 @@ export const useSettingsStore = create<SettingsState>()(
         phone: '(0714) 321xxx',
         email: 'kaboki@kemenag.go.id',
       },
-      updateSettings: (newSettings) => set((state) => ({ ...state, ...newSettings })),
+      fetchSettings: async () => {
+        try {
+          const response = await fetch('/api/db/settings');
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.length > 0) {
+              set((state) => ({ ...state, ...data[0] }));
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch settings from DB", error);
+        }
+      },
+      updateSettings: async (newSettings) => {
+        set((state) => ({ ...state, ...newSettings }));
+        
+        // Save to DB
+        try {
+          const currentSettings = get();
+          const { updateSettings, fetchSettings, ...settingsData } = currentSettings;
+          
+          await fetch('/api/db/settings/main', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settingsData)
+          });
+        } catch (error) {
+          console.error("Failed to save settings to DB", error);
+        }
+      },
     }),
     {
       name: 'kemenag-settings',
