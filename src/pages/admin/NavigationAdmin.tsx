@@ -1111,8 +1111,21 @@ export default function NavigationAdmin() {
                     <label className="block text-sm font-medium text-gray-700">Isi Konten Detail (Modal Popup HTML)</label>
                     <button 
                       type="button" 
-                      onClick={() => setIsHtmlMode(!isHtmlMode)}
-                      className="text-xs font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+                      onClick={() => {
+                        if (!isHtmlMode) {
+                          setIsHtmlMode(true);
+                        } else {
+                          const hasComplexHtml = subForm.content && (subForm.content.includes('class=') || subForm.content.includes('<div') || subForm.content.includes('grid') || subForm.content.includes('rounded'));
+                          if (hasComplexHtml) {
+                            if (window.confirm("Peringatan: Konten Anda memiliki kode HTML/Card kustom. Menggunakan Visual Editor dapat menghapus kelas CSS, layout grid, dan gaya card secara permanen. Apakah Anda yakin ingin beralih ke Visual Editor?")) {
+                              setIsHtmlMode(false);
+                            }
+                          } else {
+                            setIsHtmlMode(false);
+                          }
+                        }
+                      }}
+                      className="text-xs font-semibold px-2.5 py-1 bg-green-50 hover:bg-green-100 text-green-700 rounded-md border border-green-200 transition-colors"
                     >
                       {isHtmlMode ? "Gunakan Visual Editor" : "Gunakan HTML Editor"}
                     </button>
@@ -1122,6 +1135,46 @@ export default function NavigationAdmin() {
                       ? "Edit kode HTML secara langsung untuk mempertahankan layout card dan styling khusus." 
                       : "Peringatan: Visual editor dapat menghapus format card/HTML kompleks. Gunakan HTML Editor untuk struktur khusus."}
                   </p>
+
+                  {isHtmlMode && (
+                    <div className="flex flex-wrap gap-1.5 mb-2.5">
+                      <span className="text-xs text-gray-500 mr-1 self-center">Template Instan:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const snippet = `<div class="bg-green-50/50 p-5 rounded-2xl border border-green-100 mb-4">\n  <h4 class="font-bold text-green-900 text-base mb-2 uppercase tracking-wide">JUDUL KARTU</h4>\n  <p class="italic text-gray-800">"Tulis pesan atau teks kutipan di sini..."</p>\n</div>`;
+                          setSubForm(prev => ({ ...prev, content: prev.content ? prev.content + "\n" + snippet : snippet }));
+                          toast.success("Template Card Hijau disisipkan");
+                        }}
+                        className="text-[11px] font-medium px-2 py-1 bg-white border border-gray-200 hover:border-green-300 rounded hover:bg-green-50/20 text-gray-700 transition-colors"
+                      >
+                        + Card Hijau
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const snippet = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">\n  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\n    <h4 class="font-bold text-gray-900 text-base mb-2">Judul Card Kiri</h4>\n    <p class="text-gray-600 text-sm">Konten atau deskripsi card kiri...</p>\n  </div>\n  <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\n    <h4 class="font-bold text-gray-900 text-base mb-2">Judul Card Kanan</h4>\n    <p class="text-gray-600 text-sm">Konten atau deskripsi card kanan...</p>\n  </div>\n</div>`;
+                          setSubForm(prev => ({ ...prev, content: prev.content ? prev.content + "\n" + snippet : snippet }));
+                          toast.success("Template Grid 2 Kolom disisipkan");
+                        }}
+                        className="text-[11px] font-medium px-2 py-1 bg-white border border-gray-200 hover:border-blue-300 rounded hover:bg-blue-50/20 text-gray-700 transition-colors"
+                      >
+                        + Grid 2 Kolom
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const snippet = `<ul class="space-y-3 my-4">\n  <li class="flex gap-3">\n    <span class="w-6 h-6 shrink-0 bg-green-700 text-white rounded-full flex items-center justify-center font-bold text-xs">1</span>\n    <span class="text-gray-700 font-medium">Tulis item daftar nomor 1 di sini</span>\n  </li>\n  <li class="flex gap-3">\n    <span class="w-6 h-6 shrink-0 bg-green-700 text-white rounded-full flex items-center justify-center font-bold text-xs">2</span>\n    <span class="text-gray-700 font-medium">Tulis item daftar nomor 2 di sini</span>\n  </li>\n</ul>`;
+                          setSubForm(prev => ({ ...prev, content: prev.content ? prev.content + "\n" + snippet : snippet }));
+                          toast.success("Template Daftar Nomor disisipkan");
+                        }}
+                        className="text-[11px] font-medium px-2 py-1 bg-white border border-gray-200 hover:border-emerald-300 rounded hover:bg-emerald-50/20 text-gray-700 transition-colors"
+                      >
+                        + List Berbadge
+                      </button>
+                    </div>
+                  )}
+
                   <div className="bg-white border border-gray-200 rounded-md overflow-hidden min-h-[180px]">
                     {isHtmlMode ? (
                       <textarea
@@ -1137,6 +1190,15 @@ export default function NavigationAdmin() {
                         minHeight="180px"
                       />
                     )}
+                  </div>
+
+                  {/* LIVE PREVIEW SECTION */}
+                  <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50/50">
+                    <span className="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-2">Live Preview (Tampilan Modal di Website)</span>
+                    <div 
+                      className="prose max-w-none text-gray-700 leading-relaxed text-sm bg-white p-5 rounded-2xl border border-gray-100 shadow-inner min-h-[120px] overflow-auto"
+                      dangerouslySetInnerHTML={{ __html: subForm.content || '<p class="text-gray-400 italic">Belum ada konten...</p>' }}
+                    />
                   </div>
                 </div>
               </form>
