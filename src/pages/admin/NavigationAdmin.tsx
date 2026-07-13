@@ -117,6 +117,7 @@ export default function NavigationAdmin() {
   });
   const [isEditingSub, setIsEditingSub] = useState(false);
   const [editingSubIndex, setEditingSubIndex] = useState<number | null>(null);
+  const [isHtmlMode, setIsHtmlMode] = useState(false);
 
   // Reusable iframe-safe modal confirmation state
   const [confirmModal, setConfirmModal] = useState<{
@@ -713,6 +714,7 @@ export default function NavigationAdmin() {
     });
     setIsEditingSub(false);
     setEditingSubIndex(null);
+    setIsHtmlMode(false);
     setIsSubModalOpen(true);
   };
 
@@ -727,6 +729,8 @@ export default function NavigationAdmin() {
     });
     setIsEditingSub(true);
     setEditingSubIndex(index);
+    const hasComplexHtml = subItem.content && (subItem.content.includes('class=') || subItem.content.includes('<div'));
+    setIsHtmlMode(!!hasComplexHtml);
     setIsSubModalOpen(true);
   };
 
@@ -1103,14 +1107,36 @@ export default function NavigationAdmin() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Isi Konten Detail (Modal Popup HTML)</label>
-                  <p className="text-xs text-gray-400 mb-1.5">Tulis penjelasan detail yang akan muncul dalam popup modal ketika sub-menu diklik oleh publik.</p>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium text-gray-700">Isi Konten Detail (Modal Popup HTML)</label>
+                    <button 
+                      type="button" 
+                      onClick={() => setIsHtmlMode(!isHtmlMode)}
+                      className="text-xs font-medium px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded transition-colors"
+                    >
+                      {isHtmlMode ? "Gunakan Visual Editor" : "Gunakan HTML Editor"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 mb-1.5">
+                    {isHtmlMode 
+                      ? "Edit kode HTML secara langsung untuk mempertahankan layout card dan styling khusus." 
+                      : "Peringatan: Visual editor dapat menghapus format card/HTML kompleks. Gunakan HTML Editor untuk struktur khusus."}
+                  </p>
                   <div className="bg-white border border-gray-200 rounded-md overflow-hidden min-h-[180px]">
-                    <RichTextEditor
-                      value={subForm.content}
-                      onChange={(val) => setSubForm({ ...subForm, content: val })}
-                      minHeight="180px"
-                    />
+                    {isHtmlMode ? (
+                      <textarea
+                        value={subForm.content || ''}
+                        onChange={(e) => setSubForm({ ...subForm, content: e.target.value })}
+                        className="w-full h-full min-h-[250px] p-3 text-sm font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 resize-y"
+                        placeholder="Masukkan kode HTML di sini..."
+                      />
+                    ) : (
+                      <RichTextEditor
+                        value={subForm.content || ''}
+                        onChange={(val) => setSubForm({ ...subForm, content: val })}
+                        minHeight="180px"
+                      />
+                    )}
                   </div>
                 </div>
               </form>
