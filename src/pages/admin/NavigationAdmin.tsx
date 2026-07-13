@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query, writeBatch } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Save, MoveUp, MoveDown, RefreshCw, X, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle, MapPin, Mail, Phone, PlusCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, MoveUp, MoveDown, RefreshCw, X, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle, MapPin, Mail, Phone, PlusCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import RichTextEditor from '../../components/RichTextEditor';
 
 // Define the Icon map
@@ -90,8 +90,75 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   throw new Error(JSON.stringify(errInfo));
 }
 
+interface PejabatItem {
+  role: string;
+  name: string;
+}
+
+const DEFAULT_PEJABAT_LIST: PejabatItem[] = [
+  { role: 'Kepala Kantor', name: 'H. Syarip, S.Ag., M.Pd.I.' },
+  { role: 'Kepala Sub Bagian Tata Usaha', name: 'H. Muazni, S.Ag., M.Pd.I.' },
+  { role: 'Kasi Bimas Islam', name: 'H. Ismadi, S.Ag.' },
+  { role: 'Kasi Pendidikan Madrasah', name: 'H. Syamsul Azhar, S.Ag.' },
+  { role: 'Kasi Pendidikan Diniyah & Pondok Pesantren', name: 'Drs. H. Mutiara' },
+  { role: 'Kasi Penyelenggaraan Haji & Umrah', name: 'H. Mutawalli, M.Pd.I.' },
+  { role: 'Kasi Pendidikan Agama Islam', name: 'H. Junaidi, S.Ag.' },
+  { role: 'Penyelenggara Zakat & Wakaf', name: 'Hj. Marlina, S.Ag.' }
+];
+
+function parseStrukturOrganisasi(html: string) {
+  const result: PejabatItem[] = [];
+  let description = "Daftar pimpinan dan pejabat struktural di Kantor Kementerian Agama Kabupaten Ogan Komering Ilir:";
+  
+  if (!html) return { description, list: result };
+
+  const descMatch = html.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  if (descMatch) {
+    description = descMatch[1].replace(/<[^>]*>/g, "").trim();
+  }
+
+  const cardRegex = /<div[^>]*class="[^"]*p-4[^"]*"[^>]*>[\s\S]*?<span[^>]*class="[^"]*tracking-wider[^"]*"[^>]*>([\s\S]*?)<\/span>[\s\S]*?<span[^>]*class="[^"]*(?:text-sm|font-bold)[^"]*"[^>]*>([\s\S]*?)<\/span>/gi;
+  
+  let match;
+  while ((match = cardRegex.exec(html)) !== null) {
+    const role = match[1].replace(/<[^>]*>/g, "").trim();
+    const name = match[2].replace(/<[^>]*>/g, "").trim();
+    if (role && name) {
+      result.push({ role, name });
+    }
+  }
+
+  if (result.length === 0) {
+    const roleMatches = [...html.matchAll(/<span[^>]*class="[^"]*tracking-wider[^"]*"[^>]*>([\s\S]*?)<\/span>/gi)].map(m => m[1].replace(/<[^>]*>/g, "").trim());
+    const nameMatches = [...html.matchAll(/<span[^>]*class="[^"]*(?:text-sm|font-bold)[^"]*"[^>]*>([\s\S]*?)<\/span>/gi)].map(m => m[1].replace(/<[^>]*>/g, "").trim());
+    
+    const minLen = Math.min(roleMatches.length, nameMatches.length);
+    for (let i = 0; i < minLen; i++) {
+      result.push({ role: roleMatches[i], name: nameMatches[i] });
+    }
+  }
+
+  return { description, list: result };
+}
+
+function generateStrukturOrganisasiHtml(description: string, list: PejabatItem[]) {
+  const cardsHtml = list.map(item => `    <div class="p-4 border border-gray-100 rounded-xl bg-gray-50 hover:border-green-100 transition-colors">
+      <span class="text-xs font-mono uppercase text-green-700 tracking-wider block mb-1">${item.role || 'Jabatan'}</span>
+      <span class="font-bold text-gray-900 text-sm">${item.name || 'Nama Pejabat'}</span>
+    </div>`).join('\n');
+
+  return `<div class="space-y-6 text-gray-700 leading-relaxed text-sm">
+  <p class="text-gray-500 italic text-center mb-4">${description}</p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+${cardsHtml}
+  </div>
+</div>`;
+}
+
 export default function NavigationAdmin() {
   const [data, setData] = useState<NavLink[]>([]);
+  const [pejabatList, setPejabatList] = useState<PejabatItem[]>([]);
+  const [pejabatDescription, setPejabatDescription] = useState('Daftar pimpinan dan pejabat struktural di Kantor Kementerian Agama Kabupaten Ogan Komering Ilir:');
   const [loading, setLoading] = useState(true);
   const [isMainModalOpen, setIsMainModalOpen] = useState(false);
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
@@ -158,6 +225,25 @@ export default function NavigationAdmin() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Sync structured pejabat editor state back into subForm.content
+  useEffect(() => {
+    if (subForm.id === 'struktur-organisasi') {
+      const generated = generateStrukturOrganisasiHtml(pejabatDescription, pejabatList);
+      if (subForm.content !== generated) {
+        setSubForm(prev => ({ ...prev, content: generated }));
+      }
+    }
+  }, [pejabatList, pejabatDescription, subForm.id]);
+
+  // Handle dynamic subForm.id change to struktur-organisasi (in case they typed it)
+  useEffect(() => {
+    if (subForm.id === 'struktur-organisasi' && pejabatList.length === 0) {
+      const parsed = parseStrukturOrganisasi(subForm.content || '');
+      setPejabatList(parsed.list.length > 0 ? parsed.list : DEFAULT_PEJABAT_LIST);
+      setPejabatDescription(parsed.description);
+    }
+  }, [subForm.id]);
 
   const getDefaultsList = () => [
     {
@@ -712,6 +798,8 @@ export default function NavigationAdmin() {
       order: parent.subItems && parent.subItems.length > 0 ? Math.max(...parent.subItems.map(s => s.order)) + 1 : 1,
       content: ''
     });
+    setPejabatList(DEFAULT_PEJABAT_LIST);
+    setPejabatDescription('Daftar pimpinan dan pejabat struktural di Kantor Kementerian Agama Kabupaten Ogan Komering Ilir:');
     setIsEditingSub(false);
     setEditingSubIndex(null);
     setIsHtmlMode(false);
@@ -727,6 +815,16 @@ export default function NavigationAdmin() {
       order: subItem.order,
       content: subItem.content || ''
     });
+    
+    if (subItem.id === 'struktur-organisasi') {
+      const parsed = parseStrukturOrganisasi(subItem.content || '');
+      setPejabatList(parsed.list.length > 0 ? parsed.list : DEFAULT_PEJABAT_LIST);
+      setPejabatDescription(parsed.description);
+    } else {
+      setPejabatList([]);
+      setPejabatDescription('Daftar pimpinan dan pejabat struktural di Kantor Kementerian Agama Kabupaten Ogan Komering Ilir:');
+    }
+    
     setIsEditingSub(true);
     setEditingSubIndex(index);
     const hasComplexHtml = subItem.content && (subItem.content.includes('class=') || subItem.content.includes('<div'));
@@ -1106,9 +1204,137 @@ export default function NavigationAdmin() {
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-sm font-medium text-gray-700">Isi Konten Detail (Modal Popup HTML)</label>
+                 <div>
+                  {subForm.id === 'struktur-organisasi' ? (
+                    <div className="space-y-4 border border-green-200 bg-green-50/20 p-5 rounded-2xl">
+                      <div className="flex items-start gap-2.5 mb-2 border-b border-green-100 pb-2.5">
+                        <Users className="text-green-700 shrink-0 mt-0.5" size={18} />
+                        <div>
+                          <h4 className="font-bold text-green-950 text-sm">Editor Visual: Struktur Organisasi (Pejabat)</h4>
+                          <p className="text-xs text-gray-600">Formulir terstruktur untuk mengedit daftar pejabat. Gaya kartu (Card Grid) akan dibuat otomatis.</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Deskripsi/Teks Pengantar Atas</label>
+                        <textarea
+                          value={pejabatDescription}
+                          onChange={(e) => setPejabatDescription(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+                          placeholder="cth: Daftar pimpinan dan pejabat struktural di Kantor..."
+                          rows={2}
+                        />
+                      </div>
+
+                      <div className="space-y-2.5">
+                        <label className="block text-xs font-bold text-gray-700 uppercase">Daftar Pimpinan & Pejabat ({pejabatList.length})</label>
+                        
+                        <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                          {pejabatList.map((pejabat, idx) => (
+                            <div key={idx} className="flex gap-2 items-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                              <span className="text-xs font-bold text-gray-400 w-6 text-center shrink-0">{idx + 1}</span>
+                              
+                              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                  <span className="text-[10px] font-mono uppercase text-gray-400 block mb-0.5">Jabatan / Peran</span>
+                                  <input
+                                    type="text"
+                                    required
+                                    value={pejabat.role}
+                                    onChange={(e) => {
+                                      const newList = [...pejabatList];
+                                      newList[idx].role = e.target.value;
+                                      setPejabatList(newList);
+                                    }}
+                                    placeholder="Jabatan (cth: Kepala Kantor)"
+                                    className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-green-500 focus:outline-none font-medium"
+                                  />
+                                </div>
+                                <div>
+                                  <span className="text-[10px] font-mono uppercase text-gray-400 block mb-0.5">Nama Pejabat</span>
+                                  <input
+                                    type="text"
+                                    required
+                                    value={pejabat.name}
+                                    onChange={(e) => {
+                                      const newList = [...pejabatList];
+                                      newList[idx].name = e.target.value;
+                                      setPejabatList(newList);
+                                    }}
+                                    placeholder="Nama Lengkap & Gelar"
+                                    className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-green-500 focus:outline-none font-bold text-gray-900"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex gap-1 shrink-0 self-end mb-1">
+                                <button
+                                  type="button"
+                                  disabled={idx === 0}
+                                  onClick={() => {
+                                    if (idx === 0) return;
+                                    const newList = [...pejabatList];
+                                    const temp = newList[idx];
+                                    newList[idx] = newList[idx - 1];
+                                    newList[idx - 1] = temp;
+                                    setPejabatList(newList);
+                                  }}
+                                  className="p-1 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30 cursor-pointer"
+                                  title="Pindah Ke Atas"
+                                >
+                                  <ChevronUp size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={idx === pejabatList.length - 1}
+                                  onClick={() => {
+                                    if (idx === pejabatList.length - 1) return;
+                                    const newList = [...pejabatList];
+                                    const temp = newList[idx];
+                                    newList[idx] = newList[idx + 1];
+                                    newList[idx + 1] = temp;
+                                    setPejabatList(newList);
+                                  }}
+                                  className="p-1 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30 cursor-pointer"
+                                  title="Pindah Ke Bawah"
+                                >
+                                  <ChevronDown size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newList = pejabatList.filter((_, i) => i !== idx);
+                                    setPejabatList(newList);
+                                  }}
+                                  className="p-1 hover:bg-red-50 text-red-500 rounded cursor-pointer"
+                                  title="Hapus Pejabat"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+
+                          {pejabatList.length === 0 && (
+                            <p className="text-center py-4 text-xs text-gray-400 italic">Belum ada pejabat terdaftar. Klik tombol di bawah untuk menambah.</p>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPejabatList([...pejabatList, { role: '', name: '' }]);
+                          }}
+                          className="w-full py-2 border border-dashed border-green-300 rounded-lg text-xs text-green-700 font-semibold hover:bg-green-50/50 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <Plus size={14} /> Tambah Jabatan & Pejabat Baru
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-sm font-medium text-gray-700">Isi Konten Detail (Modal Popup HTML)</label>
                     <button 
                       type="button" 
                       onClick={() => {
@@ -1191,6 +1417,7 @@ export default function NavigationAdmin() {
                       />
                     )}
                   </div>
+                </>)}
 
                   {/* LIVE PREVIEW SECTION */}
                   <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50/50">
