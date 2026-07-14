@@ -38,7 +38,7 @@ export default function InfografisMarquee() {
       <div className="max-w-7xl mx-auto px-4 mb-4 flex justify-between items-center relative z-20">
         <h3 className="text-white font-bold text-lg uppercase tracking-wider flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          Infografis Kegiatan
+          Infografis
         </h3>
       </div>
 
