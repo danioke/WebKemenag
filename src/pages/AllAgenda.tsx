@@ -42,11 +42,11 @@ export default function AllAgenda() {
         if (data.length > 0) {
           setAgendas(data);
         } else {
-          setAgendas(fallbackAgendas);
+          setAgendas([]);
         }
       } catch (error) {
         console.error("Error fetching agendas list:", error);
-        setAgendas(fallbackAgendas);
+        setAgendas([]);
       } finally {
         setLoading(false);
       }
@@ -200,7 +200,9 @@ export default function AllAgenda() {
                 ))
               ) : (
                 <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  <p className="text-gray-400 font-medium">Tidak ada agenda yang cocok dengan filter pencarian.</p>
+                  <p className="text-gray-400 font-medium">
+                    {agendas.length === 0 ? "Data belum tersedia" : "Tidak ada agenda yang cocok dengan filter pencarian."}
+                  </p>
                 </div>
               )}
             </AnimatePresence>

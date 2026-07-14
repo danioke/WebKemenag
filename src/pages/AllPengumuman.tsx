@@ -39,11 +39,11 @@ export default function AllPengumuman() {
         if (data.length > 0) {
           setAnnouncements(data);
         } else {
-          setAnnouncements(fallbackAnnouncements);
+          setAnnouncements([]);
         }
       } catch (error) {
         console.error("Error fetching announcements list:", error);
-        setAnnouncements(fallbackAnnouncements);
+        setAnnouncements([]);
       } finally {
         setLoading(false);
       }
@@ -160,7 +160,7 @@ export default function AllPengumuman() {
                 </ul>
               ) : (
                 <div className="p-20 text-center text-gray-500 font-medium">
-                  Tidak ada pengumuman yang cocok dengan pencarian Anda.
+                  {announcements.length === 0 ? "Data belum tersedia" : "Tidak ada pengumuman yang cocok dengan pencarian Anda."}
                 </div>
               )}
             </AnimatePresence>

@@ -195,7 +195,7 @@ export default function GaleriVideo() {
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white/50">
-            Tidak ada video yang cocok.
+            {videos.length === 0 ? "Data belum tersedia" : "Tidak ada video yang cocok."}
           </div>
         )}
       </main>

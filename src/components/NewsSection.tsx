@@ -49,56 +49,11 @@ export default function NewsSection() {
         if (data.length > 0) {
           setNews(data);
         } else {
-          setNews([
-            {
-              id: '1',
-              title: "Kakanmenag OKI Resmikan Gedung Balai Nikah dan Pusat Layanan KUA",
-              category: "Berita Utama",
-              date: "14 Okt 2023",
-              author: "Humas OKI",
-              image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80",
-              excerpt: "Peresmian gedung baru ini diharapkan dapat meningkatkan kualitas pelayanan keagamaan bagi masyarakat di tingkat kecamatan."
-            },
-            {
-              id: '2',
-              title: "Pembinaan ASN di Lingkungan Kementerian Agama Kab. OKI",
-              category: "Kepegawaian",
-              date: "12 Okt 2023",
-              author: "Admin Kepegawaian",
-              image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80",
-              excerpt: "Kegiatan pembinaan ini bertujuan untuk memperkuat integritas dan profesionalitas aparatur sipil negara."
-            },
-            {
-              id: '3',
-              title: "Pelepasan Kontingen Kompetisi Sains Madrasah (KSM) Tingkat Provinsi",
-              category: "Pendidikan",
-              date: "08 Okt 2023",
-              author: "Seksi Penmad",
-              image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80",
-              excerpt: "Sebanyak 45 siswa-siswi madrasah dari Kabupaten OKI siap bersaing di tingkat provinsi Sumatera Selatan."
-            },
-            {
-              id: '4',
-              title: "Sosialisasi Sertifikasi Halal bagi Pelaku UMKM",
-              category: "Bimas Islam",
-              date: "05 Okt 2023",
-              author: "Penyuluh Agama",
-              image: "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80",
-              excerpt: "Mendorong percepatan sertifikasi halal bagi pelaku usaha mikro kecil dan menengah di Ogan Komering Ilir."
-            },
-            {
-              id: '5',
-              title: "Persiapan Keberangkatan Calon Jemaah Haji",
-              category: "Haji & Umrah",
-              date: "01 Okt 2023",
-              author: "Seksi PHU",
-              image: "https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80",
-              excerpt: "Informasi lengkap mengenai jadwal manasik dan persiapan teknis keberangkatan calon jemaah haji."
-            }
-          ]);
+          setNews([]);
         }
       } catch (error) {
         console.error("Error fetching news:", error);
+        setNews([]);
       } finally {
         setLoading(false);
       }
@@ -122,6 +77,10 @@ export default function NewsSection() {
 
         {loading ? (
           <div className="text-center py-10 text-gray-500">Memuat berita...</div>
+        ) : news.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <p className="text-gray-400 font-medium">Data belum tersedia</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Main News Card */}

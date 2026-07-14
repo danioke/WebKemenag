@@ -32,15 +32,11 @@ export default function Pengumuman() {
         if (data.length > 0) {
           setPengumuman(data);
         } else {
-          // Fallback data if empty
-          setPengumuman([
-            { id: '1', title: "Pengumuman Hasil Seleksi Administrasi Calon PPPK Kementerian Agama Tahun 2024", date: "15 Okt 2024", size: "2.4 MB", fileUrl: "#" },
-            { id: '2', title: "Surat Edaran Panduan Peringatan Hari Santri Nasional Tahun 2024", date: "10 Okt 2024", size: "1.1 MB", fileUrl: "#" },
-            { id: '3', title: "Jadwal Pelaksanaan SKD CPNS Kementerian Agama Formasi Tahun 2024", date: "05 Okt 2024", size: "3.5 MB", fileUrl: "#" }
-          ]);
+          setPengumuman([]);
         }
       } catch (error) {
         console.error("Error fetching announcements:", error);
+        setPengumuman([]);
       } finally {
         setLoading(false);
       }
@@ -66,6 +62,8 @@ export default function Pengumuman() {
         <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
           {loading ? (
             <div className="p-10 text-center text-gray-500">Memuat pengumuman...</div>
+          ) : pengumuman.length === 0 ? (
+            <div className="p-10 text-center text-gray-500">Data belum tersedia</div>
           ) : (
             <ul className="divide-y divide-gray-100">
               {pengumuman.map((item, idx) => (

@@ -34,14 +34,11 @@ export default function Agenda() {
         if (data.length > 0) {
           setAgendas(data);
         } else {
-          setAgendas([
-            { id: '1', title: "Rapat Koordinasi Persiapan Pendidikan Profesi Guru (PPG) Madrasah", date: "25", month: "Okt", time: "09:00 - Selesai", location: "Aula Kemenag OKI", status: "Akan Datang" },
-            { id: '2', title: "Pembinaan Penyuluh Agama Islam se-Kabupaten OKI", date: "28", month: "Okt", time: "08:30 - 15:00", location: "Gedung Kesenian Kayuagung", status: "Akan Datang" },
-            { id: '3', title: "Upacara Peringatan Hari Santri Nasional", date: "22", month: "Okt", time: "07:30 - Selesai", location: "Halaman Kantor Kemenag OKI", status: "Selesai" }
-          ]);
+          setAgendas([]);
         }
       } catch (error) {
         console.error("Error fetching agendas:", error);
+        setAgendas([]);
       } finally {
         setLoading(false);
       }
@@ -65,6 +62,10 @@ export default function Agenda() {
 
         {loading ? (
           <div className="text-center py-10 text-gray-500">Memuat agenda...</div>
+        ) : agendas.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <p className="text-gray-400 font-medium">Data belum tersedia</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {agendas.map((agenda, idx) => (

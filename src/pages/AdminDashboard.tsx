@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { auth, logout, isEmailAllowed } from '../lib/db';
+import { auth, logout, isEmailAllowed, db, collection, getDocs, updateDoc, doc } from '../lib/db';
 import { toast } from 'sonner';
 import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, ChevronRight, User, Save, Folder, Settings } from 'lucide-react';
 import PengumumanAdmin from './admin/PengumumanAdmin';
@@ -34,7 +34,36 @@ export default function AdminDashboard() {
   const [editName, setEditName] = useState(profileName);
   const [editEmail, setEditEmail] = useState(profileEmail);
   const [editPhoto, setEditPhoto] = useState(profilePhoto);
+  const [editPassword, setEditPassword] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [isBeritaOpen, setIsBeritaOpen] = useState(true);
+
+  const handleProfileImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 10MB");
+      return;
+    }
+    const form = new FormData();
+    form.append("file", file);
+    setIsUploadingPhoto(true);
+    toast.info("Mengunggah foto profil...");
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        const result = await res.json();
+        setEditPhoto(result.url);
+        toast.success("Foto profil berhasil diunggah");
+      } else {
+        toast.error("Gagal mengunggah foto profil");
+      }
+    } catch (err) {
+      toast.error("Terjadi kesalahan saat mengunggah");
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
   useEffect(() => {
     // Check if there's a bypass admin session
@@ -324,7 +353,7 @@ export default function AdminDashboard() {
               </button>
             </div>
             
-            <form onSubmit={(e) => {
+            <form onSubmit={async (e) => {
               e.preventDefault();
               if (!editName.trim()) {
                 toast.error("Nama tidak boleh kosong!");
@@ -334,9 +363,36 @@ export default function AdminDashboard() {
                 toast.error("Email tidak boleh kosong!");
                 return;
               }
+              
+              if (editPassword) {
+                try {
+                  const snap = await getDocs(collection(db, 'allowed_users'));
+                  let userDoc = null;
+                  snap.forEach((d) => {
+                    if (d.data().email?.toLowerCase() === profileEmail.toLowerCase()) {
+                      userDoc = { id: d.id, ...d.data() };
+                    }
+                  });
+                  if (userDoc) {
+                    await updateDoc(doc(db, 'allowed_users', userDoc.id), {
+                      name: editName.trim(),
+                      email: editEmail.trim(),
+                      password: editPassword
+                    });
+                    toast.success("Password dan profil berhasil diubah!");
+                  } else {
+                    toast.warning("Profil diubah, namun akun Anda tidak ditemukan di Manajemen User.");
+                  }
+                } catch (err) {
+                  console.error(err);
+                  toast.error("Gagal mengubah data di database.");
+                }
+              }
+
               setProfileName(editName.trim());
               setProfileEmail(editEmail.trim());
               setProfilePhoto(editPhoto.trim());
+              setEditPassword('');
               localStorage.setItem('admin_profile_name', editName.trim());
               localStorage.setItem('admin_profile_email', editEmail.trim());
               localStorage.setItem('admin_profile_photo', editPhoto.trim());
@@ -346,7 +402,7 @@ export default function AdminDashboard() {
               
               {/* Photo Preview & URL input */}
               <div className="flex flex-col items-center gap-3">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-700 shadow-md">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-700 shadow-md relative group cursor-pointer">
                   <img 
                     src={editPhoto} 
                     alt="Preview" 
@@ -355,6 +411,10 @@ export default function AdminDashboard() {
                       (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=150';
                     }}
                   />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-white text-[10px] font-bold uppercase tracking-wider">Ubah</span>
+                  </div>
+                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleProfileImageUpload} disabled={isUploadingPhoto} />
                 </div>
                 <div className="w-full">
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Foto Profil (URL)</label>
@@ -392,6 +452,20 @@ export default function AdminDashboard() {
                   required
                   className="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 focus:bg-white transition-all"
                 />
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Ubah Password</label>
+                <input
+                  type="password"
+                  value={editPassword}
+                  autoComplete="new-password"
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  placeholder="Biarkan kosong jika tidak ingin diubah"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 focus:bg-white transition-all"
+                />
+                <p className="text-[10px] text-gray-500 mt-1">Hanya berlaku untuk akun di Manajemen User.</p>
               </div>
 
               {/* Action Buttons */}

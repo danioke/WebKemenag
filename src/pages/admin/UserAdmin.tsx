@@ -23,7 +23,8 @@ export default function UserAdmin() {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    role: 'Admin'
+    role: 'Admin',
+    password: ''
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -77,7 +78,7 @@ export default function UserAdmin() {
 
   const handleOpenAddModal = () => {
     setEditingUser(null);
-    setFormData({ email: '', name: '', role: 'Admin' });
+    setFormData({ email: '', name: '', role: 'Admin', password: '' });
     setIsModalOpen(true);
   };
 
@@ -86,7 +87,8 @@ export default function UserAdmin() {
     setFormData({
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      password: '' // Don't fetch current password for security, leave blank to not update
     });
     setIsModalOpen(true);
   };
@@ -105,11 +107,15 @@ export default function UserAdmin() {
       if (editingUser) {
         // Update existing user
         const docRef = doc(db, 'allowed_users', editingUser.id);
-        await updateDoc(docRef, {
+        const updateData: any = {
           email: normalizedEmail,
           name: formData.name.trim(),
           role: formData.role,
-        });
+        };
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
+        await updateDoc(docRef, updateData);
         toast.success('User berhasil diperbarui');
       } else {
         // Check for duplicates
@@ -125,6 +131,7 @@ export default function UserAdmin() {
           email: normalizedEmail,
           name: formData.name.trim(),
           role: formData.role,
+          password: formData.password,
           createdAt: serverTimestamp()
         });
         toast.success('User baru berhasil ditambahkan');
@@ -344,6 +351,21 @@ export default function UserAdmin() {
                 <p className="text-[10px] text-gray-400 mt-1">
                   Harus berupa email aktif yang akan digunakan pengguna saat mengklik tombol Login.
                 </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder={editingUser ? "Kosongkan jika tidak ingin mengubah password" : "Password untuk login"}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required={!editingUser}
+                  autoComplete="new-password"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all disabled:bg-gray-100 disabled:text-gray-500"
+                />
               </div>
 
               <div>

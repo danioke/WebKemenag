@@ -38,12 +38,12 @@ export default function MediaGallery() {
         const photoQ = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
         const photoSnap = await getDocs(photoQ);
         const photoData = photoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as PhotoData));
-        setPhotos(photoData.length > 0 ? photoData : fallbackPhotos);
+        setPhotos(photoData);
 
         const videoQ = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
         const videoSnap = await getDocs(videoQ);
         const videoData = videoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as VideoData));
-        setVideos(videoData.length > 0 ? videoData : fallbackVideos);
+        setVideos(videoData);
       } catch (error) {
         console.error("Error fetching media:", error);
       } finally {
@@ -109,21 +109,28 @@ export default function MediaGallery() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
               >
-                {photos.map((photo, idx) => (
-                  <div 
-                    key={photo.id} 
-                    onClick={() => openModal(idx)}
-                    className="group relative rounded-xl overflow-hidden aspect-square shadow-sm cursor-pointer"
-                  >
-                    <img src={photo.image} alt={photo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <p className="text-white font-medium text-sm leading-tight">{photo.title}</p>
-                    </div>
+                {photos.length === 0 ? (
+                  <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <p className="text-gray-400 font-medium">Data belum tersedia</p>
                   </div>
-                ))}
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {photos.map((photo, idx) => (
+                      <div 
+                        key={photo.id} 
+                        onClick={() => openModal(idx)}
+                        className="group relative rounded-xl overflow-hidden aspect-square shadow-sm cursor-pointer"
+                      >
+                        <img src={photo.image} alt={photo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <p className="text-white font-medium text-sm leading-tight">{photo.title}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -133,28 +140,35 @@ export default function MediaGallery() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
               >
-                {videos.map((video, idx) => (
-                  <div 
-                    key={video.id} 
-                    onClick={() => openModal(idx)}
-                    className="group relative rounded-xl overflow-hidden aspect-video shadow-sm cursor-pointer border border-gray-100"
-                  >
-                    <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                      <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 group-hover:scale-110 transition-transform shadow-lg">
-                        <Play size={24} className="ml-1" fill="currentColor" />
-                      </div>
-                    </div>
-                    <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm">
-                      {video.duration}
-                    </div>
-                    <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/70 to-transparent">
-                      <p className="text-white font-semibold line-clamp-1">{video.title}</p>
-                    </div>
+                {videos.length === 0 ? (
+                  <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    <p className="text-gray-400 font-medium">Data belum tersedia</p>
                   </div>
-                ))}
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {videos.map((video, idx) => (
+                      <div 
+                        key={video.id} 
+                        onClick={() => openModal(idx)}
+                        className="group relative rounded-xl overflow-hidden aspect-video shadow-sm cursor-pointer border border-gray-100"
+                      >
+                        <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                          <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 group-hover:scale-110 transition-transform shadow-lg">
+                            <Play size={24} className="ml-1" fill="currentColor" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm">
+                          {video.duration}
+                        </div>
+                        <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/70 to-transparent">
+                          <p className="text-white font-semibold line-clamp-1">{video.title}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -307,14 +321,4 @@ export default function MediaGallery() {
   );
 }
 
-const fallbackPhotos: PhotoData[] = [
-  { id: '1', title: "Kegiatan Pembinaan Kerukunan Umat Beragama", image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80" },
-  { id: '2', title: "Rapat Koordinasi KUA Kecamatan", image: "https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80" },
-  { id: '3', title: "Pembinaan Madrasah", image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80" },
-  { id: '4', title: "Peringatan Maulid Nabi", image: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80" }
-];
 
-const fallbackVideos: VideoData[] = [
-  { id: '1', title: "Profil Kementerian Agama Kabupaten OKI", thumbnail: "https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80", duration: "05:24" },
-  { id: '2', title: "Sosialisasi Layanan Sertifikasi Halal Gratis 2024", thumbnail: "https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80", duration: "12:10" }
-];

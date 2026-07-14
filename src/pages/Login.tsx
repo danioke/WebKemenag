@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('anisreza498@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [checking, setChecking] = useState(false);
 
@@ -57,10 +57,6 @@ export default function Login() {
             }}
           />
         </div>
-        <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
-          Log In
-        </h2>
-        <p className="mt-1 text-sm text-gray-500">Panel Autentikasi Mandiri Pengelola Portal</p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -74,14 +70,15 @@ export default function Login() {
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
-                Alamat Email
+               Username
               </label>
               <input
                 type="email"
+                autoComplete="off"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@email.com"
+                placeholder="Username"
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 focus:bg-white transition-all shadow-sm"
               />
             </div>
@@ -92,10 +89,11 @@ export default function Login() {
               </label>
               <input
                 type="password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Password"
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 focus:bg-white transition-all shadow-sm"
               />
             </div>

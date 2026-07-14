@@ -724,21 +724,42 @@ async function startServer() {
   app.delete("/api/db/:collection/:id", deleteDbHandler);
   app.post("/api/db/:collection/:id/delete", deleteDbHandler);
 
-  app.post("/api/auth/login", (req, res) => {
+  app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
-      // Admin password is read from process.env.ADMIN_PASSWORD or defaults to a clean default
       const adminPassword = process.env.ADMIN_PASSWORD || "kemenagoki123";
       
+      let authenticatedUser = null;
+      
       if (password === adminPassword) {
-        res.json({
+        authenticatedUser = {
           uid: "admin-uid",
           email: email || "anisreza498@gmail.com",
           displayName: "Super Admin (Anis Reza)",
           role: "Super Admin",
-        });
+        };
       } else {
-        res.status(401).json({ error: "Password administrator salah!" });
+        // Check allowed_users database
+        try {
+          const users = await readCollection("allowed_users");
+          const foundUser = users.find(u => u.email?.toLowerCase() === email?.toLowerCase() && u.password === password);
+          if (foundUser) {
+            authenticatedUser = {
+              uid: foundUser.id || "user-uid",
+              email: foundUser.email,
+              displayName: foundUser.name || foundUser.email,
+              role: foundUser.role || "Admin",
+            };
+          }
+        } catch (dbErr) {
+          console.warn("Failed to check allowed_users:", dbErr);
+        }
+      }
+
+      if (authenticatedUser) {
+        res.json(authenticatedUser);
+      } else {
+        res.status(401).json({ error: "Email atau Password salah!" });
       }
     } catch (err: any) {
       res.status(500).json({ error: err.message });
