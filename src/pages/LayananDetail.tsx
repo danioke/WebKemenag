@@ -41,8 +41,7 @@ const defaultLayananData: Record<string, any> = {
       { id: '1', name: 'Nama', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
       { id: '2', name: 'Nama', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
       { id: '3', name: 'Nama', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
-      { id: '4', name: 'Nama', role: 'Admin EMIS', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' },
-      { id: '5', name: 'Nama', role: 'Admin', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
+      { id: '4', name: 'Nama', role: 'Admin EMIS', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'bimas-islam': {
