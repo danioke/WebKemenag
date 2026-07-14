@@ -96,14 +96,13 @@ interface PejabatItem {
 }
 
 const DEFAULT_PEJABAT_LIST: PejabatItem[] = [
-  { role: 'Kepala Kantor', name: 'H. Syarip, S.Ag., M.Pd.I.' },
-  { role: 'Kepala Sub Bagian Tata Usaha', name: 'H. Muazni, S.Ag., M.Pd.I.' },
-  { role: 'Kasi Bimas Islam', name: 'H. Ismadi, S.Ag.' },
-  { role: 'Kasi Pendidikan Madrasah', name: 'H. Syamsul Azhar, S.Ag.' },
-  { role: 'Kasi Pendidikan Diniyah & Pondok Pesantren', name: 'Drs. H. Mutiara' },
-  { role: 'Kasi Penyelenggaraan Haji & Umrah', name: 'H. Mutawalli, M.Pd.I.' },
-  { role: 'Kasi Pendidikan Agama Islam', name: 'H. Junaidi, S.Ag.' },
-  { role: 'Penyelenggara Zakat & Wakaf', name: 'Hj. Marlina, S.Ag.' }
+  { role: 'Kepala Kantor', name: 'H. M. Kholil Azmi, S.Ag.' },
+  { role: 'Kepala Sub Bagian Tata Usaha', name: 'Plt. H. Ismid, S.Ag., M.M.' },
+  { role: 'Kasi Bimas Islam', name: 'H. Ismid, S.Ag,.M.M' },
+  { role: 'Kasi Pendidikan Madrasah', name: 'Muh. Sobari, S.Pd.I,.M.Pd.' },
+  { role: 'Kasi Pendidikan Diniyah & Pondok Pesantren', name: 'H. Syamsul Bahr, S.Ag,.M.M' },
+  { role: 'Kasi Pendidikan Agama Islam', name: 'Hj. Zubaidah, S.Ag.' },
+  { role: 'Penyelenggara Zakat & Wakaf', name: 'Plt. Hj. Zubaidah, S.Ag.' }
 ];
 
 function parseStrukturOrganisasi(html: string) {
