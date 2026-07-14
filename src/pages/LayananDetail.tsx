@@ -22,172 +22,12 @@ const iconMap: Record<string, any> = {
 
 // Default static and fallbacks for service data
 const defaultLayananData: Record<string, any> = {
-  'pendidikan-madrasah': {
-    title: 'Pendidikan Madrasah',
-    tugasFungsi: `
-      <p class="mb-4">Seksi Pendidikan Madrasah mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi pada satuan pendidikan Raudhatul Athfal (RA), Madrasah Ibtidaiyah (MI), Madrasah Tsanawiyah (MTs), dan Madrasah Aliyah (MA) di bawah naungan Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.</p>
-      <h4 class="font-bold text-gray-900 mt-6 mb-3 text-lg">Tugas & Fungsi Utama:</h4>
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
-        <li>Penyusunan kebijakan teknis operasional kurikulum, kesiswaan, kelembagaan, sarana prasarana, serta pendidik dan tenaga kependidikan madrasah.</li>
-        <li>Pelaksanaan pelayanan administrasi kesiswaan, meliputi pengurusan mutasi siswa, validasi kelulusan, dan rekomendasi izin pendirian operasional madrasah baru.</li>
-        <li>Pelaksanaan bimbingan teknis, monitoring, evaluasi, dan pelaporan pelaksanaan program peningkatan mutu pembelajaran.</li>
-        <li>Pengelolaan sistem informasi pendidikan melalui verifikasi EMIS (Education Management Information System) dan SIMPATIKA pendidik secara berkala.</li>
-        <li>Fasilitasi penyaluran dana Bantuan Operasional Sekolah (BOS) dan pembayaran Tunjangan Profesi Guru (TPG) bersertifikasi.</li>
-      </ul>
-    `,
-    kasiName: 'H. Syamsul Azhar, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=400',
-    staf: [
-      { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Budi Santoso, S.E.', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
-      { id: '4', name: 'Eka Lestari, S.Sos.', role: 'Admin EMIS & Keuangan', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
-    ]
-  },
-  'bimas-islam': {
-    title: 'Bimbingan Masyarakat Islam',
-    tugasFungsi: `
-      <p class="mb-4">Seksi Bimbingan Masyarakat Islam mempunyai tugas melaksanakan pembinaan, bimbingan teknis, fasilitasi, pelayanan, serta pengelolaan data dan informasi di bidang kepenghuluan, pemberdayaan KUA, keluarga sakinah, kemasjidan, zakat, wakaf, dan penerangan agama Islam.</p>
-      <h4 class="font-bold text-gray-900 mt-6 mb-3 text-lg">Tugas & Fungsi Utama:</h4>
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
-        <li>Perumusan teknis bimbingan kemasjidan, pemeliharaan arah kiblat, serta pengelolaan pendaftaran masjid/mushalla ke sistem nasional SIMAS.</li>
-        <li>Pelayanan pendaftaran, pemeriksaan nikah, rujuk, pembinaan administrasi kepenghuluan KUA, serta bimbingan calon pengantin (Bimwin).</li>
-        <li>Fasilitasi sertifikasi tanah wakaf keagamaan dan pembinaan nazhir (pengelola tanah wakaf) berkolaborasi dengan BPN Kabupaten OKI.</li>
-        <li>Pembinaan dan pembekalan materi dakwah bagi penyuluh agama Islam fungsional maupun non-ASN untuk memperkuat moderasi beragama.</li>
-        <li>Pemantauan serta evaluasi tata kelola zakat, UPZ (Unit Pengumpul Zakat) kecamatan, dan lembaga filantropi Islam lainnya.</li>
-      </ul>
-    `,
-    kasiName: 'H. Ismadi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=400',
-    staf: [
-      { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Muryadi, S.H.', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' }
-    ]
-  },
-  'pondok-pesantren': {
-    title: 'Pendidikan Diniyah & Pondok Pesantren',
-    tugasFungsi: `
-      <p class="mb-4">Seksi Pendidikan Diniyah dan Pondok Pesantren mempunyai tugas melaksanakan pelayanan administrasi, pembinaan kurikulum, serta bimbingan teknis kelembagaan bagi Pondok Pesantren, Madrasah Diniyah Takmiliyah (MDT), dan Lembaga Pendidikan Al-Qur'an (LPQ) di Kabupaten OKI.</p>
-      <h4 class="font-bold text-gray-900 mt-6 mb-3 text-lg">Tugas & Fungsi Utama:</h4>
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
-        <li>Verifikasi pengajuan baru dan pembaruan izin operasional (Tanda Daftar) Pondok Pesantren, MDT, serta LPQ dalam sistem EMIS PD Pontren.</li>
-        <li>Pembinaan kurikulum pembelajaran pesantren, koordinasi ujian akhir diniyah, dan pengawasan kualitas pendidikan madrasah non-formal.</li>
-        <li>Verifikasi, validasi, dan penyaluran Program Indonesia Pintar (PIP) khusus santri kurang mampu di lingkungan pondok pesantren.</li>
-        <li>Penyelenggaraan program beasiswa santri berprestasi serta pembinaan tata kelola kelembagaan dan kemandirian ekonomi pesantren.</li>
-        <li>Penyusunan pelaporan, rekomendasi proposal bantuan fasilitas fisik, serta sarana penunjang aktivitas belajar mengajar santri.</li>
-      </ul>
-    `,
-    kasiName: 'Drs. H. Mutiara',
-    kasiPhoto: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=400',
-    staf: [
-      { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' }
-    ]
-  },
-  'sertifikasi-halal': {
-    title: 'Layanan Sertifikasi Halal',
-    tugasFungsi: '',
-    syarat: `
-      <div class="space-y-6">
-        <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-emerald-900">
-          <h4 class="text-xl font-bold mb-2 flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
-            Program Sertifikasi Halal Gratis (SEHATI)
-          </h4>
-          <p class="text-sm leading-relaxed text-emerald-800">
-            Kementerian Agama RI melalui Badan Penyelenggara Jaminan Produk Halal (BPJPH) memfasilitasi program Sertifikasi Halal Gratis (SEHATI) dengan mekanisme self-declare bagi para pelaku Usaha Mikro dan Kecil (UMK) di seluruh Indonesia, termasuk di Kabupaten OKI.
-          </p>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            Syarat Pendaftaran Sertifikasi Halal (Self Declare):
-          </h4>
-          <ul class="space-y-3 text-sm text-gray-600">
-            <li class="flex gap-3">
-              <span class="text-emerald-600 font-bold shrink-0">✓</span>
-              <span>Produk tidak berisiko atau menggunakan bahan yang sudah dipastikan kehalalannya (sudah memiliki sertifikat halal sebelumnya).</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-emerald-600 font-bold shrink-0">✓</span>
-              <span>Proses produksi dipastikan kehalalannya dan bersifat sederhana.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-emerald-600 font-bold shrink-0">✓</span>
-              <span>Memiliki Nomor Induk Berusaha (NIB) berbasis risiko.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-emerald-600 font-bold shrink-0">✓</span>
-              <span>Memiliki omset penjualan tahunan maksimal Rp 500.000.000 (Lima Ratus Juta Rupiah).</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-emerald-600 font-bold shrink-0">✓</span>
-              <span>Memiliki outlet / fasilitas produksi maksimal 1 (satu) lokasi.</span>
-            </li>
-            <li className="flex gap-3">
-              <span className="text-emerald-600 font-bold shrink-0">✓</span>
-              <span>Bersedia mendampingi proses verifikasi bahan bersama Pendamping PPH (Proses Produk Halal) setempat.</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h4 class="text-lg font-bold text-gray-900 mb-4">Alur Sertifikasi Halal Gratis (SEHATI):</h4>
-          <div class="relative pl-6 border-l-2 border-emerald-100 space-y-6">
-            <div class="relative">
-              <div class="absolute -left-9 top-0.5 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md shadow-emerald-600/20">
-                1
-              </div>
-              <h5 class="font-bold text-gray-900 text-sm mb-1">Registrasi Akun SIHALAL</h5>
-              <p class="text-xs text-gray-500">Pelaku usaha mendaftar akun di portal resmi <a href="https://ptsp.halal.go.id" target="_blank" rel="noopener noreferrer" class="text-emerald-700 hover:underline font-semibold">ptsp.halal.go.id</a> menggunakan email aktif atau NIB.</p>
-            </div>
-            <div class="relative">
-              <div class="absolute -left-9 top-0.5 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md shadow-emerald-600/20">
-                2
-              </div>
-              <h5 class="font-bold text-gray-900 text-sm mb-1">Lengkapi Profil & Unggah Dokumen</h5>
-              <p class="text-xs text-gray-500">Mengisi profil badan usaha, detail produk, daftar bahan baku yang digunakan, serta mengunggah surat pernyataan mandiri pelaku usaha (self declare).</p>
-            </div>
-            <div class="relative">
-              <div class="absolute -left-9 top-0.5 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md shadow-emerald-600/20">
-                3
-              </div>
-              <h5 class="font-bold text-gray-900 text-sm mb-1">Verifikasi & Validasi oleh Pendamping PPH</h5>
-              <p class="text-xs text-gray-500">Pendamping PPH (Proses Produk Halal) Kabupaten OKI akan melakukan audit lapangan untuk mengecekan bahan, peralatan, dan proses produksi.</p>
-            </div>
-            <div class="relative">
-              <div class="absolute -left-9 top-0.5 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md shadow-emerald-600/20">
-                4
-              </div>
-              <h5 class="font-bold text-gray-900 text-sm mb-1">Sidang Fatwa MUI & Sertifikat Terbit</h5>
-              <p class="text-xs text-gray-500">Hasil verifikasi dikirim ke Komite Fatwa MUI untuk menyetujui kehalalan produk, kemudian BPJPH menerbitkan Sertifikat Halal resmi secara elektronik.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-  'pendidikan-agama-islam': {
-    title: 'Pendidikan Agama Islam (PAIS)',
-    tugasFungsi: `
-      <p class="mb-4">Seksi Pendidikan Agama Islam (PAIS) mempunyai tugas melakukan pelayanan, bimbingan teknis, pembinaan, serta pengelolaan data dan informasi Pendidikan Agama Islam pada Pendidikan Anak Usia Dini (PAUD), Taman Kanak-Kanak (TK), Sekolah Dasar (SD), Sekolah Menengah Pertama (SMP), Sekolah Menengah Atas (SMA), dan Sekolah Menengah Kejuruan (SMK) di bawah naungan Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.</p>
-      <h4 class="font-bold text-gray-900 mt-6 mb-3 text-lg">Tugas & Fungsi Utama:</h4>
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
-        <li>Penyusunan kebijakan teknis operasional kurikulum, kesiswaan, kelembagaan, sarana prasarana, serta pendidik dan tenaga kependidikan Agama Islam pada sekolah umum.</li>
-        <li>Pelaksanaan pelayanan administrasi pendidik Agama Islam (GPAI) meliputi bimbingan sertifikasi dan peningkatan kompetensi guru.</li>
-        <li>Pelaksanaan bimbingan teknis, monitoring, evaluasi, dan pelaporan pelaksanaan program peningkatan mutu pembelajaran Pendidikan Agama Islam.</li>
-        <li>Pengelolaan sistem informasi pendidikan melalui verifikasi database SIAGA (Sistem Informasi dan Administrasi Guru Agama) secara berkala.</li>
-        <li>Fasilitasi penyaluran tunjangan profesi guru (TPG) bersertifikasi bagi Guru Pendidikan Agama Islam pada sekolah.</li>
-      </ul>
-    `,
-    kasiName: 'H. Junaidi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=400',
-    staf: [
-      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' }
-    ]
-  }
+  "pendidikan-madrasah": { title: "Pendidikan Madrasah", tugasFungsi: "Data belum tersedia", kasiName: "", kasiPhoto: "", staf: [], syarat: "" },
+  "bimas-islam": { title: "Bimbingan Masyarakat Islam", tugasFungsi: "Data belum tersedia", kasiName: "", kasiPhoto: "", staf: [], syarat: "" },
+  "pondok-pesantren": { title: "Pendidikan Diniyah & Pondok Pesantren", tugasFungsi: "Data belum tersedia", kasiName: "", kasiPhoto: "", staf: [], syarat: "" },
+  "sertifikasi-halal": { title: "Layanan Sertifikasi Halal", tugasFungsi: "Data belum tersedia", kasiName: "", kasiPhoto: "", staf: [], syarat: "" },
+  "urusan-agama-islam": { title: "Urusan Agama Islam", tugasFungsi: "Data belum tersedia", kasiName: "", kasiPhoto: "", staf: [], syarat: "" },
+  "pendidikan-agama-islam": { title: "Pendidikan Agama Islam", tugasFungsi: "Data belum tersedia", kasiName: "", kasiPhoto: "", staf: [], syarat: "" }
 };
 
 const KUA_LIST = [
@@ -330,81 +170,8 @@ export default function LayananDetail() {
 
       {/* Main content body */}
       <div className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
-        {/* Render 18 KUA Directory */}
-        {id === 'urusan-agama-islam' ? (
-          <div className="space-y-8">
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">18 Kantor Urusan Agama (KUA) Kecamatan</h3>
-                <p className="text-sm text-gray-500 mt-1">Gunakan kotak pencarian di bawah untuk mencari detail kantor KUA di Kabupaten Ogan Komering Ilir.</p>
-              </div>
-              <div className="relative w-full md:max-w-xs shrink-0">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Cari kecamatan / alamat..."
-                  value={kuaSearch}
-                  onChange={(e) => setKuaSearch(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredKua.length === 0 ? (
-                <div className="col-span-full bg-white p-12 text-center text-gray-500 rounded-2xl border border-gray-100">
-                  Tidak ditemukan KUA yang cocok dengan kata pencarian "{kuaSearch}".
-                </div>
-              ) : (
-                filteredKua.map((kua, idx) => {
-                  const slug = kua.nama.toLowerCase().replace('kua kecamatan ', '').replace(/\s+/g, '');
-                  const url = `http://kua${slug}.kemenagoki.id/`;
-                  
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: idx * 0.05 }}
-                      className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-green-500/30 transition-all flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="w-10 h-10 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold mb-4 group-hover:bg-green-700 group-hover:text-white transition-colors">
-                          {idx + 1}
-                        </div>
-                        <h4 className="text-base font-bold text-gray-900 group-hover:text-green-700 transition-colors mb-2">{kua.nama}</h4>
-                        
-                        <div className="space-y-2 text-xs text-gray-600 mt-4 border-t border-gray-50 pt-3">
-                          <div className="flex items-start gap-2">
-                            <MapPin size={14} className="text-gray-400 mt-0.5 shrink-0" />
-                            <span>{kua.alamat}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock size={14} className="text-gray-400 shrink-0" />
-                            <span>Senin - Jumat: 07:30 - 16:00 WIB</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6 pt-4 border-t border-gray-50">
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-700 text-green-700 hover:text-white rounded-xl text-xs font-semibold transition-all group-hover:scale-[1.01] active:scale-[0.99] border border-green-100/50"
-                        >
-                          <Globe size={14} />
-                          Kunjungi Website KUA
-                        </a>
-                      </div>
-                    </motion.div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        ) : id === 'sertifikasi-halal' ? (
+        {id === 'sertifikasi-halal' ? (
           /* Render Sertifikasi Halal Page */
           <div className="max-w-4xl mx-auto">
             {data.syarat ? (
@@ -419,7 +186,7 @@ export default function LayananDetail() {
             )}
           </div>
         ) : (
-          /* Render Pendidikan Madrasah, Bimas Islam, Pondok Pesantren */
+          /* Render Pendidikan Madrasah, Bimas Islam, Pondok Pesantren, Urusan Agama Islam, PAIS */
           <div className="space-y-12">
             {/* Grid: Tugas Fungsi on left, Kasi on right */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -548,6 +315,80 @@ export default function LayananDetail() {
                       </motion.div>
                     </AnimatePresence>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Append 18 KUA Directory for Urusan Agama Islam */}
+            {id === 'urusan-agama-islam' && (
+              <div className="space-y-8 mt-12 border-t border-gray-100 pt-12">
+                <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">18 Kantor Urusan Agama (KUA) Kecamatan</h3>
+                    <p className="text-sm text-gray-500 mt-1">Gunakan kotak pencarian di bawah untuk mencari detail kantor KUA di Kabupaten Ogan Komering Ilir.</p>
+                  </div>
+                  <div className="relative w-full md:max-w-xs shrink-0">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Cari kecamatan / alamat..."
+                      value={kuaSearch}
+                      onChange={(e) => setKuaSearch(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-white transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredKua.length === 0 ? (
+                    <div className="col-span-full bg-white p-12 text-center text-gray-500 rounded-2xl border border-gray-100">
+                      Tidak ditemukan KUA yang cocok dengan kata pencarian "{kuaSearch}".
+                    </div>
+                  ) : (
+                    filteredKua.map((kua, idx) => {
+                      const slug = kua.nama.toLowerCase().replace('kua kecamatan ', '').replace(/\s+/g, '');
+                      const url = `http://kua${slug}.kemenagoki.id/`;
+                      
+                      return (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.05 }}
+                          className="group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-green-500/30 transition-all flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="w-10 h-10 rounded-xl bg-green-50 text-green-700 flex items-center justify-center font-bold mb-4 group-hover:bg-green-700 group-hover:text-white transition-colors">
+                              {idx + 1}
+                            </div>
+                            <h4 className="text-base font-bold text-gray-900 group-hover:text-green-700 transition-colors mb-2">{kua.nama}</h4>
+                            
+                            <div className="space-y-2 text-xs text-gray-600 mt-4 border-t border-gray-50 pt-3">
+                              <div className="flex items-start gap-2">
+                                <MapPin size={14} className="text-gray-400 mt-0.5 shrink-0" />
+                                <span>{kua.alamat}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock size={14} className="text-gray-400 shrink-0" />
+                                <span>Senin - Jumat: 07:30 - 16:00 WIB</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-6 pt-4 border-t border-gray-50">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-50 hover:bg-green-700 text-green-700 hover:text-white rounded-xl text-xs font-semibold transition-all group-hover:scale-[1.01] active:scale-[0.99] border border-green-100/50"
+                            >
+                              <Globe size={14} />
+                              Kunjungi Website KUA
+                            </a>
+                          </div>
+                        </motion.div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             )}

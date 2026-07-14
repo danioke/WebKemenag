@@ -691,7 +691,7 @@ export async function getDocs(queryOrCol: any): Promise<any> {
 export async function getDoc(docRef: any): Promise<any> {
   const { collectionPath, id } = docRef;
   try {
-    const res = await fetch(`/api/db/${collectionPath}/${id}/delete`);
+    const res = await fetch(`/api/db/${collectionPath}/${id}`);
     if (res.status === 404) {
       return {
         id,

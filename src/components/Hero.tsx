@@ -10,28 +10,7 @@ interface CarouselItem {
   title: string;
 }
 
-const carouselItems: CarouselItem[] = [
-  {
-    image: "https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80",
-    category: "Galeri OKI",
-    title: "Masjid Agung Sholihin Kayuagung"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80",
-    category: "Fasilitas",
-    title: "Pelayanan Terpadu Satu Pintu (PTSP) Kemenag OKI"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80",
-    category: "Kegiatan",
-    title: "Pembinaan Kerukunan Umat Beragama Kab. OKI"
-  },
-  {
-    image: "https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80",
-    category: "Pendidikan",
-    title: "Pembinaan Siswa Madrasah Berprestasi"
-  }
-];
+const carouselItems: CarouselItem[] = [];
 
 export default function Hero() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -143,45 +122,49 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="hidden lg:block relative group/carousel"
           >
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative bg-black">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full h-full relative"
-                >
-                  <img 
-                    src={currentItem.image} 
-                    alt={currentItem.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Background overlay gradient: darken both top and bottom for great text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80"></div>
-                  
-                  {/* Content Overlay - Placed at the top so it is never covered by the floating badge */}
-                  <div className="absolute top-6 left-6 right-16 z-10">
-                    <motion.p 
-                      initial={{ y: -10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="text-amber-400 text-xs font-bold tracking-widest uppercase mb-1"
-                    >
-                      {currentItem.category}
-                    </motion.p>
-                    <motion.h3 
-                      initial={{ y: -10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                      className="text-white font-extrabold text-xl leading-snug"
-                    >
-                      {currentItem.title}
-                    </motion.h3>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative bg-black/20 flex items-center justify-center">
+              {currentItem ? (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-full h-full relative"
+                  >
+                    <img 
+                      src={currentItem.image} 
+                      alt={currentItem.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Background overlay gradient: darken both top and bottom for great text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80"></div>
+                    
+                    {/* Content Overlay - Placed at the top so it is never covered by the floating badge */}
+                    <div className="absolute top-6 left-6 right-16 z-10">
+                      <motion.p 
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-amber-400 text-xs font-bold tracking-widest uppercase mb-1"
+                      >
+                        {currentItem.category}
+                      </motion.p>
+                      <motion.h3 
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="text-white font-extrabold text-xl leading-snug"
+                      >
+                        {currentItem.title}
+                      </motion.h3>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              ) : (
+                <div className="text-white/50 font-medium">Banner belum tersedia</div>
+              )}
 
               {/* Slider Arrows */}
               {activeItems.length > 1 && (

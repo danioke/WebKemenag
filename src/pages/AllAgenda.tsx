@@ -251,11 +251,3 @@ export default function AllAgenda() {
   );
 }
 
-const fallbackAgendas: AgendaData[] = [
-  { id: '1', title: "Rapat Koordinasi Persiapan Pendidikan Profesi Guru (PPG) Madrasah", date: "25", month: "Okt", time: "09:00 - Selesai", location: "Aula Kemenag OKI", status: "Akan Datang" },
-  { id: '2', title: "Pembinaan Penyuluh Agama Islam se-Kabupaten OKI", date: "28", month: "Okt", time: "08:30 - 15:00", location: "Gedung Kesenian Kayuagung", status: "Akan Datang" },
-  { id: '3', title: "Upacara Peringatan Hari Santri Nasional", date: "22", month: "Okt", time: "07:30 - Selesai", location: "Halaman Kantor Kemenag OKI", status: "Selesai" },
-  { id: '4', title: "Bimbingan Manasik Haji Tingkat Kecamatan", date: "15", month: "Okt", time: "08:00 - 12:00", location: "Masjid Agung Kayuagung", status: "Selesai" },
-  { id: '5', title: "Rapat Koordinasi Evaluasi Anggaran Triwulan III", date: "10", month: "Okt", time: "13:30 - Selesai", location: "Ruang Rapat Kakanmenag", status: "Selesai" },
-  { id: '6', title: "Penyusunan Kurikulum Merdeka Madrasah Aliyah", date: "05", month: "Okt", time: "08:00 - 16:00", location: "MAN 1 Ogan Komering Ilir", status: "Selesai" }
-];
