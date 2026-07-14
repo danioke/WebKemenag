@@ -7,6 +7,7 @@ import path from "path";
 import fs from "fs";
 import multer from "multer";
 import { createServer as createViteServer } from "vite";
+import sharp from "sharp";
 
 const PORT = process.env.PORT || 3000;
 
@@ -111,6 +112,35 @@ async function startServer() {
       const filename = `${baseName}-${uniqueSuffix}${ext}`;
       const relativeUrl = `/uploads/${category}/${filename}`;
 
+      // Auto-resize image for Open Graph if uploaded file is an image
+      let ogBuffer: Buffer | null = null;
+      const isImage = file.mimetype.startsWith("image/");
+      const ogFilename = `${baseName}-${uniqueSuffix}-og${ext}`;
+      const ogRelativeUrl = `/uploads/${category}/${ogFilename}`;
+
+      if (isImage) {
+        try {
+          const extLower = ext.toLowerCase();
+          // Resize to standard Open Graph dimensions (max 1200x630, fit inside, keep aspect ratio)
+          let transformer = sharp(file.buffer).resize({ width: 1200, height: 630, fit: "inside", withoutEnlargement: true });
+          
+          if (extLower === ".jpg" || extLower === ".jpeg") {
+            transformer = transformer.jpeg({ quality: 80, progressive: true });
+          } else if (extLower === ".png") {
+            transformer = transformer.png({ compressionLevel: 8 });
+          } else if (extLower === ".webp") {
+            transformer = transformer.webp({ quality: 80 });
+          } else {
+            transformer = transformer.jpeg({ quality: 80 });
+          }
+          
+          ogBuffer = await transformer.toBuffer();
+          console.log(`Generated OG-optimized image: ${ogFilename} (${Math.round(ogBuffer.length / 1024)} KB)`);
+        } catch (sharpErr) {
+          console.error("Error creating OG image with sharp:", sharpErr);
+        }
+      }
+
       // Write to local disk in background/non-blocking as a cache
       try {
         const catPath = path.join(uploadDir, category);
@@ -118,6 +148,10 @@ async function startServer() {
           try { fs.mkdirSync(catPath, { recursive: true }); } catch (e) { console.warn("Could not create catPath", e); }
         }
         fs.writeFileSync(path.join(catPath, filename), file.buffer);
+        
+        if (ogBuffer) {
+          fs.writeFileSync(path.join(catPath, ogFilename), ogBuffer);
+        }
       } catch (writeErr) {
         console.warn("Local disk cache write failed (probably read-only filesystem):", writeErr);
       }
@@ -128,7 +162,7 @@ async function startServer() {
 
       const fileBase64 = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 
-      const fileDoc = {
+      const fileDoc: any = {
         id: filename,
         name: file.originalname,
         url: relativeUrl,
@@ -139,6 +173,26 @@ async function startServer() {
         createdAt: new Date().toISOString()
       };
 
+      let ogFileDoc: any = null;
+      if (ogBuffer) {
+        const ogSizeInKb = Math.round(ogBuffer.length / 1024);
+        const ogSizeStr = `${ogSizeInKb} KB`;
+        const ogMimeType = ext.toLowerCase() === ".png" ? "image/png" : (ext.toLowerCase() === ".webp" ? "image/webp" : "image/jpeg");
+        const ogFileBase64 = `data:${ogMimeType};base64,${ogBuffer.toString("base64")}`;
+
+        ogFileDoc = {
+          id: ogFilename,
+          name: `${baseName}-og${ext}`,
+          url: ogRelativeUrl,
+          base64: ogFileBase64,
+          category: category,
+          mimetype: ogMimeType,
+          size: ogSizeStr,
+          createdAt: new Date().toISOString(),
+          isOg: true
+        };
+      }
+
       const release = await acquireLock("uploaded_files");
       try {
         if (useMySQL && pool) {
@@ -146,9 +200,18 @@ async function startServer() {
             'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
             [filename, 'uploaded_files', JSON.stringify(fileDoc)]
           );
+          if (ogFileDoc) {
+            await pool.query(
+              'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+              [ogFilename, 'uploaded_files', JSON.stringify(ogFileDoc)]
+            );
+          }
         } else {
           const files = await readCollection("uploaded_files");
           files.push(fileDoc);
+          if (ogFileDoc) {
+            files.push(ogFileDoc);
+          }
           await writeCollection("uploaded_files", files);
         }
       } finally {
@@ -193,6 +256,10 @@ async function startServer() {
       const resultsMap = new Map<string, any>();
 
       dbFiles.forEach((f) => {
+        // Skip OG images to avoid showing them in the dashboard
+        if (f.isOg || (f.id && f.id.includes("-og."))) {
+          return;
+        }
         const cat = f.category || "foto";
         if (targetCategories.includes(cat)) {
           resultsMap.set(f.id, {
@@ -215,6 +282,8 @@ async function startServer() {
             const files = fs.readdirSync(catPath);
             files.forEach((filename) => {
               if (filename.startsWith(".")) return;
+              // Skip OG images from local file listings
+              if (filename.includes("-og.")) return;
               if (resultsMap.has(filename)) return; // already in DB, skip
 
               const filePath = path.join(catPath, filename);
@@ -290,10 +359,19 @@ async function startServer() {
         return res.status(403).json({ error: "Akses ditolak" });
       }
 
-      // Delete from local disk if exists
+      // Determine corresponding OG filename
+      const ext = path.extname(filename);
+      const base = filename.slice(0, -ext.length);
+      const ogFilename = `${base}-og${ext}`;
+      const ogFilePath = path.join(uploadDir, category, ogFilename);
+
+      // Delete from local disk if exists (both original and OG version)
       try {
         if (fs.existsSync(resolvedPath)) {
           fs.unlinkSync(resolvedPath);
+        }
+        if (fs.existsSync(ogFilePath)) {
+          fs.unlinkSync(ogFilePath);
         }
       } catch (e) {
         console.warn("Failed to delete from local disk (probably read-only):", e);
@@ -304,9 +382,10 @@ async function startServer() {
       try {
         if (useMySQL && pool) {
           await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', ['uploaded_files', filename]);
+          await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', ['uploaded_files', ogFilename]);
         } else {
           const files = await readCollection("uploaded_files");
-          const filtered = files.filter(f => f.id !== filename);
+          const filtered = files.filter(f => f.id !== filename && f.id !== ogFilename);
           await writeCollection("uploaded_files", filtered);
         }
       } finally {
@@ -769,6 +848,68 @@ async function startServer() {
       }
     } catch (e) {
       console.error("Error reading metadata from collections for OG tags:", e);
+    }
+
+    // Check if we can find a smaller, OG-optimized version of the image (less than 300KB)
+    const getOGResizedUrl = async (originalUrl: string): Promise<string | null> => {
+      if (!originalUrl || originalUrl.startsWith("http")) return null;
+      try {
+        const parts = originalUrl.split("/");
+        const filename = parts[parts.length - 1];
+        const category = parts[parts.length - 2] || "foto";
+        if (!filename) return null;
+
+        const ext = path.extname(filename);
+        const base = filename.slice(0, -ext.length);
+        const ogFilename = `${base}-og${ext}`;
+        const ogRelativeUrl = `/uploads/${category}/${ogFilename}`;
+
+        // Check local disk cache first
+        const localFilePath = path.join(uploadDir, category, ogFilename);
+        if (fs.existsSync(localFilePath)) {
+          return ogRelativeUrl;
+        }
+
+        // Check database files
+        const dbFiles = await readCollection("uploaded_files");
+        const found = dbFiles.find(f => f.id === ogFilename);
+        if (found) {
+          return ogRelativeUrl;
+        }
+      } catch (err) {
+        console.warn("Failed checking OG resized URL in injectOGTags:", err);
+      }
+      return null;
+    };
+
+    if (image) {
+      if (!image.startsWith("http")) {
+        const ogResized = await getOGResizedUrl(image);
+        if (ogResized) {
+          image = `${protocol}://${host}${ogResized.startsWith("/") ? "" : "/"}${ogResized}`;
+        } else {
+          image = `${protocol}://${host}${image.startsWith("/") ? "" : "/"}${image}`;
+        }
+      } else {
+        // It's a full URL, but if it's pointing to our host, see if we have an OG version of it
+        const ourHostPrefix = `${protocol}://${host}`;
+        const cleanHostPrefix = `://${host}`;
+        
+        let matchedPath: string | null = null;
+        if (image.startsWith(ourHostPrefix)) {
+          matchedPath = image.substring(ourHostPrefix.length);
+        } else if (image.includes(cleanHostPrefix)) {
+          const idx = image.indexOf(cleanHostPrefix);
+          matchedPath = image.substring(idx + cleanHostPrefix.length);
+        }
+
+        if (matchedPath) {
+          const ogResized = await getOGResizedUrl(matchedPath);
+          if (ogResized) {
+            image = `${protocol}://${host}${ogResized}`;
+          }
+        }
+      }
     }
 
     // Replace in template
