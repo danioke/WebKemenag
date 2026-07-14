@@ -33,6 +33,7 @@ export default function GaleriVideo() {
         setVideos(docs);
       } catch (error) {
         console.error("Error fetching videos:", error);
+        // Add some dummy if needed, but let's keep it empty for real data
       } finally {
         setLoading(false);
       }

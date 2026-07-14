@@ -209,3 +209,11 @@ export default function AllPengumuman() {
   );
 }
 
+const fallbackAnnouncements: PengumumanData[] = [
+  { id: '1', title: "Pengumuman Hasil Seleksi Administrasi Calon PPPK Kementerian Agama Tahun 2024", date: "15 Okt 2024", size: "2.4 MB", fileUrl: "#" },
+  { id: '2', title: "Surat Edaran Panduan Peringatan Hari Santri Nasional Tahun 2024", date: "10 Okt 2024", size: "1.1 MB", fileUrl: "#" },
+  { id: '3', title: "Jadwal Pelaksanaan SKD CPNS Kementerian Agama Formasi Tahun 2024", date: "05 Okt 2024", size: "3.5 MB", fileUrl: "#" },
+  { id: '4', title: "Penerimaan Mahasiswa Praktek Kerja Lapangan (PKL) Angkatan II", date: "01 Okt 2024", size: "750 KB", fileUrl: "#" },
+  { id: '5', title: "Pengumuman Pemenang Kompetisi Film Pendek Religi Kab. OKI 2024", date: "24 Sep 2024", size: "1.8 MB", fileUrl: "#" },
+  { id: '6', title: "Panduan Teknis Pelaksanaan Peringatan Maulid Nabi Muhammad SAW", date: "18 Sep 2024", size: "1.2 MB", fileUrl: "#" }
+];
