@@ -8,7 +8,7 @@ import fs from "fs";
 import multer from "multer";
 import { createServer as createViteServer } from "vite";
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   const app = express();
@@ -805,11 +805,16 @@ async function startServer() {
       return next();
     }
 
-    // Only intercept if Accept header contains text/html
+    // Many scrapers (Facebook, WhatsApp, Twitter) use Accept: */* instead of text/html
+    // Since we already filter out extensions and APIs above, it's safe to process this request
     const acceptHeader = req.headers.accept || "";
-    const isHtmlRequest = acceptHeader.includes("text/html");
+    const isHtmlRequest = acceptHeader.includes("text/html") || acceptHeader.includes("*/*") || acceptHeader === "";
     
-    if (!isHtmlRequest) {
+    // Also explicitly check common bot User-Agents just to be safe
+    const userAgent = (req.headers["user-agent"] || "").toLowerCase();
+    const isBot = userAgent.includes("bot") || userAgent.includes("whatsapp") || userAgent.includes("facebook") || userAgent.includes("twitter") || userAgent.includes("telegram");
+
+    if (!isHtmlRequest && !isBot) {
       return next();
     }
 
