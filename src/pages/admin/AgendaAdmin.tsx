@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatAgendaFullDate } from '../../lib/utils';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
@@ -12,6 +13,7 @@ interface Agenda {
   time: string;
   location: string;
   status: string;
+  fullDate?: string;
 }
 
 export default function AgendaAdmin() {
@@ -151,7 +153,7 @@ export default function AgendaAdmin() {
                     <span className="line-clamp-2">{item.title}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    <div>{item.date} {item.month} • {item.time}</div>
+                    <div>{formatAgendaFullDate(item)} • {item.time}</div>
                     <div className="text-xs text-gray-400 mt-1">{item.location}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">

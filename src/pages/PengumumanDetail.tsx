@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatIndonesianDate } from "../lib/utils";
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from '../lib/db';
@@ -149,7 +150,7 @@ export default function PengumumanDetail() {
             </h1>
             
             <div className="flex items-center justify-center gap-4 text-sm text-gray-500 mb-10">
-              <span>{pengumuman.date}</span>
+              <span>{formatIndonesianDate(pengumuman.date)}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
               <span>Dokumen PDF</span>
               <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
@@ -209,7 +210,7 @@ export default function PengumumanDetail() {
                         {item.title}
                       </h4>
                       <div className="flex gap-4 text-xs text-gray-400 mt-1.5 font-medium">
-                        <span>{item.date}</span>
+                        <span>{formatIndonesianDate(item.date)}</span>
                         <span>•</span>
                         <span>{item.size}</span>
                       </div>

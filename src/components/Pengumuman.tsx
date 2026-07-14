@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatIndonesianDate } from "../lib/utils";
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { FileText, Download, ArrowRight } from 'lucide-react';
@@ -90,7 +91,7 @@ export default function Pengumuman() {
                       </Link>
                     </h4>
                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                      <span>{item.date}</span>
+                      <span>{formatIndonesianDate(item.date)}</span>
                       <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                       <span>PDF • {item.size}</span>
                     </div>

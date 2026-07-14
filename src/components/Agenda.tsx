@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatAgendaFullDate } from "../lib/utils";
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Calendar, MapPin, Clock, ArrowRight } from 'lucide-react';
@@ -88,6 +89,10 @@ export default function Agenda() {
                   </h4>
                   
                   <div className="space-y-1.5 mt-auto">
+                    <div className="flex items-center text-sm text-gray-600 gap-2">
+                      <Calendar size={14} className="text-amber-500 shrink-0" />
+                      <span>{formatAgendaFullDate(agenda)}</span>
+                    </div>
                     <div className="flex items-center text-sm text-gray-600 gap-2">
                       <Clock size={14} className="text-amber-500 shrink-0" />
                       <span>{agenda.time}</span>

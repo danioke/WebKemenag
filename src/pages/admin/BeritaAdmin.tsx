@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { formatIndonesianDate } from '../../lib/utils';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
@@ -238,7 +239,7 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.category}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatIndonesianDate(item.date)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1.5 rounded-md">

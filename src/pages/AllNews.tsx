@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatIndonesianDate } from "../lib/utils";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from '../lib/db';
@@ -194,7 +195,7 @@ export default function AllNews() {
                     
                     <div className="p-6 flex flex-col flex-grow">
                       <div className="flex items-center gap-4 text-xs text-gray-500 mb-3 font-medium">
-                        <span className="flex items-center gap-1"><Calendar size={13} /> {item.date}</span>
+                        <span className="flex items-center gap-1"><Calendar size={13} /> {formatIndonesianDate(item.date)}</span>
                         <span className="flex items-center gap-1"><User size={13} /> {item.author || 'Humas'}</span>
                         <span className="flex items-center gap-1"><Eye size={13} /> {item.views || 0}</span>
                       </div>

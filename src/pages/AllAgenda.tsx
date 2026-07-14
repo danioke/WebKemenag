@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatAgendaFullDate } from "../lib/utils";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from '../lib/db';
@@ -181,6 +182,10 @@ export default function AllAgenda() {
                       </h4>
                       
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500 font-medium">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarIcon size={14} className="text-amber-500 shrink-0" />
+                          <span>{formatAgendaFullDate(agenda)}</span>
+                        </div>
                         <div className="flex items-center gap-1.5">
                           <Clock size={14} className="text-amber-500 shrink-0" />
                           <span>{agenda.time}</span>

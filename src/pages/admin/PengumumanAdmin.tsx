@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatIndonesianDate } from '../../lib/utils';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
@@ -182,7 +183,7 @@ export default function PengumumanAdmin() {
                       <span className="line-clamp-1">{item.title}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.date}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatIndonesianDate(item.date)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 mx-2">
                       <Edit size={18} />

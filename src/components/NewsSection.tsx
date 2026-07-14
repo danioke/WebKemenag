@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatIndonesianDate } from "../lib/utils";
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Calendar, User, ArrowRight, Eye } from 'lucide-react';
@@ -146,7 +147,7 @@ export default function NewsSection() {
                   
                   <div className="p-6 sm:p-8 flex flex-col flex-grow">
                     <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
-                      <span className="flex items-center gap-1"><Calendar size={14} /> {news[0].date}</span>
+                      <span className="flex items-center gap-1"><Calendar size={14} /> {formatIndonesianDate(news[0].date)}</span>
                       <span className="flex items-center gap-1"><User size={14} /> {news[0].author || 'Admin'}</span>
                       <span className="flex items-center gap-1"><Eye size={14} /> {news[0].views || 0}</span>
                     </div>
@@ -189,7 +190,7 @@ export default function NewsSection() {
                   <div className="p-4 sm:p-5 flex flex-col flex-grow justify-center">
                     <div className="flex items-center gap-3 text-[10px] sm:text-xs text-gray-500 mb-2">
                       <span className="text-amber-600 font-bold uppercase">{item.category}</span>
-                      <span className="flex items-center gap-1"><Calendar size={12} /> {item.date}</span>
+                      <span className="flex items-center gap-1"><Calendar size={12} /> {formatIndonesianDate(item.date)}</span>
                     </div>
                     
                     <h4 className="text-sm sm:text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-green-700 transition-colors leading-snug">

@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatIndonesianDate } from "../lib/utils";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from '../lib/db';
@@ -146,7 +147,7 @@ export default function AllPengumuman() {
                           </Link>
                         </h4>
                         <div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
-                          <span>{item.date}</span>
+                          <span>{formatIndonesianDate(item.date)}</span>
                           <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                           <span>PDF • {item.size}</span>
                         </div>

@@ -9,7 +9,7 @@ import multer from "multer";
 import { createServer as createViteServer } from "vite";
 import sharp from "sharp";
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 async function startServer() {
   const app = express();

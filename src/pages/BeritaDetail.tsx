@@ -1,4 +1,5 @@
 import { createSlug } from "../lib/helpers";
+import { formatIndonesianDate } from "../lib/utils";
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, query, orderBy, limit, getDocs, where } from '../lib/db';
@@ -153,7 +154,7 @@ export default function BeritaDetail() {
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-8 border-b border-gray-100 pb-6">
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-gray-400" />
-              <span>{berita.date}</span>
+              <span>{formatIndonesianDate(berita.date)}</span>
             </div>
             <div className="flex items-center gap-2">
               <User size={16} className="text-gray-400" />
@@ -240,7 +241,7 @@ export default function BeritaDetail() {
                       {item.title}
                     </h4>
                     <div className="flex items-center gap-3 text-xs text-gray-500 mt-auto">
-                      <span className="flex items-center gap-1"><Calendar size={12} /> {item.date}</span>
+                      <span className="flex items-center gap-1"><Calendar size={12} /> {formatIndonesianDate(item.date)}</span>
                     </div>
                   </div>
                 </Link>
