@@ -55,69 +55,72 @@
   }
 
   html, body {
-    height: 100%;
+    height: auto !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
+  /* Completely hide the entire React root to free up all layout space */
   #root {
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
+    display: none !important;
   }
 
-  /* Hide other elements completely */
-  body * {
-    visibility: hidden;
-  }
-
-  /* Keep only the printable container and children visible */
-  #printable-schedule, #printable-schedule * {
-    visibility: visible;
-  }
-
+  /* Show only the printable schedule, placed directly under body via React Portal */
   #printable-schedule {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    max-height: 100%;
+    display: block !important;
+    visibility: visible !important;
+    width: 100% !important;
     background: white !important;
     color: black !important;
     margin: 0 !important;
     padding: 0 !important;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
     page-break-inside: avoid !important;
+  }
+
+  #printable-schedule * {
+    visibility: visible !important;
   }
 
   /* Tighten spacing for print */
   #printable-schedule .print-kop {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     padding-bottom: 2px !important;
     margin-bottom: 6px !important;
-    border-bottom-width: 3px !important;
+    border-bottom: 3px double black !important;
   }
 
   #printable-schedule .print-title {
     margin-bottom: 4px !important;
+    text-align: center !important;
   }
   
   #printable-schedule .print-title h1 {
     font-size: 11px !important;
     margin-bottom: 1px !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
   }
   
   #printable-schedule .print-title h2 {
     font-size: 10px !important;
     margin-bottom: 1px !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
   }
   
   #printable-schedule .print-title h3 {
     font-size: 8.5px !important;
     margin-top: 1px !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
   }
 
   #printable-schedule .print-hadits {
@@ -126,7 +129,10 @@
     margin-left: auto !important;
     margin-right: auto !important;
     max-width: 90% !important;
+    border: 1px solid black !important;
     border-radius: 4px !important;
+    text-align: center !important;
+    background-color: #f9fafb !important;
   }
 
   #printable-schedule .print-hadits p {
@@ -136,9 +142,13 @@
 
   /* Tighten coordinates bar */
   #printable-schedule .print-coordinates {
+    display: flex !important;
+    justify-content: space-between !important;
     margin-bottom: 4px !important;
     padding-bottom: 1px !important;
     font-size: 7.5px !important;
+    border-bottom: 1px solid black !important;
+    font-weight: bold !important;
   }
 
   /* Force compact table layout on print */
@@ -156,6 +166,7 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
     border: 1px solid black !important;
+    text-transform: uppercase !important;
   }
 
   #printable-schedule .print-table td {
@@ -167,6 +178,8 @@
 
   /* Signature and Notes area */
   #printable-schedule .print-footer {
+    display: flex !important;
+    justify-content: space-between !important;
     margin-top: 6px !important;
   }
 
@@ -180,6 +193,10 @@
     width: 35% !important;
     font-size: 7.5px !important;
     line-height: 1.2 !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
 
   #printable-schedule .print-spacer {
