@@ -936,16 +936,28 @@ async function startServer() {
     // Replace in template
     let result = html;
     
+    // Clean and escape helper to prevent HTML or quotes from breaking the meta tags
+    const cleanForMeta = (str: string) => {
+      if (!str) return "";
+      let clean = str.replace(/<[^>]*>/g, ""); // Strip HTML tags
+      clean = clean.replace(/"/g, "&quot;");    // Escape double quotes
+      clean = clean.replace(/\s+/g, " ");       // Replace multiple whitespaces/newlines
+      return clean.trim();
+    };
+
+    const cleanTitle = cleanForMeta(title);
+    const cleanDescription = cleanForMeta(description);
+
     // Replace titles
-    result = result.replace(/<title>.*?<\/title>/gi, `<title>${title}</title>`);
-    result = result.replace(/<meta\s+name="title"\s+content=".*?"\s*\/?>/gi, `<meta name="title" content="${title}" />`);
-    result = result.replace(/<meta\s+property="og:title"\s+content=".*?"\s*\/?>/gi, `<meta property="og:title" content="${title}" />`);
-    result = result.replace(/<meta\s+property="twitter:title"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:title" content="${title}" />`);
+    result = result.replace(/<title>.*?<\/title>/gi, `<title>${cleanTitle}</title>`);
+    result = result.replace(/<meta\s+name="title"\s+content=".*?"\s*\/?>/gi, `<meta name="title" content="${cleanTitle}" />`);
+    result = result.replace(/<meta\s+property="og:title"\s+content=".*?"\s*\/?>/gi, `<meta property="og:title" content="${cleanTitle}" />`);
+    result = result.replace(/<meta\s+property="twitter:title"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:title" content="${cleanTitle}" />`);
     
     // Replace descriptions
-    result = result.replace(/<meta\s+name="description"\s+content=".*?"\s*\/?>/gi, `<meta name="description" content="${description}" />`);
-    result = result.replace(/<meta\s+property="og:description"\s+content=".*?"\s*\/?>/gi, `<meta property="og:description" content="${description}" />`);
-    result = result.replace(/<meta\s+property="twitter:description"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:description" content="${description}" />`);
+    result = result.replace(/<meta\s+name="description"\s+content=".*?"\s*\/?>/gi, `<meta name="description" content="${cleanDescription}" />`);
+    result = result.replace(/<meta\s+property="og:description"\s+content=".*?"\s*\/?>/gi, `<meta property="og:description" content="${cleanDescription}" />`);
+    result = result.replace(/<meta\s+property="twitter:description"\s+content=".*?"\s*\/?>/gi, `<meta property="twitter:description" content="${cleanDescription}" />`);
     
     // Replace images
     result = result.replace(/<meta\s+property="og:image"\s+content=".*?"\s*\/?>/gi, `<meta property="og:image" content="${image}" />`);
