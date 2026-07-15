@@ -17,6 +17,8 @@ export default function FotoAdmin() {
   const [formData, setFormData] = useState({ id: '', title: '', image: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const fetchData = async () => {
     try {
@@ -24,6 +26,7 @@ export default function FotoAdmin() {
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Foto));
       setData(docs);
+      setCurrentPage(1); // reset to first page on fetch
     } catch (error) {
       console.error(error);
       toast.error('Gagal mengambil data foto');
@@ -141,7 +144,7 @@ export default function FotoAdmin() {
             Belum ada data foto.
           </div>
         ) : (
-          data.map((item) => (
+          data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item) => (
             <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group">
               <div className="aspect-square bg-gray-100 relative overflow-hidden">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
@@ -161,6 +164,43 @@ export default function FotoAdmin() {
           ))
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {Math.ceil(data.length / itemsPerPage) > 1 && (
+        <div className="mt-8 flex justify-center items-center gap-2">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Sebelumnya
+          </button>
+          
+          <div className="flex gap-1">
+            {Array.from({ length: Math.ceil(data.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${
+                  currentPage === page 
+                    ? 'bg-green-700 text-white shadow-sm' 
+                    : 'border border-gray-200 text-gray-700 bg-white hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(data.length / itemsPerPage), prev + 1))}
+            disabled={currentPage === Math.ceil(data.length / itemsPerPage)}
+            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Berikutnya
+          </button>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">

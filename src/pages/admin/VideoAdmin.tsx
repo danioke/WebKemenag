@@ -18,6 +18,8 @@ export default function VideoAdmin() {
   const [data, setData] = useState<VideoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'list' | 'api'>('list');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   
   // Video Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +46,7 @@ export default function VideoAdmin() {
       const querySnapshot = await getDocs(q);
       const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as VideoData));
       setData(docs);
+      setCurrentPage(1); // reset to first page on fetch
     } catch (error) {
       console.error(error);
       toast.error('Gagal mengambil data video');
@@ -280,40 +283,79 @@ export default function VideoAdmin() {
           {loading ? (
             <div className="text-gray-400 py-10 text-center text-sm">Memuat video...</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.length === 0 ? (
-                <div className="col-span-full py-20 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                  Belum ada data video. Silakan tambahkan manual atau lakukan Ambil Otomatis di tab API Settings.
-                </div>
-              ) : (
-                data.map((item) => (
-                  <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group flex flex-col h-full">
-                    <div className="aspect-video bg-black relative overflow-hidden flex items-center justify-center shrink-0">
-                      {renderPreview(item.videoUrl || '')}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10">
-                        <button onClick={() => handleEdit(item)} className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition-colors cursor-pointer">
-                          <Edit size={16} />
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50 transition-colors cursor-pointer">
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-4 flex-grow flex flex-col justify-between">
-                      <h3 className="font-bold text-gray-900 line-clamp-2 text-sm leading-snug">{item.title}</h3>
-                      <div className="flex items-center justify-between mt-3">
-                        <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono truncate max-w-[200px]" title={item.videoUrl}>
-                          {item.videoUrl}
-                        </span>
-                        {item.duration && (
-                          <span className="text-[10px] font-bold text-gray-400">{item.duration}</span>
-                        )}
-                      </div>
-                    </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {data.length === 0 ? (
+                  <div className="col-span-full py-20 text-center text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                    Belum ada data video. Silakan tambahkan manual atau lakukan Ambil Otomatis di tab API Settings.
                   </div>
-                ))
+                ) : (
+                  data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item) => (
+                    <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group flex flex-col h-full">
+                      <div className="aspect-video bg-black relative overflow-hidden flex items-center justify-center shrink-0">
+                        {renderPreview(item.videoUrl || '')}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-10">
+                          <button onClick={() => handleEdit(item)} className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 transition-colors cursor-pointer">
+                            <Edit size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(item.id)} className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50 transition-colors cursor-pointer">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="p-4 flex-grow flex flex-col justify-between">
+                        <h3 className="font-bold text-gray-900 line-clamp-2 text-sm leading-snug">{item.title}</h3>
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-mono truncate max-w-[200px]" title={item.videoUrl}>
+                            {item.videoUrl}
+                          </span>
+                          {item.duration && (
+                            <span className="text-[10px] font-bold text-gray-400">{item.duration}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Pagination Controls */}
+              {Math.ceil(data.length / itemsPerPage) > 1 && (
+                <div className="mt-8 flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Sebelumnya
+                  </button>
+                  
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.ceil(data.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${
+                          currentPage === page 
+                            ? 'bg-green-700 text-white shadow-sm' 
+                            : 'border border-gray-200 text-gray-700 bg-white hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(Math.ceil(data.length / itemsPerPage), prev + 1))}
+                    disabled={currentPage === Math.ceil(data.length / itemsPerPage)}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Berikutnya
+                  </button>
+                </div>
               )}
-            </div>
+            </>
           )}
         </>
       ) : (

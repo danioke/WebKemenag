@@ -76,6 +76,24 @@ export default function MediaGallery() {
     fetchData();
   }, []);
 
+  // Auto-scrolling for Photo Carousel
+  useEffect(() => {
+    if (activeTab !== 'foto' || photos.length === 0) return;
+    const interval = setInterval(() => {
+      const el = photoCarouselRef.current;
+      if (el) {
+        const isAtEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 20;
+        if (isAtEnd) {
+          el.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          el.scrollBy({ left: 280, behavior: 'smooth' });
+        }
+      }
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [activeTab, photos]);
+
   // Home Carousel scroll controls
   const handleScroll = (direction: 'left' | 'right', type: 'foto' | 'video') => {
     const ref = type === 'foto' ? photoCarouselRef : videoCarouselRef;
@@ -228,12 +246,12 @@ export default function MediaGallery() {
                         <div 
                           key={photo.id} 
                           onClick={() => openModal(idx)}
-                          className="group relative rounded-2xl overflow-hidden aspect-square shadow-sm cursor-pointer min-w-[260px] sm:min-w-[300px] md:min-w-[340px] flex-shrink-0 snap-start"
+                          className="group relative rounded-xl overflow-hidden aspect-[4/3] shadow-md border border-gray-100 bg-white cursor-pointer w-48 sm:w-64 flex-shrink-0 snap-start"
                         >
                           <img src={photo.image} alt={photo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                            <p className="text-white font-bold text-sm leading-tight">{photo.title}</p>
+                          <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                            <p className="text-white font-bold text-xs sm:text-sm leading-tight">{photo.title}</p>
                           </div>
                         </div>
                       ))}
