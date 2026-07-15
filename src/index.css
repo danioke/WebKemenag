@@ -49,21 +49,141 @@
 
 /* Print Media Styles */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm 8mm 10mm;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    overflow: hidden !important;
+  }
+
+  #root {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Hide other elements completely */
   body * {
     visibility: hidden;
   }
+
+  /* Keep only the printable container and children visible */
   #printable-schedule, #printable-schedule * {
     visibility: visible;
   }
+
   #printable-schedule {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    max-height: 100%;
     background: white !important;
     color: black !important;
     margin: 0 !important;
-    padding: 20px !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+    page-break-inside: avoid !important;
+  }
+
+  /* Tighten spacing for print */
+  #printable-schedule .print-kop {
+    padding-bottom: 2px !important;
+    margin-bottom: 6px !important;
+    border-bottom-width: 3px !important;
+  }
+
+  #printable-schedule .print-title {
+    margin-bottom: 4px !important;
+  }
+  
+  #printable-schedule .print-title h1 {
+    font-size: 11px !important;
+    margin-bottom: 1px !important;
+  }
+  
+  #printable-schedule .print-title h2 {
+    font-size: 10px !important;
+    margin-bottom: 1px !important;
+  }
+  
+  #printable-schedule .print-title h3 {
+    font-size: 8.5px !important;
+    margin-top: 1px !important;
+  }
+
+  #printable-schedule .print-hadits {
+    padding: 3px 6px !important;
+    margin-bottom: 4px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 90% !important;
+    border-radius: 4px !important;
+  }
+
+  #printable-schedule .print-hadits p {
+    font-size: 8px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Tighten coordinates bar */
+  #printable-schedule .print-coordinates {
+    margin-bottom: 4px !important;
+    padding-bottom: 1px !important;
+    font-size: 7.5px !important;
+  }
+
+  /* Force compact table layout on print */
+  #printable-schedule .print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 6px !important;
+  }
+
+  #printable-schedule .print-table th {
+    padding: 2px 1px !important;
+    font-size: 7.5px !important;
+    font-weight: bold !important;
+    background-color: #f3f4f6 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border: 1px solid black !important;
+  }
+
+  #printable-schedule .print-table td {
+    padding: 1.5px 1px !important;
+    font-size: 7px !important;
+    line-height: 1 !important;
+    border: 1px solid black !important;
+  }
+
+  /* Signature and Notes area */
+  #printable-schedule .print-footer {
+    margin-top: 6px !important;
+  }
+
+  #printable-schedule .print-notes {
+    width: 55% !important;
+    font-size: 7.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  #printable-schedule .print-sig {
+    width: 35% !important;
+    font-size: 7.5px !important;
+    line-height: 1.2 !important;
+  }
+
+  #printable-schedule .print-spacer {
+    height: 35px !important; /* Shorter signature space to fit inside A4 */
   }
 }
 

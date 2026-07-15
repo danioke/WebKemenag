@@ -341,7 +341,7 @@ export default function JadwalSholatWidget() {
       {/* HIDDEN PRINT VIEW: Formatted exactly like official Kemenag schedule document */}
       <div id="printable-schedule" className="hidden print:block bg-white text-black p-4 font-serif text-[10px] leading-tight">
         {/* Kop Surat Header */}
-        <div className="flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
+        <div className="print-kop flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
           <img src={logoUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" />
           <div className="text-center flex-1 mx-4">
             <h3 className="font-bold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h3>
@@ -354,7 +354,7 @@ export default function JadwalSholatWidget() {
         </div>
 
         {/* Document Title */}
-        <div className="text-center mb-4">
+        <div className="print-title text-center mb-4">
           <h1 className="font-extrabold text-sm tracking-wide uppercase leading-tight">JADWAL WAKTU SHOLAT</h1>
           <h2 className="font-bold text-xs uppercase leading-tight">UNTUK KABUPATEN OGAN KOMERING ILIR & SEKITARNYA</h2>
           <h3 className="font-semibold text-[10px] uppercase leading-tight mt-1">
@@ -373,9 +373,9 @@ export default function JadwalSholatWidget() {
         </div>
 
         {/* Hadits */}
-        <div className="text-center border border-black p-2 rounded-lg bg-gray-50/50 mb-3 mx-auto max-w-xl">
+        <div className="print-hadits text-center border border-black p-2 rounded-lg bg-gray-50/50 mb-3 mx-auto max-w-xl">
           <p className="font-serif text-sm leading-normal text-right mb-1" dir="rtl">
-            عَنْ أُمِّ فَرْوَةَ قَالَتْ سُئِلَ رَسُولُ اللَّهِ -صلى الله عليه وسلم- أَىُّ الأَعْمَالِ أَfْضَلُ قَالَ « الصَّلاَةُ فِى أَوَّلِ وَقْتِهَا »
+            عَنْ أُمِّ فَرْوَةَ قَالَتْ سُئِلَ رَسُولُ اللَّهِ -صلى الله عليه وسلم- أَىُّ الأَعْمَالِ أَفْضَلُ قَالَ « الصَّلاَةُ فِى أَوَّلِ وَقْتِهَا »
           </p>
           <p className="text-[9px] leading-relaxed text-gray-700 italic">
             Dari Ummu Farwah, ia berkata, "Rasulullah Shallallahu 'Alaihi Wasallam pernah ditanya, Amalan apakah yang paling Afdhal? Beliau menjawab, "Shalat Diawal Waktunya." (HR. Abu Daud Nomor: 426. Syaikh Al Albani mengatakan bahwa Hadits ini Shahih)
@@ -383,13 +383,13 @@ export default function JadwalSholatWidget() {
         </div>
 
         {/* Coordinates */}
-        <div className="flex justify-between items-center text-[8px] font-bold border-b border-black pb-1 mb-2">
+        <div className="print-coordinates flex justify-between items-center text-[8px] font-bold border-b border-black pb-1 mb-2">
           <span>Arah Kiblat : 294°43' Jarak Ka'bah : 7610.561 KM</span>
           <span>Lintang : 3°22' LS  Bujur : 104°49' BT</span>
         </div>
 
         {/* Table */}
-        <table className="w-full text-center border-collapse border border-black text-[9px]">
+        <table className="print-table w-full text-center border-collapse border border-black text-[9px]">
           <thead>
             <tr className="bg-gray-100">
               <th className="border border-black px-1.5 py-1 font-bold uppercase">Hari</th>
@@ -426,9 +426,9 @@ export default function JadwalSholatWidget() {
         </table>
 
         {/* Notes and Signature Footer */}
-        <div className="mt-4 flex justify-between items-start text-[8px]">
+        <div className="print-footer mt-4 flex justify-between items-start text-[8px]">
           {/* Left Column (Notes) */}
-          <div className="w-1/2 space-y-1 pr-4">
+          <div className="print-notes w-1/2 space-y-1 pr-4">
             <p className="font-semibold">1. Sumber: http://simbi.kemenag.go.id/sihat/waktu-sholat</p>
             <p className="font-semibold text-justify">
               2. SUDAH BENARKAH ARAH KIBLAT ANDA?? Anda Ragu!! Silahkan Hubungi TIM Hisab Rukyat Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.
@@ -436,7 +436,7 @@ export default function JadwalSholatWidget() {
           </div>
 
           {/* Right Column (Signature) */}
-          <div className="w-1/3 text-center flex flex-col items-center">
+          <div className="print-sig w-1/3 text-center flex flex-col items-center">
             <p className="font-semibold">
               {(() => {
                 const date = new Date();
@@ -453,7 +453,7 @@ export default function JadwalSholatWidget() {
             <p className="font-semibold">{sholatTtdJabatan || 'Kepala'}</p>
             
             {/* Spacer for signature */}
-            <div className="h-16"></div>
+            <div className="print-spacer h-16"></div>
             
             {/* Name with underline */}
             <p className="font-bold underline uppercase">{sholatTtdNama || '......................................................'}</p>
