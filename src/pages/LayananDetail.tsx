@@ -38,10 +38,10 @@ const defaultLayananData: Record<string, any> = {
     kasiName: 'Muh. Sobari, S.Pd.I.,M.Pd.',
     kasiPhoto: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Nama', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nama', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Nama', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
-      { id: '4', name: 'Nama', role: 'Admin EMIS', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
+      { id: '3', name: 'Budi Santoso, S.E.', role: 'Pengelola Sarana & Prasarana', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' },
+      { id: '4', name: 'Eka Lestari, S.Sos.', role: 'Admin EMIS & Keuangan', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'bimas-islam': {
@@ -60,9 +60,9 @@ const defaultLayananData: Record<string, any> = {
     kasiName: 'H. Ismid, S.Ag,.M.M',
     kasiPhoto: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Nama', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nama', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' },
-      { id: '3', name: 'Nama', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
+      { id: '3', name: 'Muryadi, S.H.', role: 'Pranata Humas & Urusan Wakaf', photo: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'pondok-pesantren': {
@@ -81,8 +81,8 @@ const defaultLayananData: Record<string, any> = {
     kasiName: 'H. Syamsul Bahri, S.Ag.,M.M',
     kasiPhoto: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Nama.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nama', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' }
     ]
   },
   'sertifikasi-halal': {
@@ -184,8 +184,8 @@ const defaultLayananData: Record<string, any> = {
     kasiName: 'Hj. Zubaidah, S.Ag.',
     kasiPhoto: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=400',
     staf: [
-      { id: '1', name: 'Nama, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=250' },
-      { id: '2', name: 'Nama, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' }
+      { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
+      { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' }
     ]
   }
 };

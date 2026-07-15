@@ -47,11 +47,11 @@ export default function InfografisMarquee() {
           <div 
             key={`${item.id}-${idx}`}
             className="w-48 sm:w-64 shrink-0 mx-3 cursor-pointer group rounded-xl overflow-hidden shadow-lg border border-white/10 bg-black/20"
-            onClick={() => setSelectedImage(item.imageUrl)}
+            onClick={() => setSelectedImage(item.image || item.imageUrl)}
           >
             <div className="aspect-[3/4] relative">
               <img 
-                src={item.imageUrl} 
+                src={item.image || item.imageUrl} 
                 alt={item.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />

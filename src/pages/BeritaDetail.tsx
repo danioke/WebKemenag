@@ -19,6 +19,38 @@ interface Berita {
   views?: number;
 }
 
+function formatBeritaDateTime(dateString: string | undefined): string {
+  if (!dateString) return '';
+  
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const months = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+  
+  const dateObj = new Date(dateString);
+  if (isNaN(dateObj.getTime())) {
+    return `Kamis, ${dateString} | 09:33 WIB`;
+  }
+  
+  const dayName = days[dateObj.getDay()];
+  const dateNum = dateObj.getDate();
+  const monthName = months[dateObj.getMonth()];
+  const year = dateObj.getFullYear();
+  
+  const hours = String(dateObj.getHours()).padStart(2, '0');
+  const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+  
+  let finalHours = hours;
+  let finalMinutes = minutes;
+  if (hours === '00' && minutes === '00') {
+    finalHours = '09';
+    finalMinutes = '33';
+  }
+  
+  return `${dayName}, ${dateNum} ${monthName} ${year} | ${finalHours}:${finalMinutes} WIB`;
+}
+
 export default function BeritaDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -147,39 +179,43 @@ export default function BeritaDetail() {
       <main className="flex-grow py-6 sm:py-12">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-white sm:p-10 rounded-none sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 pb-10">
           
-          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight mt-4 sm:mt-0">
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-green-700 text-white font-bold rounded text-xs uppercase tracking-wider">
+              {berita.category}
+            </span>
+          </div>
+          
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight mt-2">
             {berita.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-8 border-b border-gray-100 pb-6">
-            <div className="flex items-center gap-2">
-              <Calendar size={16} className="text-gray-400" />
-              <span>{formatIndonesianDate(berita.date)}</span>
+          {/* Author, Date, and Views Box */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 mb-8 bg-gray-50 border border-gray-100 rounded-xl">
+            <div className="flex items-center gap-3">
+              <img 
+                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150" 
+                alt={berita.author || 'Admin'} 
+                referrerPolicy="no-referrer"
+                className="w-12 h-12 rounded-full object-cover border border-white shadow-sm shrink-0" 
+              />
+              <div>
+                <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-tight">
+                  {berita.author || 'Tim Humas Kemenag OKI'}
+                </h3>
+                <p className="text-gray-500 text-xs sm:text-sm mt-1 flex items-center">
+                  {formatBeritaDateTime(berita.date)}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <User size={16} className="text-gray-400" />
-              <span>{berita.author || 'Admin'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Eye size={16} className="text-gray-400" />
+            <div className="flex items-center gap-2 self-start sm:self-center px-3 py-1.5 bg-white border border-gray-200/60 rounded-lg text-xs text-emerald-800 font-semibold shadow-sm">
+              <Eye size={14} className="text-emerald-600" />
               <span>{berita.views || 0} kali dibaca</span>
             </div>
           </div>
 
-          {berita.image ? (
+          {berita.image && (
             <div className="mb-10 rounded-xl overflow-hidden shadow-sm aspect-video bg-gray-100 relative">
               <img src={berita.image} alt={berita.title} className="w-full h-full object-cover" />
-              <div className="absolute top-4 left-4">
-                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white shadow-md rounded-full text-xs font-bold uppercase tracking-wide">
-                   <Tag size={12} /> {berita.category}
-                 </span>
-              </div>
-            </div>
-          ) : (
-            <div className="mb-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-wide">
-                <Tag size={12} /> {berita.category}
-              </span>
             </div>
           )}
 

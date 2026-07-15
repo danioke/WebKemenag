@@ -23,8 +23,8 @@ const defaultLayananData: Record<string, any> = {
         <li>Fasilitasi penyaluran dana Bantuan Operasional Sekolah (BOS) dan pembayaran Tunjangan Profesi Guru (TPG) bersertifikasi.</li>
       </ul>
     `,
-    kasiName: 'H. Syamsul Azhar, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1519817914152-2a041fdd68c6?auto=format&fit=crop&q=80&w=400',
+    kasiName: 'Muh. Sobari, S.Pd.I.,M.Pd.',
+    kasiPhoto: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=400',
     staf: [
       { id: '1', name: 'Ahmad Fauzi, S.Pd.I', role: 'Pelaksana Kelembagaan & SIMPATIKA', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' },
       { id: '2', name: 'Siti Rahma, M.Pd.', role: 'Pengelola Kurikulum & Kesiswaan', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
@@ -45,8 +45,8 @@ const defaultLayananData: Record<string, any> = {
         <li>Pemantauan serta evaluasi tata kelola zakat, UPZ (Unit Pengumpul Zakat) kecamatan, dan lembaga filantropi Islam lainnya.</li>
       </ul>
     `,
-    kasiName: 'H. Ismadi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=400',
+    kasiName: 'H. Ismid, S.Ag,.M.M',
+    kasiPhoto: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=400',
     staf: [
       { id: '1', name: 'Hidayatullah, S.Th.I', role: 'Penyuluh Agama Islam Ahli Muda', photo: 'https://images.unsplash.com/photo-1564683214965-3619addd900d?auto=format&fit=crop&q=80&w=250' },
       { id: '2', name: 'Drs. Iskandar', role: 'Pengelola Pemberdayaan KUA & Masjid', photo: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=250' },
@@ -66,8 +66,8 @@ const defaultLayananData: Record<string, any> = {
         <li>Penyusunan pelaporan, rekomendasi proposal bantuan fasilitas fisik, serta sarana penunjang aktivitas belajar mengajar santri.</li>
       </ul>
     `,
-    kasiName: 'Drs. H. Mutiara',
-    kasiPhoto: 'https://images.unsplash.com/photo-1604085572504-a392ddf0d86a?auto=format&fit=crop&q=80&w=400',
+    kasiName: 'H. Syamsul Bahri, S.Ag.,M.M',
+    kasiPhoto: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=400',
     staf: [
       { id: '1', name: 'Siti Aminah, S.Ag.', role: 'Pengelola Sarana Prasarana Diniyah', photo: 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80&w=250' },
       { id: '2', name: 'Zulkarnain, S.Pd.I', role: 'Pelaksana EMIS & Kelembagaan Pesantren', photo: 'https://images.unsplash.com/photo-1551041777-ed277b8ce348?auto=format&fit=crop&q=80&w=250' }
@@ -169,8 +169,8 @@ const defaultLayananData: Record<string, any> = {
         <li>Fasilitasi penyaluran tunjangan profesi guru (TPG) bersertifikasi bagi Guru Pendidikan Agama Islam pada sekolah.</li>
       </ul>
     `,
-    kasiName: 'H. Junaidi, S.Ag.',
-    kasiPhoto: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400',
+    kasiName: 'Hj. Zubaidah, S.Ag.',
+    kasiPhoto: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=400',
     staf: [
       { id: '1', name: 'Rahmat Hidayat, S.Pd.I', role: 'Pengelola Data SIAGA & TPG PAIS', photo: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&q=80&w=250' },
       { id: '2', name: 'Nurlaila, S.Th.I', role: 'Pelaksana Kurikulum & Evaluasi PAIS', photo: 'https://images.unsplash.com/photo-1585036156171-384164a8c675?auto=format&fit=crop&q=80&w=250' }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { auth, logout, isEmailAllowed, db, collection, getDocs, updateDoc, doc } from '../lib/db';
 import { toast } from 'sonner';
-import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, ChevronRight, User, Save, Folder, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, Calendar, Image as ImageIcon, Video, LogOut, Menu, X, ArrowLeft, Navigation, Users, Briefcase, ChevronDown, ChevronRight, User, Save, Folder, Settings, Mail } from 'lucide-react';
 import PengumumanAdmin from './admin/PengumumanAdmin';
 import BeritaAdmin from './admin/BeritaAdmin';
 import AgendaAdmin from './admin/AgendaAdmin';
@@ -18,6 +18,7 @@ import KategoriAdmin from './admin/KategoriAdmin';
 import LaporanAdmin from './admin/LaporanAdmin';
 import MediaAdmin from './admin/MediaAdmin';
 import SettingsAdmin from './admin/SettingsAdmin';
+import SubscribersAdmin from './admin/SubscribersAdmin';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -147,6 +148,7 @@ export default function AdminDashboard() {
       ]
     },
     { name: 'Laporan', path: '/admin/laporan', icon: FileText },
+    { name: 'Pelanggan Buletin', path: '/admin/subscribers', icon: Mail },
     { name: 'Pengaturan', path: '/admin/settings', icon: Settings },
   ];
 
@@ -332,6 +334,7 @@ export default function AdminDashboard() {
             <Route path="/layanan" element={<LayananAdmin />} />
             <Route path="/kategori" element={<KategoriAdmin />} />
             <Route path="/laporan" element={<LaporanAdmin />} />
+            <Route path="/subscribers" element={<SubscribersAdmin />} />
           </Routes>
         </main>
       </div>

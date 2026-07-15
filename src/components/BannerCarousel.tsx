@@ -36,7 +36,7 @@ export default function BannerCarousel() {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 sm:mb-8 relative md:hidden">
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-16 relative">
       {banners.length > 2 && (
         <>
           <button onClick={() => scroll('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md text-gray-800 hover:text-green-700 -ml-4">
@@ -55,12 +55,12 @@ export default function BannerCarousel() {
         {banners.map((banner) => (
           <div 
             key={banner.id}
-            className={`snap-start shrink-0 rounded-2xl overflow-hidden cursor-pointer relative group ${banners.length === 1 ? 'w-full' : 'w-[85vw] sm:w-[calc(50%-12px)]'}`}
-            onClick={() => setSelectedImage(banner.imageUrl)}
+            className={`snap-start shrink-0 rounded-2xl overflow-hidden cursor-pointer relative group ${banners.length === 1 ? 'w-full' : 'w-[85vw] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)]'}`}
+            onClick={() => setSelectedImage(banner.image || banner.imageUrl)}
           >
             <div className="aspect-[21/9] bg-gray-100">
               <img 
-                src={banner.imageUrl} 
+                src={banner.image || banner.imageUrl} 
                 alt={banner.title} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
               />
