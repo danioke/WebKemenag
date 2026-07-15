@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check } from 'lucide-react';
+import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
 export default function SettingsAdmin() {
   const { 
-    logoUrl, faviconUrl, ogImageUrl, siteName, metaDescription, socialMedia, contactInfo, updateSettings, fetchSettings 
+    logoUrl, faviconUrl, ogImageUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, updateSettings, fetchSettings 
   } = useSettingsStore();
 
   const [formData, setFormData] = useState({
@@ -15,7 +15,10 @@ export default function SettingsAdmin() {
     siteName,
     metaDescription,
     socialMedia: { ...socialMedia },
-    contactInfo: { ...contactInfo }
+    contactInfo: { ...contactInfo },
+    sholatTtdNama: sholatTtdNama || '',
+    sholatTtdNip: sholatTtdNip || '',
+    sholatTtdJabatan: sholatTtdJabatan || ''
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -31,7 +34,10 @@ export default function SettingsAdmin() {
         siteName: store.siteName,
         metaDescription: store.metaDescription,
         socialMedia: { ...store.socialMedia },
-        contactInfo: { ...store.contactInfo }
+        contactInfo: { ...store.contactInfo },
+        sholatTtdNama: store.sholatTtdNama || '',
+        sholatTtdNip: store.sholatTtdNip || '',
+        sholatTtdJabatan: store.sholatTtdJabatan || ''
       });
     });
   }, []);
@@ -244,6 +250,46 @@ export default function SettingsAdmin() {
                 onChange={(e) => setFormData({...formData, socialMedia: {...formData.socialMedia, youtube: e.target.value}})}
                 placeholder="URL YouTube"
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Tanda Tangan Jadwal Sholat */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <User className="text-green-700" size={20} />
+            <h3 className="font-bold text-gray-800">Tanda Tangan Jadwal Sholat</h3>
+          </div>
+          <div className="p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Jabatan Penandatangan (contoh: Kepala Kantor)</label>
+              <input
+                type="text"
+                value={formData.sholatTtdJabatan}
+                onChange={(e) => setFormData({...formData, sholatTtdJabatan: e.target.value})}
+                placeholder="Kepala Kantor"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap & Gelar</label>
+              <input
+                type="text"
+                value={formData.sholatTtdNama}
+                onChange={(e) => setFormData({...formData, sholatTtdNama: e.target.value})}
+                placeholder="H. Syarifin S.Ag., M.Pd.I"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">NIP (Nomor Induk Pegawai)</label>
+              <input
+                type="text"
+                value={formData.sholatTtdNip}
+                onChange={(e) => setFormData({...formData, sholatTtdNip: e.target.value})}
+                placeholder="197001151997031005"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
               />
             </div>
           </div>

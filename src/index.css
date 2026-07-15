@@ -46,3 +46,24 @@
   flex: 1;
   min-height: 300px;
 }
+
+/* Print Media Styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-schedule, #printable-schedule * {
+    visibility: visible;
+  }
+  #printable-schedule {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+}
+

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ChevronDown, Moon, Sunrise, Sun, CloudSun, Sunset, MoonStar, X, Calendar, Clock } from 'lucide-react';
+import { Search, ChevronDown, Moon, Sunrise, Sun, CloudSun, Sunset, MoonStar, X, Calendar, Clock, Printer } from 'lucide-react';
+import { useSettingsStore } from '../store/useSettingsStore';
 
 interface Jadwal {
   tanggal: string;
@@ -20,6 +21,7 @@ interface Kota {
 }
 
 export default function JadwalSholatWidget() {
+  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, logoUrl, fetchSettings } = useSettingsStore();
   const [jadwal, setJadwal] = useState<Jadwal | null>(null);
   const [kotaList, setKotaList] = useState<Kota[]>([]);
   const [selectedKota, setSelectedKota] = useState<string>("0809"); // OKI default
@@ -33,6 +35,10 @@ export default function JadwalSholatWidget() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [monthlyJadwal, setMonthlyJadwal] = useState<Jadwal[]>([]);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -311,17 +317,152 @@ export default function JadwalSholatWidget() {
                 <Clock size={12} />
                 Seluruh waktu dalam WIB / Zona Waktu Setempat
               </span>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="px-5 py-2 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-colors"
-              >
-                Tutup
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => window.print()}
+                  className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm text-xs"
+                >
+                  <Printer size={14} />
+                  Cetak PDF
+                </button>
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 transition-colors text-xs cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
 
           </div>
         </div>
       )}
+
+      {/* HIDDEN PRINT VIEW: Formatted exactly like official Kemenag schedule document */}
+      <div id="printable-schedule" className="hidden print:block bg-white text-black p-4 font-serif text-[10px] leading-tight">
+        {/* Kop Surat Header */}
+        <div className="flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
+          <img src={logoUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" />
+          <div className="text-center flex-1 mx-4">
+            <h3 className="font-bold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h3>
+            <h2 className="font-extrabold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h2>
+            <p className="text-[10px] font-medium italic leading-snug">Jalan Letnan Mukhtar Saleh No. 087 Kayuagung 30611</p>
+            <p className="text-[8px] font-medium leading-snug">Telepon (0712) 321004; Faksimili (0712) 321014; e-mail: kabogankomeringilir@kemenag.go.id</p>
+            <p className="text-[8px] font-semibold leading-snug">Website: www.sumsel.kemenag.go.id</p>
+          </div>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png" alt="Logo DMI" className="w-16 h-16 object-contain shrink-0" />
+        </div>
+
+        {/* Document Title */}
+        <div className="text-center mb-4">
+          <h1 className="font-extrabold text-sm tracking-wide uppercase leading-tight">JADWAL WAKTU SHOLAT</h1>
+          <h2 className="font-bold text-xs uppercase leading-tight">UNTUK KABUPATEN OGAN KOMERING ILIR & SEKITARNYA</h2>
+          <h3 className="font-semibold text-[10px] uppercase leading-tight mt-1">
+            {(() => {
+              const date = new Date();
+              const months = [
+                'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
+                'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
+              ];
+              const indonesianMonth = months[date.getMonth()];
+              const year = date.getFullYear();
+              const hijriYear = year - 579;
+              return `${indonesianMonth} ${year} M / RAJAB - SYA'BAN ${hijriYear} H`;
+            })()}
+          </h3>
+        </div>
+
+        {/* Hadits */}
+        <div className="text-center border border-black p-2 rounded-lg bg-gray-50/50 mb-3 mx-auto max-w-xl">
+          <p className="font-serif text-sm leading-normal text-right mb-1" dir="rtl">
+            عَنْ أُمِّ فَرْوَةَ قَالَتْ سُئِلَ رَسُولُ اللَّهِ -صلى الله عليه وسلم- أَىُّ الأَعْمَالِ أَfْضَلُ قَالَ « الصَّلاَةُ فِى أَوَّلِ وَقْتِهَا »
+          </p>
+          <p className="text-[9px] leading-relaxed text-gray-700 italic">
+            Dari Ummu Farwah, ia berkata, "Rasulullah Shallallahu 'Alaihi Wasallam pernah ditanya, Amalan apakah yang paling Afdhal? Beliau menjawab, "Shalat Diawal Waktunya." (HR. Abu Daud Nomor: 426. Syaikh Al Albani mengatakan bahwa Hadits ini Shahih)
+          </p>
+        </div>
+
+        {/* Coordinates */}
+        <div className="flex justify-between items-center text-[8px] font-bold border-b border-black pb-1 mb-2">
+          <span>Arah Kiblat : 294°43' Jarak Ka'bah : 7610.561 KM</span>
+          <span>Lintang : 3°22' LS  Bujur : 104°49' BT</span>
+        </div>
+
+        {/* Table */}
+        <table className="w-full text-center border-collapse border border-black text-[9px]">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Hari</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Tanggal</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Subuh</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Terbit</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Dhuha</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Zuhur</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Ashar</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Maghrib</th>
+              <th className="border border-black px-1.5 py-1 font-bold uppercase">Isya'</th>
+            </tr>
+          </thead>
+          <tbody>
+            {monthlyJadwal.map((row, idx) => {
+              const parts = row.tanggal.split(', ');
+              const hari = parts[0] || '';
+              const tgl = parts[1] || row.tanggal;
+              return (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="border border-black px-1.5 py-0.5 font-semibold">{hari}</td>
+                  <td className="border border-black px-1.5 py-0.5 whitespace-nowrap">{tgl}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.subuh}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.terbit}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.dhuha}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.dzuhur}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.ashar}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.maghrib}</td>
+                  <td className="border border-black px-1.5 py-0.5 font-medium">{row.isya}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+
+        {/* Notes and Signature Footer */}
+        <div className="mt-4 flex justify-between items-start text-[8px]">
+          {/* Left Column (Notes) */}
+          <div className="w-1/2 space-y-1 pr-4">
+            <p className="font-semibold">1. Sumber: http://simbi.kemenag.go.id/sihat/waktu-sholat</p>
+            <p className="font-semibold text-justify">
+              2. SUDAH BENARKAH ARAH KIBLAT ANDA?? Anda Ragu!! Silahkan Hubungi TIM Hisab Rukyat Kantor Kementerian Agama Kabupaten Ogan Komering Ilir.
+            </p>
+          </div>
+
+          {/* Right Column (Signature) */}
+          <div className="w-1/3 text-center flex flex-col items-center">
+            <p className="font-semibold">
+              {(() => {
+                const date = new Date();
+                const months = [
+                  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ];
+                const indonesianMonth = months[date.getMonth()];
+                const day = String(date.getDate()).padStart(2, '0');
+                const year = date.getFullYear();
+                return `Kayuagung, ${day} ${indonesianMonth} ${year} M`;
+              })()}
+            </p>
+            <p className="font-semibold">{sholatTtdJabatan || 'Kepala'}</p>
+            
+            {/* Spacer for signature */}
+            <div className="h-16"></div>
+            
+            {/* Name with underline */}
+            <p className="font-bold underline uppercase">{sholatTtdNama || '......................................................'}</p>
+            <p className="font-semibold mt-0.5">
+              {sholatTtdNip ? `NIP. ${sholatTtdNip}` : 'NIP. ......................................................'}
+            </p>
+          </div>
+        </div>
+      </div>
 
     </div>
   );

@@ -17,6 +17,9 @@ interface SettingsState {
     phone: string;
     email: string;
   };
+  sholatTtdNama?: string;
+  sholatTtdNip?: string;
+  sholatTtdJabatan?: string;
   updateSettings: (newSettings: Partial<Omit<SettingsState, 'updateSettings' | 'fetchSettings'>>) => Promise<void>;
   fetchSettings: () => Promise<void>;
 }
@@ -39,6 +42,9 @@ export const useSettingsStore = create<SettingsState>()(
         phone: '(0714) 321xxx',
         email: 'kaboki@kemenag.go.id',
       },
+      sholatTtdNama: '',
+      sholatTtdNip: '',
+      sholatTtdJabatan: '',
       fetchSettings: async () => {
         try {
           const response = await fetch('/api/db/settings');
