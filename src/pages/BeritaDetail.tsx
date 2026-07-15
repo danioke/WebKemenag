@@ -184,7 +184,7 @@ export default function BeritaDetail() {
           )}
 
           <div 
-            className="prose prose-lg max-w-none text-gray-700 leading-relaxed"
+            className="prose prose-lg max-w-none text-gray-700 leading-relaxed break-words"
             dangerouslySetInnerHTML={{ __html: berita.excerpt }}
           />
         </article>

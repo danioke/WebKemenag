@@ -3,8 +3,9 @@ import { formatIndonesianDate } from '../../lib/utils';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, X, CloudDownload, Upload, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { createSlug } from '../../lib/helpers';
 import RichTextEditor from '../../components/RichTextEditor';
 interface Berita {
   id: string;
@@ -210,6 +211,7 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
@@ -219,11 +221,14 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {currentItems.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-6 py-10 text-center text-gray-500">Belum ada data berita.</td>
+                <td colSpan={5} className="px-6 py-10 text-center text-gray-500">Belum ada data berita.</td>
               </tr>
             ) : (
-              currentItems.map((item) => (
+              currentItems.map((item, index) => (
                 <tr key={item.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                    {startIndex + index + 1}
+                  </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
                     <div className="flex items-center gap-4">
                       {item.image ? (
@@ -242,6 +247,9 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatIndonesianDate(item.date)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-2">
+                      <Link to={`/berita/${createSlug(item.title) || item.id}`} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-gray-900 bg-gray-50 p-1.5 rounded-md">
+                        <Eye size={16} />
+                      </Link>
                       <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1.5 rounded-md">
                         <Edit size={16} />
                       </button>
