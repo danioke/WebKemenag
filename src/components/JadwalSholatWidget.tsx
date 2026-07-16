@@ -411,8 +411,8 @@ export default function JadwalSholatWidget() {
           <div className="print-kop flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
             <img src={logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
             <div className="text-center flex-1 mx-4">
-              <h2 className="font-bold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
-              <h3 className="font-extrabold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
+              <h2 className="font-extrabold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
+              <h3 className="font-bold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
               <p className="text-[10px] font-medium italic leading-snug">Jalan Letnan Mukhtar Saleh No. 087 Kayuagung 30611</p>
               <p className="text-[8px] font-medium leading-snug">Telepon (0712) 321014; Faksimili (0712) 321014; e-mail: kabogankomeringilir@kemenag.go.id</p>
               <p className="text-[8px] font-semibold leading-snug">Website: https://kemenagoki.id</p>
