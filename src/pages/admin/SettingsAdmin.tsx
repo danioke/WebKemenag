@@ -2,11 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User, Upload, Radio } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
+import MediaPickerModal from '../../components/MediaPickerModal';
 
 export default function SettingsAdmin() {
   const { 
     logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, liveStreaming, updateSettings, fetchSettings 
   } = useSettingsStore();
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerCallback, setPickerCallback] = useState<(url: string) => void>(() => () => {});
+
+  const openPicker = (callback: (url: string) => void) => {
+    setPickerCallback(() => callback);
+    setPickerOpen(true);
+  };
 
   const [formData, setFormData] = useState({
     logoUrl,
@@ -28,14 +37,7 @@ export default function SettingsAdmin() {
     }
   });
 
-  const logoRef = useRef<HTMLInputElement>(null);
-  const faviconRef = useRef<HTMLInputElement>(null);
-  const ogImageRef = useRef<HTMLInputElement>(null);
-  const logoKemenagRef = useRef<HTMLInputElement>(null);
-  const logoDmiRef = useRef<HTMLInputElement>(null);
-
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSettings().then(() => {
@@ -63,39 +65,6 @@ export default function SettingsAdmin() {
     });
   }, []);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Ukuran file maksimal 5MB");
-      return;
-    }
-    
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    
-    setUploadingField(fieldName);
-    toast.info('Mengunggah gambar...');
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setFormData(prev => ({ ...prev, [fieldName]: data.url }));
-        toast.success('Gambar berhasil diunggah');
-      } else {
-        toast.error('Gagal mengunggah gambar');
-      }
-    } catch (error) {
-      toast.error('Terjadi kesalahan saat mengunggah');
-    } finally {
-      setUploadingField(null);
-      e.target.value = '';
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,25 +143,13 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../logo.png"
                   />
-                  <input
-                    type="file"
-                    ref={logoRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, 'logoUrl')}
-                  />
                   <button
                     type="button"
-                    onClick={() => logoRef.current?.click()}
-                    disabled={uploadingField === 'logoUrl'}
-                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                    onClick={() => openPicker((url) => setFormData({...formData, logoUrl: url}))}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
                   >
-                    {uploadingField === 'logoUrl' ? (
-                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Upload size={16} />
-                    )}
-                    Upload
+                    <Upload size={16} />
+                    Pilih Media
                   </button>
                 </div>
                 <p className="text-xs text-gray-500">Anda dapat menyalin URL dari menu Media Library setelah mengunggah logo.</p>
@@ -217,25 +174,13 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../favicon.ico"
                   />
-                  <input
-                    type="file"
-                    ref={faviconRef}
-                    accept="image/x-icon,image/png,image/jpeg"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, 'faviconUrl')}
-                  />
                   <button
                     type="button"
-                    onClick={() => faviconRef.current?.click()}
-                    disabled={uploadingField === 'faviconUrl'}
-                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                    onClick={() => openPicker((url) => setFormData({...formData, faviconUrl: url}))}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
                   >
-                    {uploadingField === 'faviconUrl' ? (
-                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Upload size={16} />
-                    )}
-                    Upload
+                    <Upload size={16} />
+                    Pilih Media
                   </button>
                 </div>
               </div>
@@ -259,25 +204,13 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../og-image.jpg"
                   />
-                  <input
-                    type="file"
-                    ref={ogImageRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, 'ogImageUrl')}
-                  />
                   <button
                     type="button"
-                    onClick={() => ogImageRef.current?.click()}
-                    disabled={uploadingField === 'ogImageUrl'}
-                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                    onClick={() => openPicker((url) => setFormData({...formData, ogImageUrl: url}))}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
                   >
-                    {uploadingField === 'ogImageUrl' ? (
-                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Upload size={16} />
-                    )}
-                    Upload
+                    <Upload size={16} />
+                    Pilih Media
                   </button>
                 </div>
                 <p className="text-xs text-gray-500">Gambar yang muncul ketika link website dibagikan (WhatsApp, FB, dll).</p>
@@ -302,25 +235,13 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../logo-kemenag.png"
                   />
-                  <input
-                    type="file"
-                    ref={logoKemenagRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, 'logoKemenagUrl')}
-                  />
                   <button
                     type="button"
-                    onClick={() => logoKemenagRef.current?.click()}
-                    disabled={uploadingField === 'logoKemenagUrl'}
-                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                    onClick={() => openPicker((url) => setFormData({...formData, logoKemenagUrl: url}))}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
                   >
-                    {uploadingField === 'logoKemenagUrl' ? (
-                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Upload size={16} />
-                    )}
-                    Upload
+                    <Upload size={16} />
+                    Pilih Media
                   </button>
                 </div>
               </div>
@@ -344,25 +265,13 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../logo-dmi.png"
                   />
-                  <input
-                    type="file"
-                    ref={logoDmiRef}
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, 'logoDmiUrl')}
-                  />
                   <button
                     type="button"
-                    onClick={() => logoDmiRef.current?.click()}
-                    disabled={uploadingField === 'logoDmiUrl'}
-                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                    onClick={() => openPicker((url) => setFormData({...formData, logoDmiUrl: url}))}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
                   >
-                    {uploadingField === 'logoDmiUrl' ? (
-                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      <Upload size={16} />
-                    )}
-                    Upload
+                    <Upload size={16} />
+                    Pilih Media
                   </button>
                 </div>
               </div>
@@ -558,6 +467,16 @@ export default function SettingsAdmin() {
           </button>
         </div>
       </form>
+
+      {pickerOpen && (
+        <MediaPickerModal 
+          onSelect={(url) => {
+            pickerCallback(url);
+            setPickerOpen(false);
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }

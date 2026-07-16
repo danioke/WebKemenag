@@ -1,8 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
-import { db } from '../../lib/db';
-import { toast } from 'sonner';
-import { Plus, Edit, Trash2, X, Image as ImageIcon, Upload } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+  orderBy,
+  query,
+} from "../../lib/db";
+import { db } from "../../lib/db";
+import { toast } from "sonner";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  X,
+  Image as ImageIcon,
+  Upload,
+} from "lucide-react";
+import { useMediaPickerStore } from "../../store/useMediaPickerStore";
 
 interface Foto {
   id: string;
@@ -14,22 +32,25 @@ export default function FotoAdmin() {
   const [data, setData] = useState<Foto[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ id: '', title: '', image: '' });
+  const [formData, setFormData] = useState({ id: "", title: "", image: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const { openPicker } = useMediaPickerStore();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const fetchData = async () => {
     try {
-      const q = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
+      const q = query(collection(db, "photos"), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
-      const docs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Foto));
+      const docs = querySnapshot.docs.map(
+        (doc) => ({ id: doc.id, ...doc.data() }) as Foto,
+      );
       setData(docs);
       setCurrentPage(1); // reset to first page on fetch
     } catch (error) {
       console.error(error);
-      toast.error('Gagal mengambil data foto');
+      toast.error("Gagal mengambil data foto");
     } finally {
       setLoading(false);
     }
@@ -69,31 +90,31 @@ export default function FotoAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.image) {
-      toast.error('Judul dan URL Gambar wajib diisi');
+      toast.error("Judul dan URL Gambar wajib diisi");
       return;
     }
-    
+
     try {
       if (isEditing) {
-        const docRef = doc(db, 'photos', formData.id);
+        const docRef = doc(db, "photos", formData.id);
         await updateDoc(docRef, {
           title: formData.title,
           image: formData.image,
         });
-        toast.success('Foto berhasil diperbarui');
+        toast.success("Foto berhasil diperbarui");
       } else {
-        await addDoc(collection(db, 'photos'), {
+        await addDoc(collection(db, "photos"), {
           title: formData.title,
           image: formData.image,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
         });
-        toast.success('Foto berhasil ditambahkan');
+        toast.success("Foto berhasil ditambahkan");
       }
       setIsModalOpen(false);
       fetchData();
     } catch (error) {
       console.error(error);
-      toast.error('Terjadi kesalahan saat menyimpan data');
+      toast.error("Terjadi kesalahan saat menyimpan data");
     }
   };
 
@@ -104,20 +125,20 @@ export default function FotoAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus foto ini?')) {
+    if (window.confirm("Apakah Anda yakin ingin menghapus foto ini?")) {
       try {
-        await deleteDoc(doc(db, 'photos', id));
-        toast.success('Foto berhasil dihapus');
+        await deleteDoc(doc(db, "photos", id));
+        toast.success("Foto berhasil dihapus");
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error('Gagal menghapus foto');
+        toast.error("Gagal menghapus foto");
       }
     }
   };
 
   const openAddModal = () => {
-    setFormData({ id: '', title: '', image: '' });
+    setFormData({ id: "", title: "", image: "" });
     setIsEditing(false);
     setIsModalOpen(true);
   };
@@ -144,24 +165,41 @@ export default function FotoAdmin() {
             Belum ada data foto.
           </div>
         ) : (
-          data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item) => (
-            <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group">
-              <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-4 border-t border-gray-100">
-                <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm mb-3">{item.title}</h3>
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(item)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-xs font-semibold">
-                    <Edit size={14} /> Edit
-                  </button>
-                  <button onClick={() => handleDelete(item.id)} className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs font-semibold">
-                    <Trash2 size={14} /> Hapus
-                  </button>
+          data
+            .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+            .map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden group"
+              >
+                <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-4 border-t border-gray-100">
+                  <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm mb-3">
+                    {item.title}
+                  </h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-xs font-semibold"
+                    >
+                      <Edit size={14} /> Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs font-semibold"
+                    >
+                      <Trash2 size={14} /> Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
 
@@ -169,22 +207,25 @@ export default function FotoAdmin() {
       {Math.ceil(data.length / itemsPerPage) > 1 && (
         <div className="mt-8 flex justify-center items-center gap-2">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
             className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Sebelumnya
           </button>
-          
+
           <div className="flex gap-1">
-            {Array.from({ length: Math.ceil(data.length / itemsPerPage) }, (_, i) => i + 1).map((page) => (
+            {Array.from(
+              { length: Math.ceil(data.length / itemsPerPage) },
+              (_, i) => i + 1,
+            ).map((page) => (
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
                 className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-colors ${
-                  currentPage === page 
-                    ? 'bg-green-700 text-white shadow-sm' 
-                    : 'border border-gray-200 text-gray-700 bg-white hover:bg-gray-50'
+                  currentPage === page
+                    ? "bg-green-700 text-white shadow-sm"
+                    : "border border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
                 }`}
               >
                 {page}
@@ -193,7 +234,11 @@ export default function FotoAdmin() {
           </div>
 
           <button
-            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(data.length / itemsPerPage), prev + 1))}
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.min(Math.ceil(data.length / itemsPerPage), prev + 1),
+              )
+            }
             disabled={currentPage === Math.ceil(data.length / itemsPerPage)}
             className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -206,45 +251,65 @@ export default function FotoAdmin() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
             <div className="flex justify-between items-center p-5 border-b border-gray-100 shrink-0">
-              <h3 className="text-lg font-bold text-gray-900">{isEditing ? 'Edit Foto' : 'Tambah Foto'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-lg font-bold text-gray-900">
+                {isEditing ? "Edit Foto" : "Tambah Foto"}
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X size={20} />
               </button>
             </div>
             <div className="p-5 overflow-y-auto">
-              <form id="foto-form" onSubmit={handleSubmit} className="space-y-4">
+              <form
+                id="foto-form"
+                onSubmit={handleSubmit}
+                className="space-y-4"
+              >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul Foto</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Judul Foto
+                  </label>
                   <input
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Foto</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gambar Foto
+                  </label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, image: e.target.value })
+                      }
                       placeholder="Masukkan URL Gambar, upload lokal,  "
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
-                    <label className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap">
-                      {uploading ? (
-                        <div className="w-3 h-3 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        <><Upload size={14} className="mr-1" /> Upload Lokal</>
-                      )}
-                      <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                    </label>
+                    <button
+                      type="button"
+                      onClick={() => openPicker((url) => setFormData({ ...formData, image: url }))}
+                      className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap"
+                    >
+                      <Upload size={14} className="mr-1" /> Pilih dari Media
+                    </button>
                   </div>
                   {formData.image && (
                     <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                      <img
+                        src={formData.image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   )}
                 </div>
@@ -269,7 +334,6 @@ export default function FotoAdmin() {
           </div>
         </div>
       )}
-
     </div>
   );
 }

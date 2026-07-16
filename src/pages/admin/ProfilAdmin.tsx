@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, doc, getDoc, setDoc } from '../../lib/db';
 import { toast } from 'sonner';
 import { Save, Plus, Trash2, Edit } from 'lucide-react';
+import MediaPickerModal from '../../components/MediaPickerModal';
 
 interface Seksi {
   id: string;
@@ -23,6 +24,10 @@ export default function ProfilAdmin() {
   const [kepalaPhoto, setKepalaPhoto] = useState('');
   
   const [seksiList, setSeksiList] = useState<Seksi[]>([]);
+
+  // Media Picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerCallback, setPickerCallback] = useState<(url: string) => void>(() => () => {});
 
   useEffect(() => {
     const fetchProfil = async () => {
@@ -74,31 +79,9 @@ export default function ProfilAdmin() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Ukuran file maksimal 5MB");
-      return;
-    }
-    const formDataUpload = new FormData();
-    formDataUpload.append('file', file);
-    toast.info('Mengunggah gambar...');
-    try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        callback(data.url);
-        toast.success('Gambar berhasil diunggah');
-      } else {
-        toast.error('Gagal mengunggah gambar');
-      }
-    } catch (error) {
-      toast.error('Terjadi kesalahan saat mengunggah');
-    }
+  const openPicker = (callback: (url: string) => void) => {
+    setPickerCallback(() => callback);
+    setPickerOpen(true);
   };
 
   const updateMisi = (index: number, value: string) => {
@@ -206,10 +189,9 @@ export default function ProfilAdmin() {
                   <span className="text-xs mt-1">Belum ada foto</span>
                 </div>
               )}
-              <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white">
+              <button type="button" onClick={() => openPicker(setKepalaPhoto)} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white w-full h-full">
                 <Edit size={24} />
-                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, setKepalaPhoto)} />
-              </label>
+              </button>
             </div>
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">Nama Kepala Kantor</label>
@@ -251,14 +233,13 @@ export default function ProfilAdmin() {
                       <span className="text-[10px] mt-1 text-center">Foto</span>
                     </div>
                   )}
-                  <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white">
-                    <Edit size={16} />
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, (url) => {
+                  <button type="button" onClick={() => openPicker((url) => {
                       const newList = [...seksiList];
                       newList[index].photoUrl = url;
                       setSeksiList(newList);
-                    })} />
-                  </label>
+                    })} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity text-white w-full h-full">
+                    <Edit size={16} />
+                  </button>
                 </div>
                 <div className="flex-1 space-y-3">
                   <div>
@@ -318,6 +299,16 @@ export default function ProfilAdmin() {
         </div>
 
       </form>
+      
+      {pickerOpen && (
+        <MediaPickerModal 
+          onSelect={(url) => {
+            pickerCallback(url);
+            setPickerOpen(false);
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
     </div>
   );
 }

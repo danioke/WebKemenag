@@ -129,7 +129,7 @@ export default function ProfilPage() {
                 </div>
                 <div className="text-center md:text-left">
                   <h3 className="text-sm font-bold tracking-widest text-green-300 uppercase mb-2">Kepala Kantor Kemenag OKI</h3>
-                  <h2 className="text-3xl md:text-5xl font-extrabold mb-4">{kepalaNama}</h2>
+                  <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold mb-4">{kepalaNama}</h2>
                   <p className="text-green-100 max-w-2xl text-lg leading-relaxed">
                     Memimpin dan mengoordinasikan seluruh pelaksanaan tugas Kementerian Agama di wilayah Kabupaten Ogan Komering Ilir demi terwujudnya masyarakat yang taat beragama, rukun, cerdas, dan sejahtera.
                   </p>
