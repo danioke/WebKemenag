@@ -180,7 +180,7 @@ export default function AgendaDetail() {
             <div className="bg-white rounded-none sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 p-6 sm:p-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-gray-900">Agenda Lainnya</h3>
-                <Link to="/" className="text-sm font-semibold text-green-700 hover:text-green-800 flex items-center gap-1">
+                <Link to="/agenda" className="text-sm font-semibold text-green-700 hover:text-green-800 flex items-center gap-1">
                   Lihat Semua <ArrowRight size={16} />
                 </Link>
               </div>
