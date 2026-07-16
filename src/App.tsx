@@ -18,6 +18,7 @@ import AgendaDetail from './pages/AgendaDetail';
 import PengumumanDetail from './pages/PengumumanDetail';
 import GaleriFoto from './pages/GaleriFoto';
 import GaleriVideo from './pages/GaleriVideo';
+import VideoDetail from './pages/VideoDetail';
 import AllNews from './pages/AllNews';
 import AllPengumuman from './pages/AllPengumuman';
 import AllAgenda from './pages/AllAgenda';
@@ -63,6 +64,7 @@ export default function App() {
           <Route path="/pengumuman/:id" element={<PengumumanDetail />} />
           <Route path="/galeri-foto" element={<GaleriFoto />} />
           <Route path="/galeri-video" element={<GaleriVideo />} />
+          <Route path="/galeri-video/:id" element={<VideoDetail />} />
           <Route path="/layanan/:id" element={<LayananDetail />} />
           <Route path="/hmsoke" element={<Login />} />
           <Route path="/admin/*" element={<AdminDashboard />} />

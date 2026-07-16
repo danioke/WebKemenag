@@ -410,9 +410,9 @@ export default function JadwalSholatWidget() {
           {/* Kop Surat Header */}
           <div className="print-kop flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
             <img src={logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
-            <div className="text-center flex-1 mx-4">
+            <div className="text-center flex-1 mx-2">
               <h2 className="font-extrabold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
-              <h3 className="font-bold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
+              <h3 className="font-bold text-[13px] uppercase leading-tight tracking-tight whitespace-nowrap">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
               <p className="text-[10px] font-medium italic leading-snug">Jalan Letnan Mukhtar Saleh No. 087 Kayuagung 30611</p>
               <p className="text-[8px] font-medium leading-snug">Telepon (0712) 321014; Faksimili (0712) 321014; e-mail: kabogankomeringilir@kemenag.go.id</p>
               <p className="text-[8px] font-semibold leading-snug">Website: https://kemenagoki.id</p>
@@ -459,15 +459,15 @@ export default function JadwalSholatWidget() {
           <table className="print-table w-full text-center border-collapse border border-black text-[9px]">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Hari</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Tanggal</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Subuh</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Terbit</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Dhuha</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Zuhur</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Ashar</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Maghrib</th>
-                <th className="border border-black px-1.5 py-1 font-bold uppercase">Isya'</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Hari</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Tanggal</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Subuh</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Terbit</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Dhuha</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Zuhur</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Ashar</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Maghrib</th>
+                <th className="border border-black px-1.5 py-2 font-bold uppercase">Isya'</th>
               </tr>
             </thead>
             <tbody>
@@ -477,15 +477,15 @@ export default function JadwalSholatWidget() {
                 const tgl = parts[1] || row.tanggal;
                 return (
                   <tr key={idx} className="hover:bg-gray-50">
-                    <td className="border border-black px-1.5 py-[7.5px] font-semibold">{hari}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] whitespace-nowrap">{tgl}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.subuh}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.terbit}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.dhuha}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.dzuhur}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.ashar}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.maghrib}</td>
-                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.isya}</td>
+                    <td className="border border-black px-1.5 py-3 font-semibold">{hari}</td>
+                    <td className="border border-black px-1.5 py-3 whitespace-nowrap">{tgl}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.subuh}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.terbit}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.dhuha}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.dzuhur}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.ashar}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.maghrib}</td>
+                    <td className="border border-black px-1.5 py-3 font-medium">{row.isya}</td>
                   </tr>
                 );
               })}
