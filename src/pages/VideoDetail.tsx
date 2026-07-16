@@ -78,7 +78,6 @@ export default function VideoDetail() {
           width="100%"
           height="100%"
           controls={true}
-          playing={true}
           config={{
             youtube: {
               playerVars: { showinfo: 0, rel: 0, modestbranding: 1 }
