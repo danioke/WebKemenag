@@ -10,6 +10,7 @@ import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { useSettingsStore } from './store/useSettingsStore';
 import { AnimatePresence } from 'motion/react';
 import HomePage from './pages/HomePage';
+import ProfilPage from './pages/ProfilPage';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 
@@ -56,6 +57,7 @@ export default function App() {
         <Toaster position="top-right" richColors />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/profil" element={<ProfilPage />} />
           <Route path="/berita" element={<AllNews />} />
           <Route path="/berita/:id" element={<BeritaDetail />} />
           <Route path="/agenda" element={<AllAgenda />} />

@@ -13,6 +13,7 @@ import VideoAdmin from './admin/VideoAdmin';
 import WordPressImporter from './admin/WordPressImporter';
 import NavigationAdmin from './admin/NavigationAdmin';
 import UserAdmin from './admin/UserAdmin';
+import ProfilAdmin from './admin/ProfilAdmin';
 import LayananAdmin from './admin/LayananAdmin';
 import KategoriAdmin from './admin/KategoriAdmin';
 import LaporanAdmin from './admin/LaporanAdmin';
@@ -129,6 +130,7 @@ export default function AdminDashboard() {
 
   const navItems = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { name: 'Profil Kantor', path: '/admin/profil', icon: Users },
     { name: 'Media', path: '/admin/media', icon: Folder },
     { name: 'Navigasi', path: '/admin/navigasi', icon: Navigation },
     { name: 'User Admin', path: '/admin/users', icon: Users },
@@ -330,6 +332,7 @@ export default function AdminDashboard() {
             <Route path="/banner" element={<BannerAdmin />} />
             <Route path="/infografis" element={<InfografisAdmin />} />
             <Route path="/video" element={<VideoAdmin />} />
+            <Route path="/profil" element={<ProfilAdmin />} />
             <Route path="/users" element={<UserAdmin />} />
             <Route path="/layanan" element={<LayananAdmin />} />
             <Route path="/kategori" element={<KategoriAdmin />} />

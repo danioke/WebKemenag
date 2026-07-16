@@ -117,7 +117,7 @@ export default function Hero() {
                 <FileText size={18} />
                 Layanan Online PTSP
               </a>
-              <a href="#" className="inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl backdrop-blur-sm transition-all">
+              <a href="/profil" className="inline-flex justify-center items-center gap-2 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold rounded-xl backdrop-blur-sm transition-all">
                 Jelajahi Profil
                 <ArrowRight size={18} />
               </a>
