@@ -37,6 +37,10 @@ export default function JadwalSholatWidget() {
   const [monthlyJadwal, setMonthlyJadwal] = useState<Jadwal[]>([]);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
 
+  const [lintang, setLintang] = useState<string>("3°22' LS");
+  const [bujur, setBujur] = useState<string>("104°49' BT");
+  const [arahKiblat, setArahKiblat] = useState<string>("294°43' Jarak Ka'bah : 7610.561 KM");
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -83,6 +87,65 @@ export default function JadwalSholatWidget() {
       .catch(err => console.error("Error fetching jadwal:", err))
       .finally(() => setLoading(false));
   }, [selectedKota]);
+
+  useEffect(() => {
+    const selectedKotaObj = kotaList.find(k => k.id === selectedKota);
+    if (!selectedKotaObj) return;
+
+    // Bersihkan nama kota (misal: "KAB. OGAN KOMERING ILIR" -> "OGAN KOMERING ILIR")
+    const cleanCityName = selectedKotaObj.lokasi
+      .replace('KAB. ', '')
+      .replace('KOTA ', '');
+    
+    // Fetch coordinates from Nominatim
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanCityName + ', Indonesia')}&format=json&limit=1`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          
+          // Format lintang bujur
+          const latDeg = Math.floor(Math.abs(lat));
+          const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
+          const latDir = lat >= 0 ? 'LU' : 'LS';
+          
+          const lonDeg = Math.floor(Math.abs(lon));
+          const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
+          const lonDir = lon >= 0 ? 'BT' : 'BB';
+          
+          setLintang(`${latDeg}°${latMin}' ${latDir}`);
+          setBujur(`${lonDeg}°${lonMin}' ${lonDir}`);
+
+          // Hitung arah kiblat (Ka'bah Lat: 21.4225, Lon: 39.8262)
+          const kaabaLat = 21.422487 * (Math.PI / 180);
+          const kaabaLon = 39.826206 * (Math.PI / 180);
+          const userLat = lat * (Math.PI / 180);
+          const userLon = lon * (Math.PI / 180);
+
+          const y = Math.sin(kaabaLon - userLon);
+          const x = Math.cos(userLat) * Math.tan(kaabaLat) - Math.sin(userLat) * Math.cos(kaabaLon - userLon);
+          let qibla = Math.atan2(y, x) * (180 / Math.PI);
+          if (qibla < 0) qibla += 360;
+
+          const qiblaDeg = Math.floor(qibla);
+          const qiblaMin = Math.floor((qibla - qiblaDeg) * 60);
+
+          // Hitung jarak ke Ka'bah (Rumus Haversine)
+          const R = 6371; // Earth radius in km
+          const dLat = kaabaLat - userLat;
+          const dLon = kaabaLon - userLon;
+          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(userLat) * Math.cos(kaabaLat) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          const distance = (R * c).toFixed(3);
+
+          setArahKiblat(`${qiblaDeg}°${qiblaMin}' Jarak Ka'bah : ${distance} KM`);
+        }
+      })
+      .catch(err => console.error("Error fetching coordinates:", err));
+  }, [selectedKota, kotaList]);
 
   // Fetch monthly schedule when modal opens
   useEffect(() => {
@@ -348,11 +411,11 @@ export default function JadwalSholatWidget() {
           <div className="print-kop flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
             <img src={logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
             <div className="text-center flex-1 mx-4">
-              <h3 className="font-bold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h3>
-              <h2 className="font-extrabold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h2>
+              <h2 className="font-bold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
+              <h3 className="font-extrabold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
               <p className="text-[10px] font-medium italic leading-snug">Jalan Letnan Mukhtar Saleh No. 087 Kayuagung 30611</p>
-              <p className="text-[8px] font-medium leading-snug">Telepon (0712) 321004; Faksimili (0712) 321014; e-mail: kabogankomeringilir@kemenag.go.id</p>
-              <p className="text-[8px] font-semibold leading-snug">Website: www.sumsel.kemenag.go.id</p>
+              <p className="text-[8px] font-medium leading-snug">Telepon (0712) 321014; Faksimili (0712) 321014; e-mail: kabogankomeringilir@kemenag.go.id</p>
+              <p className="text-[8px] font-semibold leading-snug">Website: https://kemenagoki.id</p>
             </div>
             <img src={logoDmiUrl || 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png'} alt="Logo DMI" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
           </div>
@@ -385,11 +448,11 @@ export default function JadwalSholatWidget() {
               Dari Ummu Farwah, ia berkata, "Rasulullah Shallallahu 'Alaihi Wasallam pernah ditanya, Amalan apakah yang paling Afdhal? Beliau menjawab, "Shalat Diawal Waktunya." (HR. Abu Daud Nomor: 426. Syaikh Al Albani mengatakan bahwa Hadits ini Shahih)
             </p>
           </div>
-
+          <br />
           {/* Coordinates */}
           <div className="print-coordinates flex justify-between items-center text-[8px] font-bold border-b border-black pb-1 mb-2">
-            <span>Arah Kiblat : 294°43' Jarak Ka'bah : 7610.561 KM</span>
-            <span>Lintang : 3°22' LS  Bujur : 104°49' BT</span>
+            <span>Arah Kiblat : {arahKiblat}</span>
+            <span>Lintang : {lintang}  Bujur : {bujur}</span>
           </div>
 
           {/* Table */}
@@ -414,15 +477,15 @@ export default function JadwalSholatWidget() {
                 const tgl = parts[1] || row.tanggal;
                 return (
                   <tr key={idx} className="hover:bg-gray-50">
-                    <td className="border border-black px-1.5 py-0.5 font-semibold">{hari}</td>
-                    <td className="border border-black px-1.5 py-0.5 whitespace-nowrap">{tgl}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.subuh}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.terbit}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.dhuha}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.dzuhur}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.ashar}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.maghrib}</td>
-                    <td className="border border-black px-1.5 py-0.5 font-medium">{row.isya}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-semibold">{hari}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] whitespace-nowrap">{tgl}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.subuh}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.terbit}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.dhuha}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.dzuhur}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.ashar}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.maghrib}</td>
+                    <td className="border border-black px-1.5 py-[7.5px] font-medium">{row.isya}</td>
                   </tr>
                 );
               })}
