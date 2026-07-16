@@ -408,10 +408,12 @@ export default function LayananDetail() {
           /* Render Sertifikasi Halal Page */
           <div className="max-w-4xl mx-auto">
             {data.syarat ? (
-              <div 
-                className="prose max-w-none text-gray-700 leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: data.syarat }}
-              />
+              <div className="overflow-x-auto">
+                <div 
+                  className="prose prose-green max-w-none prose-img:rounded-xl prose-img:max-w-full text-gray-700 leading-relaxed break-words"
+                  dangerouslySetInnerHTML={{ __html: data.syarat }}
+                />
+              </div>
             ) : (
               <div className="text-center py-10 text-gray-500">
                 Syarat dan ketentuan sedang diperbarui.
@@ -429,10 +431,12 @@ export default function LayananDetail() {
                   <span className="w-1.5 h-6 bg-green-700 rounded-full"></span>
                   Tugas Pokok & Fungsi
                 </h3>
-                <div 
-                  className="prose max-w-none text-gray-700 leading-relaxed text-sm md:text-base"
-                  dangerouslySetInnerHTML={{ __html: data.tugasFungsi }}
-                />
+                <div className="overflow-x-auto">
+                  <div 
+                    className="prose prose-green max-w-none prose-img:rounded-xl prose-img:max-w-full text-gray-700 leading-relaxed text-sm md:text-base break-words"
+                    dangerouslySetInnerHTML={{ __html: data.tugasFungsi }}
+                  />
+                </div>
               </div>
 
               {/* Right Column: Kepala Seksi (Kasi) */}

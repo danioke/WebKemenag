@@ -5,6 +5,8 @@ interface SettingsState {
   logoUrl: string;
   faviconUrl: string;
   ogImageUrl: string;
+  logoKemenagUrl: string;
+  logoDmiUrl: string;
   siteName: string;
   metaDescription: string;
   socialMedia: {
@@ -30,6 +32,8 @@ export const useSettingsStore = create<SettingsState>()(
       logoUrl: 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
       faviconUrl: '',
       ogImageUrl: '',
+      logoKemenagUrl: 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
+      logoDmiUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png',
       siteName: 'Kementerian Agama OKI',
       metaDescription: 'Website Resmi Kementerian Agama Kabupaten OKI',
       socialMedia: {

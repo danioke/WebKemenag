@@ -22,7 +22,7 @@ interface Kota {
 }
 
 export default function JadwalSholatWidget() {
-  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, logoUrl, fetchSettings } = useSettingsStore();
+  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, logoKemenagUrl, logoDmiUrl, fetchSettings } = useSettingsStore();
   const [jadwal, setJadwal] = useState<Jadwal | null>(null);
   const [kotaList, setKotaList] = useState<Kota[]>([]);
   const [selectedKota, setSelectedKota] = useState<string>("0809"); // OKI default
@@ -138,62 +138,64 @@ export default function JadwalSholatWidget() {
   };
 
   return (
-    <div className="w-full bg-gradient-to-b from-[#f2f7f1] to-[#e6f0e4] border border-[#d9e8d6] rounded-3xl p-5 sm:p-8 shadow-sm font-sans">
+    <div className="w-full bg-gradient-to-b from-[#e6f0e4] to-[#e6f0e4] border border-[#d9e8d6] rounded-3xl p-5 sm:p-8 shadow-sm font-sans">
       
-      {/* Title */}
-      <div className="text-center mb-2">
-        <h2 className="text-emerald-950 font-extrabold text-2xl sm:text-3xl tracking-tight uppercase">Jadwal Sholat</h2>
-        <p className="text-emerald-800/80 text-sm sm:text-base font-semibold mt-1">
-          {formatHeaderDate()}
-        </p>
-      </div>
+      <div className="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto mb-6 gap-4">
+        {/* Title */}
+        <div className="text-center md:text-left">
+          <h2 className="text-green-800 font-bold text-2xl sm:text-3xl tracking-tight">Jadwal Sholat</h2>
+          <p className="text-gray-600 text-sm font-medium mt-1">
+            {formatHeaderDate()}
+          </p>
+        </div>
 
-      {/* Search Bar / Input Trigger */}
-      <div className="relative max-w-xs sm:max-w-md mx-auto mb-6 z-30" ref={dropdownRef}>
-        <button 
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="w-full bg-white border border-[#d2e4cf] focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-2xl px-5 py-3 text-left text-sm sm:text-base text-emerald-800 font-semibold shadow-sm flex justify-between items-center transition-all cursor-pointer hover:border-emerald-400"
-        >
-          <span className="truncate">Pilih/Cari Kota: {selectedKotaObj ? selectedKotaObj.lokasi : 'Jakarta'}</span>
-          <Search size={18} className="text-emerald-600 shrink-0" />
-        </button>
-        
-        {dropdownOpen && (
-          <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-40">
-            <div className="p-3 border-b border-gray-100 flex items-center bg-gray-50">
-              <Search size={16} className="text-gray-400 mr-2 shrink-0" />
-              <input
-                type="text"
-                className="w-full bg-transparent focus:outline-none text-sm text-gray-700"
-                placeholder="Cari kota..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div className="max-h-60 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-              {filteredKota.length > 0 ? (
-                filteredKota.map((kota) => (
-                  <div
-                    key={kota.id}
-                    className={`px-4 py-3 text-sm cursor-pointer hover:bg-emerald-50 transition-colors ${selectedKota === kota.id ? 'bg-emerald-50 text-emerald-800 font-bold' : 'text-gray-700'}`}
-                    onClick={() => {
-                      setSelectedKota(kota.id);
-                      setDropdownOpen(false);
-                      setSearchQuery('');
-                    }}
-                  >
-                    {kota.lokasi}
+        {/* Search Bar / Input Trigger */}
+        <div className="relative w-full max-w-xs sm:max-w-md z-30" ref={dropdownRef}>
+          <button 
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-full bg-white border border-[#d2e4cf] focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-xl px-4 py-2.5 text-left text-sm sm:text-base text-gray-500 font-medium shadow-sm flex justify-between items-center transition-all cursor-pointer hover:border-emerald-400"
+          >
+            <span className="truncate">Pilih/Cari Kota: {selectedKotaObj ? selectedKotaObj.lokasi : 'Jakarta'}</span>
+            <Search size={18} className="text-gray-400 shrink-0" />
+          </button>
+          
+          {dropdownOpen && (
+            <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-40">
+              <div className="p-3 border-b border-gray-100 flex items-center bg-gray-50">
+                <Search size={16} className="text-gray-400 mr-2 shrink-0" />
+                <input
+                  type="text"
+                  className="w-full bg-transparent focus:outline-none text-sm text-gray-700"
+                  placeholder="Cari kota..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div className="max-h-60 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                {filteredKota.length > 0 ? (
+                  filteredKota.map((kota) => (
+                    <div
+                      key={kota.id}
+                      className={`px-4 py-3 text-sm cursor-pointer hover:bg-emerald-50 transition-colors ${selectedKota === kota.id ? 'bg-emerald-50 text-emerald-800 font-bold' : 'text-gray-700'}`}
+                      onClick={() => {
+                        setSelectedKota(kota.id);
+                        setDropdownOpen(false);
+                        setSearchQuery('');
+                      }}
+                    >
+                      {kota.lokasi}
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                    Kota tidak ditemukan
                   </div>
-                ))
-              ) : (
-                <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                  Kota tidak ditemukan
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Grid of times */}
@@ -203,25 +205,25 @@ export default function JadwalSholatWidget() {
         </div>
       ) : (
         <div>
-          <div className="grid grid-cols-4 gap-2 sm:gap-4 max-w-4xl mx-auto mb-5">
+          <div className="grid grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-4 max-w-7xl mx-auto mb-5">
             {times.map((t, i) => (
               <div 
                 key={i} 
-                className="bg-white/50 backdrop-blur-sm rounded-xl sm:rounded-2xl p-2 sm:p-4 flex flex-col items-center justify-center border border-[#d2e4cf]/40 shadow-[0_2px_8px_-3px_rgba(0,0,0,0.05)] hover:bg-white/80 transition-all text-center"
+                className="bg-transparent rounded-xl p-2 sm:p-4 flex flex-col items-center justify-center border border-white/60 hover:border-white shadow-sm transition-all text-center"
               >
-                <span className="text-emerald-800 text-[10px] sm:text-xs md:text-sm font-semibold mb-1 truncate w-full">{t.name}</span>
-                <span className="text-emerald-950 font-black text-sm sm:text-lg md:text-2xl tracking-tight">{t.time}</span>
+                <span className="text-green-800 text-xs sm:text-sm font-medium mb-1 truncate w-full">{t.name}</span>
+                <span className="text-green-800 font-bold text-sm sm:text-lg tracking-tight">{t.time}</span>
               </div>
             ))}
           </div>
 
           {/* Footer Link */}
           <div className="text-center mt-4">
-            <span className="text-emerald-850 text-xs sm:text-sm font-medium">
+            <span className="text-gray-600 text-xs sm:text-sm font-medium">
               Untuk jadwal sholat selengkapnya,{' '}
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="text-emerald-800 font-bold underline hover:text-emerald-900 focus:outline-none cursor-pointer"
+                className="text-green-800 font-bold underline hover:text-green-900 focus:outline-none cursor-pointer"
               >
                 Klik Disini
               </button>
@@ -344,7 +346,7 @@ export default function JadwalSholatWidget() {
         <div id="printable-schedule" className="hidden print:block bg-white text-black p-4 font-serif text-[10px] leading-tight">
           {/* Kop Surat Header */}
           <div className="print-kop flex items-center justify-between border-b-4 border-double border-black pb-2 mb-4">
-            <img src={logoUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
+            <img src={logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png'} alt="Logo Kemenag" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
             <div className="text-center flex-1 mx-4">
               <h3 className="font-bold text-sm uppercase leading-tight">KEMENTERIAN AGAMA REPUBLIK INDONESIA</h3>
               <h2 className="font-extrabold text-base uppercase leading-tight">KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h2>
@@ -352,7 +354,7 @@ export default function JadwalSholatWidget() {
               <p className="text-[8px] font-medium leading-snug">Telepon (0712) 321004; Faksimili (0712) 321014; e-mail: kabogankomeringilir@kemenag.go.id</p>
               <p className="text-[8px] font-semibold leading-snug">Website: www.sumsel.kemenag.go.id</p>
             </div>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png" alt="Logo DMI" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
+            <img src={logoDmiUrl || 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png'} alt="Logo DMI" className="w-16 h-16 object-contain shrink-0" referrerPolicy="no-referrer" />
           </div>
 
           {/* Document Title */}

@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User } from 'lucide-react';
+import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User, Upload } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
 export default function SettingsAdmin() {
   const { 
-    logoUrl, faviconUrl, ogImageUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, updateSettings, fetchSettings 
+    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, updateSettings, fetchSettings 
   } = useSettingsStore();
 
   const [formData, setFormData] = useState({
     logoUrl,
     faviconUrl,
     ogImageUrl,
+    logoKemenagUrl: logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
+    logoDmiUrl: logoDmiUrl || 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png',
     siteName,
     metaDescription,
     socialMedia: { ...socialMedia },
@@ -21,7 +23,14 @@ export default function SettingsAdmin() {
     sholatTtdJabatan: sholatTtdJabatan || ''
   });
 
+  const logoRef = useRef<HTMLInputElement>(null);
+  const faviconRef = useRef<HTMLInputElement>(null);
+  const ogImageRef = useRef<HTMLInputElement>(null);
+  const logoKemenagRef = useRef<HTMLInputElement>(null);
+  const logoDmiRef = useRef<HTMLInputElement>(null);
+
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSettings().then(() => {
@@ -31,6 +40,8 @@ export default function SettingsAdmin() {
         logoUrl: store.logoUrl,
         faviconUrl: store.faviconUrl,
         ogImageUrl: store.ogImageUrl,
+        logoKemenagUrl: store.logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
+        logoDmiUrl: store.logoDmiUrl || 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png',
         siteName: store.siteName,
         metaDescription: store.metaDescription,
         socialMedia: { ...store.socialMedia },
@@ -41,6 +52,40 @@ export default function SettingsAdmin() {
       });
     });
   }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 5MB");
+      return;
+    }
+    
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+    
+    setUploadingField(fieldName);
+    toast.info('Mengunggah gambar...');
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setFormData(prev => ({ ...prev, [fieldName]: data.url }));
+        toast.success('Gambar berhasil diunggah');
+      } else {
+        toast.error('Gagal mengunggah gambar');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat mengunggah');
+    } finally {
+      setUploadingField(null);
+      e.target.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +164,26 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../logo.png"
                   />
+                  <input
+                    type="file"
+                    ref={logoRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, 'logoUrl')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => logoRef.current?.click()}
+                    disabled={uploadingField === 'logoUrl'}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    {uploadingField === 'logoUrl' ? (
+                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload size={16} />
+                    )}
+                    Upload
+                  </button>
                 </div>
                 <p className="text-xs text-gray-500">Anda dapat menyalin URL dari menu Media Library setelah mengunggah logo.</p>
               </div>
@@ -134,13 +199,42 @@ export default function SettingsAdmin() {
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">URL Favicon (Ikon Tab Browser)</label>
-                <input
-                  type="text"
-                  value={formData.faviconUrl}
-                  onChange={(e) => setFormData({...formData, faviconUrl: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                  placeholder="https://.../favicon.ico"
-                />
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={formData.faviconUrl}
+                    onChange={(e) => setFormData({...formData, faviconUrl: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    placeholder="https://.../favicon.ico"
+                  />
+                  <input
+                    type="file"
+                    ref={faviconRef}
+                    accept="image/x-icon,image/png,image/jpeg"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, 'faviconUrl')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => faviconRef.current?.click()}
+                    disabled={uploadingField === 'faviconUrl'}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    {uploadingField === 'faviconUrl' ? (
+                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload size={16} />
+                    )}
+                    Upload
+                  </button>
+                </div>
+              </div>
+              <div className="w-32 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center p-2">
+                {formData.faviconUrl ? (
+                  <img src={formData.faviconUrl} alt="Favicon Preview" className="max-w-full max-h-full object-contain" />
+                ) : (
+                  <span className="text-xs text-gray-400">Favicon Preview</span>
+                )}
               </div>
             </div>
 
@@ -155,6 +249,26 @@ export default function SettingsAdmin() {
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
                     placeholder="https://.../og-image.jpg"
                   />
+                  <input
+                    type="file"
+                    ref={ogImageRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, 'ogImageUrl')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => ogImageRef.current?.click()}
+                    disabled={uploadingField === 'ogImageUrl'}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    {uploadingField === 'ogImageUrl' ? (
+                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload size={16} />
+                    )}
+                    Upload
+                  </button>
                 </div>
                 <p className="text-xs text-gray-500">Gambar yang muncul ketika link website dibagikan (WhatsApp, FB, dll).</p>
               </div>
@@ -163,6 +277,90 @@ export default function SettingsAdmin() {
                   <img src={formData.ogImageUrl} alt="OG Image Preview" className="max-w-full max-h-full object-cover" />
                 ) : (
                   <span className="text-xs text-center text-gray-400">OG Preview</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL Logo Kemenag (Jadwal Sholat)</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={formData.logoKemenagUrl || ''}
+                    onChange={(e) => setFormData({...formData, logoKemenagUrl: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    placeholder="https://.../logo-kemenag.png"
+                  />
+                  <input
+                    type="file"
+                    ref={logoKemenagRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, 'logoKemenagUrl')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => logoKemenagRef.current?.click()}
+                    disabled={uploadingField === 'logoKemenagUrl'}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    {uploadingField === 'logoKemenagUrl' ? (
+                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload size={16} />
+                    )}
+                    Upload
+                  </button>
+                </div>
+              </div>
+              <div className="w-32 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
+                {formData.logoKemenagUrl ? (
+                  <img src={formData.logoKemenagUrl} alt="Logo Kemenag" className="max-w-full max-h-full object-cover" />
+                ) : (
+                  <span className="text-xs text-center text-gray-400">Logo</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">URL Logo DMI (Jadwal Sholat)</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={formData.logoDmiUrl || ''}
+                    onChange={(e) => setFormData({...formData, logoDmiUrl: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    placeholder="https://.../logo-dmi.png"
+                  />
+                  <input
+                    type="file"
+                    ref={logoDmiRef}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e, 'logoDmiUrl')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => logoDmiRef.current?.click()}
+                    disabled={uploadingField === 'logoDmiUrl'}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium disabled:opacity-50"
+                  >
+                    {uploadingField === 'logoDmiUrl' ? (
+                      <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload size={16} />
+                    )}
+                    Upload
+                  </button>
+                </div>
+              </div>
+              <div className="w-32 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
+                {formData.logoDmiUrl ? (
+                  <img src={formData.logoDmiUrl} alt="Logo DMI" className="max-w-full max-h-full object-cover" />
+                ) : (
+                  <span className="text-xs text-center text-gray-400">Logo</span>
                 )}
               </div>
             </div>

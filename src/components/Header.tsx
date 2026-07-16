@@ -139,10 +139,12 @@ export default function Header() {
     if (matchedSubItem && (matchedSubItem as any).content) {
       icon = (typeof matchedSubItem.icon === 'string' ? iconMap[matchedSubItem.icon] : matchedSubItem.icon) || BookOpen;
       content = (
-        <div 
-          className="prose max-w-none text-gray-700 leading-relaxed text-sm"
-          dangerouslySetInnerHTML={{ __html: (matchedSubItem as any).content }}
-        />
+        <div className="overflow-x-auto">
+          <div 
+            className="prose prose-green max-w-none prose-img:rounded-xl prose-img:max-w-full text-gray-700 leading-relaxed text-sm break-words"
+            dangerouslySetInnerHTML={{ __html: (matchedSubItem as any).content }}
+          />
+        </div>
       );
     } else if (id === 'visi-misi') {
       icon = Award;
@@ -458,8 +460,8 @@ export default function Header() {
     <>
       <header className="fixed w-full top-0 z-50">
         {/* Top Bar */}
-        <div className="bg-green-800 text-white text-xs py-2 hidden md:block">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <div className={`bg-green-800 text-white text-xs transition-all duration-300 hidden md:block ${isScrolled ? 'h-0 py-0 opacity-0 overflow-hidden' : 'h-[32px] py-2 opacity-100'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-full">
             <div className="flex space-x-6">
               <span className="flex items-center gap-1.5"><MapPin size={14} /> {contactInfo.address}</span>
               <span className="flex items-center gap-1.5"><Phone size={14} /> {contactInfo.phone}</span>
@@ -486,7 +488,7 @@ export default function Header() {
         </div>
 
         {/* Main Navbar */}
-        <nav className={`transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-3' : 'bg-white/95 backdrop-blur-sm py-4 border-b border-gray-100'}`}>
+        <nav className={`transition-all duration-300 backdrop-blur-md ${isScrolled ? 'bg-white/80 shadow-md py-2.5' : 'bg-white/95 py-4 border-b border-gray-100'}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
               {/* Logo */}

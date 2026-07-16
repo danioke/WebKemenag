@@ -64,8 +64,20 @@ export default function GaleriVideo() {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [activeVideoIndex, filteredVideos]);
 
-  const toggleMute = () => {
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  // Reset play state when changing videos
+  useEffect(() => {
+    setIsPlaying(true);
+  }, [activeVideoIndex]);
+
+  const toggleMute = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setIsMuted(!isMuted);
+  };
+
+  const togglePlay = () => {
+    setIsPlaying(!isPlaying);
   };
 
   const renderVideoPlayer = (video: VideoData, isActive: boolean) => {
@@ -75,7 +87,7 @@ export default function GaleriVideo() {
     const gDriveMatch = url.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{25,})/);
     if (gDriveMatch && gDriveMatch[1]) {
       return (
-        <div className="w-full h-full relative" onClick={toggleMute}>
+        <div className="w-full h-full relative">
           <iframe 
             src={`https://drive.google.com/file/d/${gDriveMatch[1]}/preview`} 
             className="w-full h-full border-0 pointer-events-auto" 
@@ -106,27 +118,38 @@ export default function GaleriVideo() {
     }
 
     return (
-      <div className="w-full h-full relative" onClick={toggleMute}>
-        {/* @ts-ignore */}
-        <Player 
-          url={url}
-          width="100%"
-          height="100%"
-          playing={isActive}
-          loop={true}
-          muted={isMuted}
-          controls={false}
-          style={{ objectFit: 'cover' }}
-          config={{
-            youtube: {
-              playerVars: { showinfo: 0, rel: 0, modestbranding: 1 }
-            }
-          }}
-        />
-        {/* Play overlay for interaction hint */}
-        <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none opacity-0 hover:opacity-100 transition-opacity bg-black/20">
-           {isMuted ? <VolumeX className="text-white drop-shadow-md" size={48} /> : <Volume2 className="text-white drop-shadow-md" size={48} />}
+      <div className="w-full h-full relative cursor-pointer" onClick={togglePlay}>
+        <div className="w-full h-full pointer-events-none">
+          {/* @ts-ignore */}
+          <Player 
+            url={url}
+            width="100%"
+            height="100%"
+            playing={isActive && isPlaying}
+            loop={true}
+            muted={isMuted}
+            controls={false}
+            playsinline={true}
+            style={{ objectFit: 'contain' }}
+            config={{
+              youtube: {
+                playerVars: { showinfo: 0, rel: 0, modestbranding: 1, controls: 0 }
+              },
+              file: {
+                attributes: {
+                  style: { width: '100%', height: '100%', objectFit: 'contain' },
+                  playsInline: true
+                }
+              }
+            }}
+          />
         </div>
+        {/* Play overlay for interaction hint */}
+        {isActive && !isPlaying && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+             <Play className="text-white drop-shadow-lg opacity-80" size={72} fill="currentColor" />
+          </div>
+        )}
       </div>
     );
   };

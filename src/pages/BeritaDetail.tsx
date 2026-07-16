@@ -219,10 +219,12 @@ export default function BeritaDetail() {
             </div>
           )}
 
-          <div 
-            className="prose prose-lg max-w-none text-gray-700 leading-relaxed break-words"
-            dangerouslySetInnerHTML={{ __html: berita.excerpt }}
-          />
+          <div className="overflow-x-auto">
+            <div 
+              className="prose prose-lg prose-green max-w-none prose-img:rounded-xl prose-img:max-w-full text-gray-700 leading-relaxed break-words"
+              dangerouslySetInnerHTML={{ __html: berita.excerpt }}
+            />
+          </div>
         </article>
 
         {/* Berita Lainnya - Carousel/Horizontal Scroll */}
