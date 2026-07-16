@@ -378,9 +378,9 @@ export default function JadwalSholatWidget() {
 
           {/* Hadits */}
           <div className="print-hadits text-center border border-black p-2 rounded-lg bg-gray-50/50 mb-3 mx-auto max-w-xl">
-            <p className="font-serif text-sm leading-normal text-right mb-1" dir="rtl">
+            <h3 className="font-serif text-lg leading-normal text-center mb-1" dir="rtl">
               عَنْ أُمِّ فَرْوَةَ قَالَتْ سُئِلَ رَسُولُ اللَّهِ -صلى الله عليه وسلم- أَىُّ الأَعْمَالِ أَفْضَلُ قَالَ « الصَّلاَةُ فِى أَوَّلِ وَقْتِهَا »
-            </p>
+            </h3>
             <p className="text-[9px] leading-relaxed text-gray-700 italic">
               Dari Ummu Farwah, ia berkata, "Rasulullah Shallallahu 'Alaihi Wasallam pernah ditanya, Amalan apakah yang paling Afdhal? Beliau menjawab, "Shalat Diawal Waktunya." (HR. Abu Daud Nomor: 426. Syaikh Al Albani mengatakan bahwa Hadits ini Shahih)
             </p>
