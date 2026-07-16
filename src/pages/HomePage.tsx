@@ -84,13 +84,13 @@ export default function HomePage() {
         <ScrollReveal direction="up" amount={0.1}>
           <Pengumuman />
         </ScrollReveal>
-        
-        <ScrollReveal direction="up" amount={0.1}>
-          <InfografisMarquee />
+
+          <ScrollReveal direction="up" amount={0.1}>
+          <Agenda />
         </ScrollReveal>
         
         <ScrollReveal direction="up" amount={0.1}>
-          <Agenda />
+          <InfografisMarquee />
         </ScrollReveal>
         
         <ScrollReveal direction="up" amount={0.1}>

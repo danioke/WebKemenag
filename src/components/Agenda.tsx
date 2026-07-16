@@ -96,7 +96,7 @@ export default function Agenda() {
                     </div>
                     <div className="flex items-center text-sm text-gray-600 gap-2">
                       <Clock size={14} className="text-amber-500 shrink-0" />
-                      <span>{agenda.time}</span>
+                      <span>{agenda.time} - Selesai</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600 gap-2">
                       <MapPin size={14} className="text-amber-500 shrink-0" />

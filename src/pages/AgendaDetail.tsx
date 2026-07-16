@@ -164,7 +164,7 @@ export default function AgendaDetail() {
                   </div>
                   <div className="flex items-center text-gray-700 gap-3">
                     <Clock size={20} className="text-amber-500 shrink-0" />
-                    <span className="font-medium text-base sm:text-lg">{agenda.time}</span>
+                    <span className="font-medium text-base sm:text-lg">{agenda.time} - Selesai</span>
                   </div>
                   <div className="flex items-center text-gray-700 gap-3">
                     <MapPin size={20} className="text-amber-500 shrink-0" />
