@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User, Upload } from 'lucide-react';
+import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User, Upload, Radio } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
 export default function SettingsAdmin() {
   const { 
-    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, updateSettings, fetchSettings 
+    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, liveStreaming, updateSettings, fetchSettings 
   } = useSettingsStore();
 
   const [formData, setFormData] = useState({
@@ -20,7 +20,12 @@ export default function SettingsAdmin() {
     contactInfo: { ...contactInfo },
     sholatTtdNama: sholatTtdNama || '',
     sholatTtdNip: sholatTtdNip || '',
-    sholatTtdJabatan: sholatTtdJabatan || ''
+    sholatTtdJabatan: sholatTtdJabatan || '',
+    liveStreaming: { 
+      isLive: liveStreaming?.isLive || false,
+      youtubeUrl: liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenag_oki/live',
+      title: liveStreaming?.title || 'Kemenag OKI Live',
+    }
   });
 
   const logoRef = useRef<HTMLInputElement>(null);
@@ -48,7 +53,12 @@ export default function SettingsAdmin() {
         contactInfo: { ...store.contactInfo },
         sholatTtdNama: store.sholatTtdNama || '',
         sholatTtdNip: store.sholatTtdNip || '',
-        sholatTtdJabatan: store.sholatTtdJabatan || ''
+        sholatTtdJabatan: store.sholatTtdJabatan || '',
+        liveStreaming: { 
+          isLive: store.liveStreaming?.isLive || false,
+          youtubeUrl: store.liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenag_oki/live',
+          title: store.liveStreaming?.title || 'Kemenag OKI Live',
+        }
       });
     });
   }, []);
@@ -487,6 +497,46 @@ export default function SettingsAdmin() {
                 value={formData.sholatTtdNip}
                 onChange={(e) => setFormData({...formData, sholatTtdNip: e.target.value})}
                 placeholder="197001151997031005"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Live Streaming */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <Radio className="text-red-600" size={20} />
+            <h3 className="font-bold text-gray-800">Live Streaming</h3>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="isLive"
+                checked={formData.liveStreaming.isLive}
+                onChange={(e) => setFormData({...formData, liveStreaming: {...formData.liveStreaming, isLive: e.target.checked}})}
+                className="w-5 h-5 text-red-600 border-gray-300 rounded focus:ring-red-500"
+              />
+              <label htmlFor="isLive" className="block text-sm font-medium text-gray-700">Tampilkan Tombol Live Streaming di Header</label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Judul Live Streaming</label>
+              <input
+                type="text"
+                value={formData.liveStreaming.title}
+                onChange={(e) => setFormData({...formData, liveStreaming: {...formData.liveStreaming, title: e.target.value}})}
+                placeholder="Misal: Live Kajian Rutin..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">URL YouTube Live</label>
+              <input
+                type="text"
+                value={formData.liveStreaming.youtubeUrl}
+                onChange={(e) => setFormData({...formData, liveStreaming: {...formData.liveStreaming, youtubeUrl: e.target.value}})}
+                placeholder="https://youtube.com/@kemenag_oki/live"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
               />
             </div>

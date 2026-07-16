@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Facebook, Instagram, Youtube, Phone, Mail, MapPin, ChevronDown, ChevronRight, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle } from 'lucide-react';
+import { Menu, X, Facebook, Instagram, Youtube, Phone, Mail, MapPin, ChevronDown, ChevronRight, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { collection, onSnapshot, query, orderBy } from '../lib/db';
 import { db } from '../lib/db';
@@ -71,7 +71,7 @@ const staticNavLinks: NavLink[] = [
 ];
 
 export default function Header() {
-  const { logoUrl, contactInfo, socialMedia } = useSettingsStore();
+  const { logoUrl, contactInfo, socialMedia, liveStreaming } = useSettingsStore();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -467,7 +467,7 @@ export default function Header() {
               <span className="flex items-center gap-1.5"><Phone size={14} /> {contactInfo.phone}</span>
               <span className="flex items-center gap-1.5"><Mail size={14} /> {contactInfo.email}</span>
             </div>
-            <div className="flex space-x-4 font-medium">
+            <div className="flex space-x-4 font-medium items-center">
               {socialMedia.facebook && (
                 <a href={socialMedia.facebook} target="_blank" rel="noopener noreferrer" className="hover:text-green-200 transition-colors flex items-center gap-1.5" aria-label="Facebook">
                   <Facebook size={14} /> Facebook
@@ -481,6 +481,11 @@ export default function Header() {
               {socialMedia.youtube && (
                 <a href={socialMedia.youtube} target="_blank" rel="noopener noreferrer" className="hover:text-green-200 transition-colors flex items-center gap-1.5" aria-label="YouTube">
                   <Youtube size={14} /> YouTube
+                </a>
+              )}
+              {liveStreaming?.isLive && (
+                <a href={liveStreaming.youtubeUrl} title={liveStreaming.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2 py-0.5 bg-red-600 text-white rounded text-[10px] font-bold uppercase tracking-wider hover:bg-red-700 transition-colors animate-pulse">
+                  <Radio size={12} /> Live
                 </a>
               )}
             </div>
@@ -568,7 +573,12 @@ export default function Header() {
               </div>
 
               {/* Mobile Menu Button */}
-              <div className="md:hidden">
+              <div className="md:hidden flex items-center gap-2">
+                {liveStreaming?.isLive && (
+                  <a href={liveStreaming.youtubeUrl} title={liveStreaming.title} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-2.5 py-1 bg-red-600 text-white rounded-full text-[10px] font-bold uppercase tracking-wider hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Live
+                  </a>
+                )}
                 <button 
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="p-2 text-gray-600 hover:text-green-700"

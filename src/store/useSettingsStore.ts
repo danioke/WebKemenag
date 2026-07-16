@@ -22,6 +22,11 @@ interface SettingsState {
   sholatTtdNama?: string;
   sholatTtdNip?: string;
   sholatTtdJabatan?: string;
+  liveStreaming?: {
+    isLive: boolean;
+    youtubeUrl: string;
+    title: string;
+  };
   updateSettings: (newSettings: Partial<Omit<SettingsState, 'updateSettings' | 'fetchSettings'>>) => Promise<void>;
   fetchSettings: () => Promise<void>;
 }
@@ -49,6 +54,11 @@ export const useSettingsStore = create<SettingsState>()(
       sholatTtdNama: '',
       sholatTtdNip: '',
       sholatTtdJabatan: '',
+      liveStreaming: {
+        isLive: false,
+        youtubeUrl: 'https://youtube.com/@kemenag_oki/live',
+        title: 'Kemenag OKI Live',
+      },
       fetchSettings: async () => {
         try {
           const response = await fetch('/api/db/settings');
