@@ -612,6 +612,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      <GlobalMediaPicker />
     </div>
   );
 }
@@ -735,7 +736,6 @@ function DashboardHome() {
           <div className="text-3xl font-bold text-gray-900">24</div>
         </div>
       </div>
-      <GlobalMediaPicker />
     </div>
   );
 }
