@@ -13,6 +13,7 @@ import HomePage from './pages/HomePage';
 import ProfilPage from './pages/ProfilPage';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
+import GlobalMediaPicker from './components/GlobalMediaPicker';
 
 import BeritaDetail from './pages/BeritaDetail';
 import AgendaDetail from './pages/AgendaDetail';
@@ -55,6 +56,7 @@ export default function App() {
       </AnimatePresence>
       <BrowserRouter>
         <Toaster position="top-right" richColors />
+        <GlobalMediaPicker />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profil" element={<ProfilPage />} />

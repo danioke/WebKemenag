@@ -10,6 +10,6 @@ interface MediaPickerState {
 export const useMediaPickerStore = create<MediaPickerState>((set) => ({
   isOpen: false,
   callback: () => {},
-  openPicker: (callback) => set({ isOpen: true, callback }),
-  closePicker: () => set({ isOpen: false, callback: () => {} }),
+  openPicker: (cb) => set(() => ({ isOpen: true, callback: cb })),
+  closePicker: () => set(() => ({ isOpen: false, callback: () => {} })),
 }));

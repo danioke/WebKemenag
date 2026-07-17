@@ -55,7 +55,6 @@ import LaporanAdmin from "./admin/LaporanAdmin";
 import MediaAdmin from "./admin/MediaAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import SubscribersAdmin from "./admin/SubscribersAdmin";
-import GlobalMediaPicker from "../components/GlobalMediaPicker";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -612,7 +611,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-      <GlobalMediaPicker />
     </div>
   );
 }
