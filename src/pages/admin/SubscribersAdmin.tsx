@@ -114,6 +114,38 @@ export default function SubscribersAdmin() {
     };
   };
 
+  const handleDeleteLog = async (id: string) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus riwayat ini?')) {
+      try {
+        await deleteDoc(doc(db, 'newsletter_sent_logs', id));
+        toast.success('Riwayat berhasil dihapus');
+        fetchSentLogs();
+      } catch (err) {
+        console.error(err);
+        toast.error('Gagal menghapus riwayat');
+      }
+    };
+  };
+
+  const handleClearLogs = async () => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus SEMUA riwayat pengiriman buletin? Tindakan ini tidak dapat dibatalkan.')) {
+      try {
+        const response = await fetch('/api/db/newsletter_sent_logs/clear', {
+          method: 'POST'
+        });
+        if (response.ok) {
+          toast.success('Semua riwayat pengiriman berhasil dibersihkan');
+          fetchSentLogs();
+        } else {
+          toast.error('Gagal membersihkan riwayat');
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Terjadi kesalahan saat membersihkan riwayat');
+      }
+    }
+  };
+
   const handleManualSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualSubject || !manualTitle || !manualContent) {
@@ -290,13 +322,24 @@ export default function SubscribersAdmin() {
               <FileText size={18} className="text-amber-500" />
               Riwayat Pengiriman Buletin
             </h2>
-            <button 
-              onClick={fetchSentLogs}
-              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
-              title="Refresh logs"
-            >
-              <RefreshCw size={14} />
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={fetchSentLogs}
+                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors"
+                title="Refresh logs"
+              >
+                <RefreshCw size={14} />
+              </button>
+              {sentLogs.length > 0 && (
+                <button 
+                  onClick={handleClearLogs}
+                  className="p-1.5 hover:bg-red-50 rounded-lg text-red-500 transition-colors"
+                  title="Bersihkan Semua Riwayat"
+                >
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -338,12 +381,22 @@ export default function SubscribersAdmin() {
                         </span>
                       </td>
                       <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => handleOpenPreview(log)}
-                          className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-800 font-semibold cursor-pointer"
-                        >
-                          <Eye size={12} /> Pratinjau
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenPreview(log)}
+                            className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-800 font-semibold cursor-pointer"
+                            title="Pratinjau Email"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLog(log.id)}
+                            className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                            title="Hapus Riwayat"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

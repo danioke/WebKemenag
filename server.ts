@@ -912,6 +912,25 @@ async function startServer() {
   app.delete("/api/db/:collection/:id", deleteDbHandler);
   app.post("/api/db/:collection/:id/delete", deleteDbHandler);
 
+  // Clear all documents in a collection
+  app.post("/api/db/:collection/clear", async (req, res) => {
+    const { collection: collectionName } = req.params;
+    const release = await acquireLock(collectionName);
+    try {
+      if (useMySQL && pool) {
+        await pool.query('DELETE FROM collections WHERE collection_name = ?', [collectionName]);
+      } else {
+        await writeCollection(collectionName, []);
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error(`Error clear /api/db/${collectionName}:`, err);
+      res.status(500).json({ error: err.message });
+    } finally {
+      release();
+    }
+  });
+
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
