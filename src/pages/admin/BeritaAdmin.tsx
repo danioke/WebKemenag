@@ -486,14 +486,14 @@ export default function BeritaAdmin() {
                         setFormData({ ...formData, image: e.target.value })
                       }
                       placeholder="Masukkan URL Gambar, upload lokal,  "
-                      className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => openPicker((url) => setFormData({ ...formData, image: url }))}
-                      className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-sm w-full"
+                      className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center relative z-10 cursor-pointer transition-colors text-gray-700 text-sm w-full"
                     >
-                      <Upload size={16} className="mr-2" /> Pilih
+                      <Upload size={16}/> Pilih Media
                     </button>
                   </div>
                   {formData.image && (

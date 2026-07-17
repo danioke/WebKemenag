@@ -21,8 +21,8 @@ export default function SettingsAdmin() {
     logoUrl,
     faviconUrl,
     ogImageUrl,
-    logoKemenagUrl: logoKemenagUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
-    logoDmiUrl: logoDmiUrl || 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png',
+    logoKemenagUrl: logoKemenagUrl || '/uploads/foto_staf/fav-1784035270535-947609399.png',
+    logoDmiUrl: logoDmiUrl || '/uploads/foto/DMI-1784172402626-586526853.png',
     siteName,
     metaDescription,
     socialMedia: { ...socialMedia },
@@ -32,7 +32,7 @@ export default function SettingsAdmin() {
     sholatTtdJabatan: sholatTtdJabatan || '',
     liveStreaming: { 
       isLive: liveStreaming?.isLive || false,
-      youtubeUrl: liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenag_oki/live',
+      youtubeUrl: liveStreaming?.youtubeUrl || '@kemenagokitv5177/live',
       title: liveStreaming?.title || 'Kemenag OKI Live',
     }
   });
@@ -58,7 +58,7 @@ export default function SettingsAdmin() {
         sholatTtdJabatan: store.sholatTtdJabatan || '',
         liveStreaming: { 
           isLive: store.liveStreaming?.isLive || false,
-          youtubeUrl: store.liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenag_oki/live',
+          youtubeUrl: store.liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenagokitv5177/live',
           title: store.liveStreaming?.title || 'Kemenag OKI Live',
         }
       });
