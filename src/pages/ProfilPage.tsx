@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { db, doc, getDoc } from '../lib/db';
-import { Award, FileText, CheckCircle2 } from 'lucide-react';
+import { Award, FileText, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 
 export default function ProfilPage() {
   const [loading, setLoading] = useState(true);
   const [profil, setProfil] = useState<any>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchProfil = async () => {
@@ -26,6 +27,13 @@ export default function ProfilPage() {
     };
     fetchProfil();
   }, []);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const amount = scrollRef.current.clientWidth / 2;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+    }
+  };
 
   if (loading) {
     return (
@@ -141,16 +149,31 @@ export default function ProfilPage() {
           {/* Personil (Carousel-like structure) */}
           {seksiList.length > 0 && (
             <ScrollReveal direction="up" amount={0.2}>
-              <div className="space-y-8">
+              <div className="space-y-8 relative">
                 <div className="text-center">
                   <h2 className="text-3xl font-extrabold text-gray-900">Jajaran Pimpinan</h2>
                   <p className="text-gray-600 mt-2">Kepala Sub Bagian, Kepala Seksi & Penyelenggara</p>
                 </div>
                 
-                {/* Horizontal scroll container on mobile, grid on desktop */}
-                <div className="flex overflow-x-auto snap-x snap-mandatory pb-8 md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 hide-scrollbar px-4 md:px-0">
+                {seksiList.length > 3 && (
+                  <>
+                    <button onClick={() => scroll('left')} className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-800 hover:text-green-700 -ml-4 items-center justify-center transition-all hover:scale-105">
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button onClick={() => scroll('right')} className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-800 hover:text-green-700 -mr-4 items-center justify-center transition-all hover:scale-105">
+                      <ChevronRight size={24} />
+                    </button>
+                  </>
+                )}
+
+                {/* Horizontal scroll container */}
+                <div 
+                  ref={scrollRef}
+                  className="flex overflow-x-auto gap-6 snap-x snap-mandatory scrollbar-hide pb-8 px-4 md:px-0"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
                   {seksiList.map((personil: any, idx: number) => (
-                    <div key={idx} className="w-[280px] md:w-auto shrink-0 snap-center bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all">
+                    <div key={idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all">
                       <div className="aspect-[3/4] overflow-hidden bg-gray-100">
                         <img 
                           src={personil.photoUrl || "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80&w=400"} 
