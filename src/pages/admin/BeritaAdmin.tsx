@@ -486,15 +486,34 @@ export default function BeritaAdmin() {
                         setFormData({ ...formData, image: e.target.value })
                       }
                       placeholder="Masukkan URL Gambar, upload lokal,  "
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => openPicker((url) => setFormData({ ...formData, image: url }))}
-                      className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center relative z-10 cursor-pointer transition-colors text-gray-700 text-sm w-full"
+                      className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-4 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-sm w-full"
                     >
-                      <Upload size={16}/> Pilih Media
+                      <Upload size={16} className="mr-2" /> Pilih dari Media
                     </button>
+
+  <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={formData.logoUrl}
+                    onChange={(e) => setFormData({...formData, logoUrl: e.target.value})}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    placeholder="https://.../logo.png"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openPicker((url) => setFormData({...formData, logoUrl: url}))}
+                    className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
+                  >
+                    <Upload size={16} />
+                    Pilih Media
+                  </button>
+                </div>
+
                   </div>
                   {formData.image && (
                     <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
