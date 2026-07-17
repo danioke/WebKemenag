@@ -637,14 +637,14 @@ function DashboardHome() {
   const fetchCounts = async () => {
     try {
       const [pengumumanSnap, agendaSnap, beritaSnap] = await Promise.all([
-        getDocs(collection(db, "pengumuman")),
-        getDocs(collection(db, "agenda")),
-        getDocs(collection(db, "berita")),
+        getDocs(collection(db, "announcements")),
+        getDocs(collection(db, "agendas")),
+        getDocs(collection(db, "news")),
       ]);
       setCounts({
-        pengumuman: pengumumanSnap.size || 0,
-        agenda: agendaSnap.size || 0,
-        berita: beritaSnap.size || 0,
+        pengumuman: pengumumanSnap.length || pengumumanSnap.size || 0,
+        agenda: agendaSnap.length || agendaSnap.size || 0,
+        berita: beritaSnap.length || beritaSnap.size || 0,
       });
     } catch (error) {
       console.error("Error fetching counts:", error);
@@ -729,28 +729,40 @@ function DashboardHome() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="text-gray-500 text-sm font-medium mb-1">
-            Total Pengumuman
+        <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-6 rounded-2xl shadow-lg border border-emerald-400/30 text-white relative overflow-hidden group hover:shadow-xl transition-all">
+          <div className="absolute -right-6 -top-6 text-emerald-400/20 group-hover:scale-110 transition-transform duration-500">
+            <FileText size={120} strokeWidth={1.5} />
           </div>
-
-          <div className="text-3xl font-bold text-gray-900">{counts.pengumuman}</div>
+          <div className="relative z-10">
+            <div className="text-emerald-50 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText size={16} /> Total Pengumuman
+            </div>
+            <div className="text-4xl font-extrabold tracking-tight">{counts.pengumuman}</div>
+          </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="text-gray-500 text-sm font-medium mb-1">
-            Total Agenda
+        <div className="bg-gradient-to-br from-amber-500 to-orange-500 p-6 rounded-2xl shadow-lg border border-amber-400/30 text-white relative overflow-hidden group hover:shadow-xl transition-all">
+          <div className="absolute -right-6 -top-6 text-amber-400/20 group-hover:scale-110 transition-transform duration-500">
+            <Calendar size={120} strokeWidth={1.5} />
           </div>
-
-          <div className="text-3xl font-bold text-gray-900">{counts.agenda}</div>
+          <div className="relative z-10">
+            <div className="text-amber-50 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
+              <Calendar size={16} /> Total Agenda
+            </div>
+            <div className="text-4xl font-extrabold tracking-tight">{counts.agenda}</div>
+          </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <div className="text-gray-500 text-sm font-medium mb-1">
-            Total Berita
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-6 rounded-2xl shadow-lg border border-blue-400/30 text-white relative overflow-hidden group hover:shadow-xl transition-all">
+          <div className="absolute -right-6 -top-6 text-blue-400/20 group-hover:scale-110 transition-transform duration-500">
+            <FileText size={120} strokeWidth={1.5} />
           </div>
-
-          <div className="text-3xl font-bold text-gray-900">{counts.berita}</div>
+          <div className="relative z-10">
+            <div className="text-blue-50 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
+              <FileText size={16} /> Total Berita
+            </div>
+            <div className="text-4xl font-extrabold tracking-tight">{counts.berita}</div>
+          </div>
         </div>
       </div>
     </div>
