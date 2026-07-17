@@ -192,12 +192,9 @@ export default function BeritaDetail() {
           {/* Author, Date, and Views Box */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 mb-8 bg-gray-50 border border-gray-100 rounded-xl">
             <div className="flex items-center gap-3">
-              <img 
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150" 
-                alt={berita.author || 'Admin'} 
-                referrerPolicy="no-referrer"
-                className="w-12 h-12 rounded-full object-cover border border-white shadow-sm shrink-0" 
-              />
+              <div className="w-12 h-12 rounded-full bg-green-100 text-green-700 flex items-center justify-center border border-white shadow-sm shrink-0">
+                <User size={24} />
+              </div>
               <div>
                 <h3 className="font-semibold text-gray-800 text-sm sm:text-base leading-tight">
                   {berita.author || 'Tim Humas Kemenag OKI'}

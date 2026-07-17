@@ -618,6 +618,7 @@ export default function AdminDashboard() {
 function DashboardHome() {
   const [dbStatus, setDbStatus] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [counts, setCounts] = useState({ pengumuman: 0, agenda: 0, berita: 0 });
 
   const fetchDbStatus = () => {
     setIsRefreshing(true);
@@ -633,8 +634,26 @@ function DashboardHome() {
       });
   };
 
+  const fetchCounts = async () => {
+    try {
+      const [pengumumanSnap, agendaSnap, beritaSnap] = await Promise.all([
+        getDocs(collection(db, "pengumuman")),
+        getDocs(collection(db, "agenda")),
+        getDocs(collection(db, "berita")),
+      ]);
+      setCounts({
+        pengumuman: pengumumanSnap.size || 0,
+        agenda: agendaSnap.size || 0,
+        berita: beritaSnap.size || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching counts:", error);
+    }
+  };
+
   useEffect(() => {
     fetchDbStatus();
+    fetchCounts();
   }, []);
 
   return (
@@ -715,7 +734,7 @@ function DashboardHome() {
             Total Pengumuman
           </div>
 
-          <div className="text-3xl font-bold text-gray-900">12</div>
+          <div className="text-3xl font-bold text-gray-900">{counts.pengumuman}</div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -723,7 +742,7 @@ function DashboardHome() {
             Total Agenda
           </div>
 
-          <div className="text-3xl font-bold text-gray-900">5</div>
+          <div className="text-3xl font-bold text-gray-900">{counts.agenda}</div>
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -731,7 +750,7 @@ function DashboardHome() {
             Total Berita
           </div>
 
-          <div className="text-3xl font-bold text-gray-900">24</div>
+          <div className="text-3xl font-bold text-gray-900">{counts.berita}</div>
         </div>
       </div>
     </div>
