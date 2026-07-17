@@ -28,6 +28,7 @@ import AllAgenda from './pages/AllAgenda';
 import Loader from './components/Loader';
 import LayananDetail from './pages/LayananDetail';
 import NotFound from './pages/NotFound';
+import AccessibilityMenu from './components/AccessibilityMenu';
 
 export default function App() {
   const [showLoader, setShowLoader] = useState(false);
@@ -76,6 +77,7 @@ export default function App() {
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <AccessibilityMenu />
       </BrowserRouter>
     </HelmetProvider>
   );

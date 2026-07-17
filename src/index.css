@@ -205,3 +205,23 @@
   }
 }
 
+
+/* Accessibility Feature Classes */
+.a11y-high-contrast {
+  filter: contrast(125%) saturate(120%);
+}
+
+.a11y-grayscale {
+  filter: grayscale(100%);
+}
+
+.a11y-highlight-links a {
+  text-decoration: underline !important;
+  text-decoration-color: #f59e0b !important;
+  text-decoration-thickness: 3px !important;
+  text-underline-offset: 4px !important;
+  color: #166534 !important;
+  font-weight: 700 !important;
+}
+
+/* Ensure the app stays above filters if needed, though html filter applies to everything */
