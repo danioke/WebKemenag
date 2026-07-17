@@ -253,12 +253,8 @@ export default function BannerAdmin() {
                       onClick={() => openPicker((url) => setFormData({ ...formData, image: url }))}
                       className="bg-gray-100 hover:bg-gray-200 border border-gray-300 px-3 py-2 rounded-md flex items-center justify-center cursor-pointer transition-colors text-gray-700 text-xs font-semibold whitespace-nowrap"
                     >
-                      <Upload size={14} className="mr-1" /> Pilih dari Media
+                      <Upload size={14} className="mr-1" /> Pilih
                     </button>
-                    <button
-                      type="button"
-                      className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap"
-                    ></button>
                   </div>
                   {formData.image && (
                     <div className="mt-3 aspect-video bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
