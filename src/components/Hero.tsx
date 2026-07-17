@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowRight, FileText, Search, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy } from '../lib/db';
@@ -36,6 +37,15 @@ const carouselItems: CarouselItem[] = [
 export default function Hero() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [banners, setBanners] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   // Fetch dynamic banners from Firestore in real-time
   useEffect(() => {
@@ -125,14 +135,18 @@ export default function Hero() {
 
             {/* Quick Search */}
             <div className="mt-10 max-w-md">
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <input 
                   type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari informasi layanan, berita..."
                   className="w-full bg-white/10 border border-white/20 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-green-200/70 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white/20 backdrop-blur-sm transition-all"
                 />
-                <Search className="absolute left-4 top-3.5 text-green-200/70" size={20} />
-              </div>
+                <button type="submit" className="absolute left-4 top-3.5 text-green-200/70 hover:text-white transition-colors">
+                  <Search size={20} />
+                </button>
+              </form>
             </div>
           </motion.div>
 

@@ -130,43 +130,24 @@ export default function SubscribersAdmin() {
     toast.info('Mengirim buletin ke seluruh pelanggan...');
 
     try {
-      // Direct call to server endpoint or simulate campaign sending via bulk inserts
-      const promises = subscribers.map(async (sub) => {
-        const htmlBody = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div style="background-color: #065f46; color: white; padding: 24px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px; letter-spacing: 0.5px;">Kementerian Agama OKI</h1>
-              <p style="margin: 4px 0 0 0; font-size: 14px; opacity: 0.85;">Buletin Berita & Informasi Resmi</p>
-            </div>
-            <div style="padding: 24px; background-color: #ffffff; color: #333333; line-height: 1.6;">
-              <h2 style="color: #111827; margin-top: 0; font-size: 20px;">${manualTitle}</h2>
-              <p style="color: #6b7280; font-size: 13px;">Tanggal Pengiriman: ${new Date().toLocaleDateString('id-ID')}</p>
-              <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 16px 0;" />
-              <div style="margin-bottom: 24px; font-size: 14px; color: #374151;">
-                ${manualContent.replace(/\n/g, '<br />')}
-              </div>
-              <div style="text-align: center; margin-top: 32px; margin-bottom: 16px;">
-                <a href="${window.location.origin}" target="_blank" style="background-color: #10b981; color: white; padding: 12px 28px; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 14px; display: inline-block; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">Lihat di Website</a>
-              </div>
-            </div>
-            <div style="background-color: #f9fafb; padding: 16px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f3f4f6;">
-              <p style="margin: 0;">Anda menerima email ini karena Anda berlangganan Buletin Kementerian Agama Kabupaten OKI.</p>
-              <p style="margin: 4px 0 0 0;">© ${new Date().getFullYear()} Kemenag Kabupaten OKI. Hak Cipta Dilindungi.</p>
-            </div>
-          </div>
-        `;
-
-        await addDoc(collection(db, 'newsletter_sent_logs'), {
-          subscriberEmail: sub.email,
-          newsTitle: manualTitle,
+      // Direct call to server endpoint
+      const response = await fetch('/api/newsletter/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           subject: manualSubject,
-          htmlBody,
-          sentAt: new Date().toISOString(),
-          status: 'Terkirim (Simulasi)'
-        });
+          title: manualTitle,
+          content: manualContent,
+          subscribers: subscribers
+        })
       });
 
-      await Promise.all(promises);
+      if (!response.ok) {
+        throw new Error('Gagal mengirim buletin ke server');
+      }
+
       toast.success(`Berhasil mengirimkan buletin ke ${subscribers.length} pelanggan!`);
       setIsManualModalOpen(false);
       setManualSubject('');

@@ -21,6 +21,7 @@ import PengumumanDetail from './pages/PengumumanDetail';
 import GaleriFoto from './pages/GaleriFoto';
 import GaleriVideo from './pages/GaleriVideo';
 import VideoDetail from './pages/VideoDetail';
+import SearchPage from './pages/SearchPage';
 import AllNews from './pages/AllNews';
 import AllPengumuman from './pages/AllPengumuman';
 import AllAgenda from './pages/AllAgenda';
@@ -60,6 +61,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profil" element={<ProfilPage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/berita" element={<AllNews />} />
           <Route path="/berita/:id" element={<BeritaDetail />} />
           <Route path="/agenda" element={<AllAgenda />} />

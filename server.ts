@@ -8,6 +8,19 @@ import fs from "fs";
 import multer from "multer";
 import { createServer as createViteServer } from "vite";
 import sharp from "sharp";
+import nodemailer from "nodemailer";
+
+// Helper function to create transporter
+const getTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.ethereal.email",
+    port: Number(process.env.SMTP_PORT) || 587,
+    auth: {
+      user: process.env.SMTP_USER || "dallas.reinger@ethereal.email",
+      pass: process.env.SMTP_PASS || "rST2kUvqVd39x32P6j",
+    },
+  });
+};
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -228,6 +241,78 @@ async function startServer() {
     } catch (err: any) {
       console.error("Error in /api/upload:", err);
       res.status(500).json({ error: "Gagal mengunggah file ke penyimpanan", details: err.message });
+    }
+  });
+
+  // Manual newsletter send endpoint
+  app.post("/api/newsletter/send", async (req, res) => {
+    try {
+      const { subject, title, content, subscribers } = req.body;
+      if (!subject || !title || !content || !Array.isArray(subscribers)) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+      let sentCount = 0;
+
+      for (const sub of subscribers) {
+        const htmlBody = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f0f0f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="background-color: #065f46; color: white; padding: 24px; text-align: center;">
+              <h1 style="margin: 0; font-size: 22px;">${title}</h1>
+            </div>
+            <div style="padding: 24px; color: #333; line-height: 1.6;">
+              ${content}
+            </div>
+            <div style="background-color: #f9f9f9; padding: 16px; text-align: center; font-size: 12px; color: #777;">
+              <p style="margin: 0;">Pesan ini dikirim ke ${sub.email}</p>
+              <p style="margin: 4px 0 0 0;">Kemenag OKI - Hak Cipta Dilindungi</p>
+            </div>
+          </div>
+        `;
+
+        const logId = 'auto-' + Math.random().toString(36).substring(2, 11);
+        const logItem = {
+          id: logId,
+          subscriberEmail: sub.email,
+          newsTitle: title,
+          subject: subject,
+          htmlBody,
+          sentAt: new Date().toISOString(),
+          status: 'Gagal'
+        };
+
+        try {
+          const transporter = getTransporter();
+          await transporter.sendMail({
+            from: process.env.SMTP_FROM || '"Humas Kemenag OKI" <humas@kemenagoki.id>',
+            to: sub.email,
+            subject: subject,
+            html: htmlBody
+          });
+          logItem.status = 'Terkirim (Manual)';
+          console.log(`[NEWSLETTER] Email successfully sent to ${sub.email}`);
+          sentCount++;
+        } catch (emailErr) {
+          console.error(`[NEWSLETTER] Failed to send email to ${sub.email}:`, emailErr);
+        }
+        
+        if (useMySQL && pool) {
+          await pool.query(
+            'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+            [logId, 'newsletter_sent_logs', JSON.stringify(logItem)]
+          );
+        } else {
+          const logs = await readCollection('newsletter_sent_logs');
+          logs.push(logItem);
+          await writeCollection('newsletter_sent_logs', logs);
+        }
+      }
+
+      res.json({ success: true, count: sentCount });
+    } catch (err: any) {
+      console.error("Error in /api/newsletter/send:", err);
+      res.status(500).json({ error: "Gagal mengirim buletin", details: err.message });
     }
   });
 
@@ -711,8 +796,22 @@ async function startServer() {
                 subject: `Berita Terkini Kemenag OKI: ${newItem.title}`,
                 htmlBody,
                 sentAt: new Date().toISOString(),
-                status: 'Terkirim (Otomatis)'
+                status: 'Gagal'
               };
+
+              try {
+                const transporter = getTransporter();
+                await transporter.sendMail({
+                  from: process.env.SMTP_FROM || '"Humas Kemenag OKI" <humas@kemenagoki.id>',
+                  to: sub.email,
+                  subject: logItem.subject,
+                  html: htmlBody
+                });
+                logItem.status = 'Terkirim (Otomatis)';
+                console.log(`[NEWSLETTER] Email successfully sent to ${sub.email}`);
+              } catch (emailErr) {
+                console.error(`[NEWSLETTER] Failed to send email to ${sub.email}:`, emailErr);
+              }
               
               if (useMySQL && pool) {
                 await pool.query(
