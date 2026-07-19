@@ -67,7 +67,7 @@ export default function AccessibilityMenu() {
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -75,7 +75,7 @@ export default function AccessibilityMenu() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 mb-4 w-72 origin-bottom-left"
+            className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 mb-4 w-72 origin-bottom-right"
           >
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">
