@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Accessibility, Type, Contrast, Monitor, Link2, X, RotateCcw, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useLocation } from 'react-router-dom';
 
 export default function AccessibilityMenu() {
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState({
     fontSize: 100, // percentage
@@ -10,6 +12,8 @@ export default function AccessibilityMenu() {
     grayscale: false,
     highlightLinks: false,
   });
+
+  const isAdminPage = location.pathname.startsWith('/admin') || location.pathname.startsWith('/hmsoke');
 
   useEffect(() => {
     // Apply Font Size
@@ -37,6 +41,10 @@ export default function AccessibilityMenu() {
 
   }, [settings]);
 
+  if (isAdminPage) {
+    return null;
+  }
+
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -59,7 +67,7 @@ export default function AccessibilityMenu() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -67,7 +75,7 @@ export default function AccessibilityMenu() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 mb-4 w-72 origin-bottom-right"
+            className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 mb-4 w-72 origin-bottom-left"
           >
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
               <h3 className="font-bold text-gray-800 flex items-center gap-2">

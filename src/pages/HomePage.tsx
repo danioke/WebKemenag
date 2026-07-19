@@ -64,7 +64,7 @@ export default function HomePage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <a 
-                  href="https://dumas.kemenagoki.id/" 
+                  href="https://mediumblue-boar-124776.hostingersite.com/" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-green-900 font-bold rounded-xl shadow-md hover:bg-green-50 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm"
