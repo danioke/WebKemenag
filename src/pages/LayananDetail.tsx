@@ -132,9 +132,9 @@ const defaultLayananData: Record<string, any> = {
           </ul>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6 mb-20 sm:mb-6">
           <h4 class="text-lg font-bold text-gray-900 mb-4">Alur Sertifikasi Halal Gratis (SEHATI):</h4>
-          <div class="relative pl-6 border-l-2 border-emerald-100 space-y-6">
+          <div class="relative ml-4 sm:ml-0 pl-6 border-l-2 border-emerald-100 space-y-6">
             <div class="relative">
               <div class="absolute -left-9 top-0.5 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md shadow-emerald-600/20">
                 1
