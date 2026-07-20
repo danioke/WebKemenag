@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { db, doc, getDoc } from '../lib/db';
-import { Award, FileText, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Award, FileText, CheckCircle2, ChevronLeft, ChevronRight, Building2, ArrowLeft } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 
 export default function ProfilPage() {
@@ -30,10 +31,29 @@ export default function ProfilPage() {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const amount = scrollRef.current.clientWidth / 2;
+      // Find the width of one item + gap
+      const firstChild = scrollRef.current.children[0] as HTMLElement;
+      const amount = firstChild ? firstChild.offsetWidth + 16 : scrollRef.current.clientWidth;
       scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+    if (!profil?.seksiList || profil.seksiList.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scroll('right');
+        }
+      }
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [profil]);
 
   if (loading) {
     return (
@@ -56,22 +76,40 @@ export default function ProfilPage() {
   const seksiList = profil?.seksiList || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans pt-24 md:pt-28">
       <Helmet>
         <title>Profil Kantor | Kemenag OKI</title>
       </Helmet>
       <Header />
       
-      <main className="flex-grow pt-24 sm:pt-32 pb-16">
+      {/* Banner / Hero Section */}
+      <div className="bg-gradient-to-r from-green-800 to-green-950 text-white py-12 md:py-16 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-200 hover:text-white transition-colors mb-4 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm"
+          >
+            <ArrowLeft size={14} />
+            Kembali ke Beranda
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 shadow-lg border border-white/20">
+                <Building2 size={32} className="text-amber-400" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Profil Kantor</h1>
+                <p className="text-xs md:text-sm text-green-200 font-medium tracking-wide mt-1">Kementerian Agama Kabupaten Ogan Komering Ilir</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <main className="flex-grow py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
           
-          {/* Header Section */}
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">Profil Kantor</h1>
-            <p className="text-gray-600 text-lg">Kementerian Agama Kabupaten Ogan Komering Ilir</p>
-            <div className="w-24 h-1 bg-green-700 mx-auto mt-6 rounded-full"></div>
-          </div>
-
           {/* Visi Misi & Tugas Fungsi */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <ScrollReveal direction="up" amount={0.2}>
@@ -155,12 +193,12 @@ export default function ProfilPage() {
                   <p className="text-gray-600 mt-2">Kepala Sub Bagian, Kepala Seksi & Penyelenggara</p>
                 </div>
                 
-                {seksiList.length > 3 && (
+                {seksiList.length > 2 && (
                   <>
-                    <button onClick={() => scroll('left')} className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-800 hover:text-green-700 -ml-4 items-center justify-center transition-all hover:scale-105">
+                    <button onClick={() => scroll('left')} className="flex absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-800 hover:text-green-700 -ml-2 md:-ml-4 items-center justify-center transition-all hover:scale-105">
                       <ChevronLeft size={24} />
                     </button>
-                    <button onClick={() => scroll('right')} className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-800 hover:text-green-700 -mr-4 items-center justify-center transition-all hover:scale-105">
+                    <button onClick={() => scroll('right')} className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow-md border border-gray-100 text-gray-800 hover:text-green-700 -mr-2 md:-mr-4 items-center justify-center transition-all hover:scale-105">
                       <ChevronRight size={24} />
                     </button>
                   </>
@@ -169,11 +207,11 @@ export default function ProfilPage() {
                 {/* Horizontal scroll container */}
                 <div 
                   ref={scrollRef}
-                  className="flex overflow-x-auto gap-6 snap-x snap-mandatory scrollbar-hide pb-8 px-4 md:px-0"
+                  className="flex overflow-x-auto gap-4 md:gap-6 snap-x snap-mandatory scrollbar-hide pb-8 px-4 md:px-0"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   {seksiList.map((personil: any, idx: number) => (
-                    <div key={idx} className="w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all">
+                    <div key={idx} className="w-full sm:w-[280px] shrink-0 snap-start bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition-all">
                       <div className="aspect-[3/4] overflow-hidden bg-gray-100">
                         <img 
                           src={personil.photoUrl || "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80&w=400"} 
@@ -181,8 +219,8 @@ export default function ProfilPage() {
                           className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
-                      <div className="p-5 text-center">
-                        <h4 className="font-bold text-gray-900 line-clamp-1">{personil.name}</h4>
+                      <div className="p-4 sm:p-5 text-center">
+                        <h4 className="font-bold text-gray-900 line-clamp-2 leading-tight">{personil.name}</h4>
                         <p className="text-sm text-green-700 font-medium mt-1">{personil.role}</p>
                       </div>
                     </div>

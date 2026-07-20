@@ -64,7 +64,7 @@ export default function WordPressImporter() {
 
     try {
       // Use standard WordPress REST API with embedding for images/authors
-      const apiUrl = `${cleanUrl}/wp-json/wp/v2/posts?_embed=true&per_page=15`;
+      const apiUrl = `${cleanUrl}/wp-json/wp/v2/posts?_embed=true&per_page=120`;
       const response = await fetch(apiUrl);
       
       if (!response.ok) {
@@ -247,7 +247,7 @@ export default function WordPressImporter() {
           </button>
         </div>
         <p className="text-[11px] text-gray-400 mt-2">
-          * Sistem akan menarik 15 artikel terbaru secara otomatis melalui endpoint WordPress REST API.
+          * Sistem akan menarik 120 artikel terbaru secara otomatis melalui endpoint WordPress REST API.
         </p>
       </div>
 

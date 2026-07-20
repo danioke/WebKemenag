@@ -93,17 +93,24 @@ export default function Services() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               onClick={() => handleServiceClick(service)}
-              className={`group bg-white p-8 rounded-2xl shadow-sm hover:shadow-md border border-gray-100 transition-all ${service.borderColor} cursor-pointer flex flex-col h-full`}
+              className={`group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 transition-all ${service.borderColor} cursor-pointer flex flex-col h-full relative overflow-hidden hover:-translate-y-1`}
             >
-              <div className={`w-14 h-14 ${service.color} rounded-xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
-                <service.icon size={28} strokeWidth={1.5} />
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent group-hover:opacity-0 transition-opacity duration-500 z-0 pointer-events-none"></div>
+              <div className={`absolute inset-0 ${service.color.split(' ')[0].replace('50', '100')}/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none`}></div>
+              <div className="absolute -right-12 -top-12 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 group-hover:scale-110 pointer-events-none">
+                <service.icon size={160} strokeWidth={1} />
               </div>
-              <h4 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h4>
-              <p className="text-gray-600 leading-relaxed flex-grow">
-                {service.description}
-              </p>
-              <div className="mt-6 flex items-center text-sm font-semibold text-green-700 group-hover:text-green-800">
-                Selengkapnya <ArrowRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
+              <div className="relative z-10 flex flex-col h-full">
+                <div className={`w-14 h-14 ${service.color} rounded-xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+                  <service.icon size={28} strokeWidth={1.5} />
+                </div>
+                <h4 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h4>
+                <p className="text-gray-600 leading-relaxed flex-grow">
+                  {service.description}
+                </p>
+                <div className="mt-6 flex items-center text-sm font-semibold text-green-700 group-hover:text-green-800">
+                  Selengkapnya <ArrowRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
+                </div>
               </div>
             </motion.div>
           ))}

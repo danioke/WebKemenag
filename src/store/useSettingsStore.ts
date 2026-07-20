@@ -35,7 +35,7 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       logoUrl: 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
-      faviconUrl: '',
+      faviconUrl: 'https://royalblue-wolf-843345.hostingersite.com/uploads/foto_staf/fav-1784035270535-947609399.png',
       ogImageUrl: '',
       logoKemenagUrl: 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png',
       logoDmiUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ea/Logo_Dewan_Masjid_Indonesia_%28DMI%29.png',
