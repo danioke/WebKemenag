@@ -63,12 +63,9 @@ export default function WordPressImporter() {
     setSelectedIds([]);
 
     try {
-      // Use proxy to avoid CORS issues
-      const response = await fetch("/api/proxy-wp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wpUrl: cleanUrl })
-      });
+      // Use standard WordPress REST API with embedding for images/authors
+      const apiUrl = `${cleanUrl}/wp-json/wp/v2/posts?_embed=true&per_page=100`;
+      const response = await fetch(apiUrl);
       
       if (!response.ok) {
         throw new Error(`HTTP status ${response.status}`);
@@ -143,22 +140,7 @@ export default function WordPressImporter() {
         // Get featured image
         let imageUrl = '';
         if (post._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
-          const wpImage = post._embedded['wp:featuredmedia'][0].source_url;
-          try {
-            const imgRes = await fetch("/api/download-image", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: wpImage, category: "foto" })
-            });
-            if (imgRes.ok) {
-              const imgData = await imgRes.json();
-              imageUrl = imgData.url;
-            } else {
-              imageUrl = wpImage;
-            }
-          } catch {
-            imageUrl = wpImage;
-          }
+          imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
         }
 
         // Get author name
@@ -168,31 +150,7 @@ export default function WordPressImporter() {
         }
 
         // Extract clean text/HTML for excerpt/content
-        let fullContent = (post.content.rendered || post.excerpt.rendered).replace(/srcset="[^"]*"/g, "");
-        
-        // Download all inline images
-        const imgRegex = /<img[^>]+src="([^">]+)"/g;
-        let match;
-        const inlineImgUrls = [];
-        while ((match = imgRegex.exec(fullContent)) !== null) {
-           inlineImgUrls.push(match[1]);
-        }
-        
-        for (const url of inlineImgUrls) {
-           try {
-             const dlRes = await fetch("/api/download-image", {
-                 method: "POST",
-                 headers: { "Content-Type": "application/json" },
-                 body: JSON.stringify({ url, category: "foto" })
-              });
-              if (dlRes.ok) {
-                 const dlData = await dlRes.json();
-                 fullContent = fullContent.split(url).join(dlData.url);
-              }
-           } catch {
-             // ignore
-           }
-        }
+        const fullContent = post.content.rendered || post.excerpt.rendered;
 
         // Parse date to clean YYYY-MM-DD
         let postDate = '';
@@ -289,7 +247,7 @@ export default function WordPressImporter() {
           </button>
         </div>
         <p className="text-[11px] text-gray-400 mt-2">
-          * Sistem akan menarik 120 artikel terbaru secara otomatis melalui endpoint WordPress REST API.
+          * Sistem akan menarik 100 artikel terbaru secara otomatis melalui endpoint WordPress REST API.
         </p>
       </div>
 
