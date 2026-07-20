@@ -244,6 +244,81 @@ async function startServer() {
     }
   });
 
+  // WordPress proxy
+  app.post("/api/proxy-wp", async (req, res) => {
+    try {
+      const { wpUrl } = req.body;
+      let cleanUrl = wpUrl.trim();
+      if (!cleanUrl.startsWith('http')) cleanUrl = 'https://' + cleanUrl;
+      cleanUrl = cleanUrl.replace(/\/$/, "");
+      const apiUrl = `${cleanUrl}/wp-json/wp/v2/posts?_embed=true&per_page=120`;
+      const response = await fetch(apiUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      res.json(data);
+    } catch(err: any) {
+      console.error("WP Proxy error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // WordPress image downloader
+  app.post("/api/download-image", async (req, res) => {
+    try {
+      const { url: imageUrl, category = "foto" } = req.body;
+      if (!imageUrl) return res.status(400).json({ error: "Missing URL" });
+      
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error(`Fetch failed ${response.status}`);
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const mimetype = response.headers.get("content-type") || "image/jpeg";
+      
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      let ext = ".jpg";
+      if (mimetype.includes("png")) ext = ".png";
+      if (mimetype.includes("webp")) ext = ".webp";
+      const filename = `wp-img-${uniqueSuffix}${ext}`;
+      const relativeUrl = `/uploads/${category}/${filename}`;
+      
+      const sizeInKb = Math.round(buffer.length / 1024);
+      const sizeStr = sizeInKb > 1024 ? `${(sizeInKb / 1024).toFixed(1)} MB` : `${sizeInKb} KB`;
+      const fileBase64 = `data:${mimetype};base64,${buffer.toString("base64")}`;
+      
+      const fileDoc: any = {
+        id: filename,
+        name: filename,
+        url: relativeUrl,
+        base64: fileBase64,
+        category,
+        mimetype,
+        size: sizeStr,
+        createdAt: new Date().toISOString()
+      };
+      
+      const release = await acquireLock("uploaded_files");
+      try {
+        if (useMySQL && pool) {
+           await pool.query(
+            'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+            [filename, 'uploaded_files', JSON.stringify(fileDoc)]
+          );
+        } else {
+           const files = await readCollection("uploaded_files");
+           files.push(fileDoc);
+           await writeCollection("uploaded_files", files);
+        }
+      } finally {
+        release();
+      }
+      
+      res.json({ url: relativeUrl });
+    } catch(err: any) {
+      console.error("Error downloading image:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Manual newsletter send endpoint
   app.post("/api/newsletter/send", async (req, res) => {
     try {

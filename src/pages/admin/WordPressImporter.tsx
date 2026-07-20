@@ -63,9 +63,12 @@ export default function WordPressImporter() {
     setSelectedIds([]);
 
     try {
-      // Use standard WordPress REST API with embedding for images/authors
-      const apiUrl = `${cleanUrl}/wp-json/wp/v2/posts?_embed=true&per_page=120`;
-      const response = await fetch(apiUrl);
+      // Use proxy to avoid CORS issues
+      const response = await fetch("/api/proxy-wp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wpUrl: cleanUrl })
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP status ${response.status}`);
@@ -140,7 +143,22 @@ export default function WordPressImporter() {
         // Get featured image
         let imageUrl = '';
         if (post._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
-          imageUrl = post._embedded['wp:featuredmedia'][0].source_url;
+          const wpImage = post._embedded['wp:featuredmedia'][0].source_url;
+          try {
+            const imgRes = await fetch("/api/download-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: wpImage, category: "foto" })
+            });
+            if (imgRes.ok) {
+              const imgData = await imgRes.json();
+              imageUrl = imgData.url;
+            } else {
+              imageUrl = wpImage;
+            }
+          } catch {
+            imageUrl = wpImage;
+          }
         }
 
         // Get author name
@@ -150,7 +168,31 @@ export default function WordPressImporter() {
         }
 
         // Extract clean text/HTML for excerpt/content
-        const fullContent = post.content.rendered || post.excerpt.rendered;
+        let fullContent = (post.content.rendered || post.excerpt.rendered).replace(/srcset="[^"]*"/g, "");
+        
+        // Download all inline images
+        const imgRegex = /<img[^>]+src="([^">]+)"/g;
+        let match;
+        const inlineImgUrls = [];
+        while ((match = imgRegex.exec(fullContent)) !== null) {
+           inlineImgUrls.push(match[1]);
+        }
+        
+        for (const url of inlineImgUrls) {
+           try {
+             const dlRes = await fetch("/api/download-image", {
+                 method: "POST",
+                 headers: { "Content-Type": "application/json" },
+                 body: JSON.stringify({ url, category: "foto" })
+              });
+              if (dlRes.ok) {
+                 const dlData = await dlRes.json();
+                 fullContent = fullContent.split(url).join(dlData.url);
+              }
+           } catch {
+             // ignore
+           }
+        }
 
         // Parse date to clean YYYY-MM-DD
         let postDate = '';
