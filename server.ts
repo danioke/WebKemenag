@@ -244,6 +244,28 @@ async function startServer() {
     }
   });
 
+  // Proxy image for Open Graph
+  app.get("/api/proxy-image", async (req, res) => {
+    try {
+      const imageUrl = req.query.url as string;
+      if (!imageUrl) return res.status(400).send("Missing URL");
+      
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error("Fetch failed");
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const contentType = response.headers.get("content-type") || "image/jpeg";
+      
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Cache-Control", "public, max-age=31536000"); // Cache for 1 year
+      res.send(buffer);
+    } catch (err: any) {
+      console.error("Image proxy error:", err.message);
+      res.status(500).send("Proxy error");
+    }
+  });
+
   // Manual newsletter send endpoint
   app.post("/api/newsletter/send", async (req, res) => {
     try {
@@ -1136,6 +1158,9 @@ async function startServer() {
           if (ogResized) {
             image = `${protocol}://${host}${ogResized}`;
           }
+        } else {
+          // It's a completely external URL, proxy it to prevent CDN blocking bots
+          image = `${protocol}://${host}/api/proxy-image?url=${encodeURIComponent(image)}`;
         }
       }
     }

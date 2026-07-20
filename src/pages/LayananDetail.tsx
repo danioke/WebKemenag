@@ -311,9 +311,21 @@ export default function LayananDetail() {
       <div className="bg-gradient-to-r from-green-800 to-green-950 text-white py-12 md:py-16 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-200 hover:text-white transition-colors mb-4 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
-            <ArrowLeft size={14} /> Kembali ke Beranda
-          </Link>
+          <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-green-200 mb-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
+            <Link to="/" className="hover:text-white transition-colors flex items-center gap-1 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              <ArrowLeft size={14} className="sm:hidden mr-1" />
+              <span className="hidden sm:inline">Beranda</span>
+              <span className="sm:hidden">Kembali</span>
+            </Link>
+            <ChevronRight size={14} className="text-green-400/50 shrink-0 hidden sm:block" />
+            <span className="text-white bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm hidden sm:block">
+              Layanan
+            </span>
+            <ChevronRight size={14} className="text-green-400/50 shrink-0 hidden sm:block" />
+            <span className="text-white truncate max-w-[150px] sm:max-w-[300px] hidden sm:block">
+              {data.title}
+            </span>
+          </nav>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/10 flex items-center justify-center shrink-0 shadow-lg border border-white/20">

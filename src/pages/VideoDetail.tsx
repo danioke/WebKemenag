@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { db, doc, getDoc } from '../lib/db';
-import { ArrowLeft, Play } from 'lucide-react';
+import { ArrowLeft, Play, ChevronRight } from 'lucide-react';
 import ReactPlayer from 'react-player';
 import { Helmet } from 'react-helmet-async';
 
@@ -123,13 +123,27 @@ export default function VideoDetail() {
       <Header />
       <main className="flex-grow pt-28 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <button 
-            onClick={() => navigate('/galeri-video')}
-            className="flex items-center text-emerald-700 hover:text-emerald-800 font-medium mb-6 transition-colors group"
-          >
-            <ArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" size={20} />
-            Kembali ke Galeri Video
-          </button>
+          <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 mb-6 overflow-x-auto whitespace-nowrap scrollbar-hide">
+            <button 
+              onClick={() => navigate('/')} 
+              className="hover:text-emerald-700 flex items-center gap-1 transition-colors"
+            >
+              <ArrowLeft size={14} className="sm:hidden mr-1" />
+              <span className="hidden sm:inline">Beranda</span>
+              <span className="sm:hidden">Kembali</span>
+            </button>
+            <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
+            <button 
+              onClick={() => navigate('/galeri-video')} 
+              className="hover:text-emerald-700 transition-colors hidden sm:block"
+            >
+              Galeri Video
+            </button>
+            <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
+            <span className="text-gray-900 font-medium truncate max-w-[150px] sm:max-w-[300px] hidden sm:block">
+              {video.title}
+            </span>
+          </nav>
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">{video.title}</h1>

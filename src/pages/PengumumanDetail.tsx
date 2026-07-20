@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from '../lib/db';
 import { db } from '../lib/db';
-import { ArrowLeft, FileText, Download, ExternalLink, Share2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, FileText, Download, ExternalLink, Share2, ArrowRight, ChevronRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
 interface Pengumuman {
@@ -127,14 +127,25 @@ export default function PengumumanDetail() {
         <meta property="og:type" content="article" />
       </Helmet>
 
-      {/* Mobile-style Top Nav Bar */}
-      <div className="bg-white px-4 py-4 border-b border-gray-100 flex items-center sticky top-0 z-50 shadow-sm">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors mr-3">
-          <ArrowLeft size={24} />
-        </button>
-        <h2 className="font-semibold text-gray-900 truncate flex-1">Detail Pengumuman</h2>
-        <button onClick={handleShare} className="p-2 -mr-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
-          <Share2 size={20} />
+      {/* Breadcrumb Top Nav Bar */}
+      <div className="bg-white px-4 sm:px-6 py-3 border-b border-gray-100 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+        <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600 overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <Link to="/" className="hover:text-green-700 flex items-center gap-1 transition-colors">
+            <ArrowLeft size={14} className="sm:hidden mr-1" />
+            <span className="hidden sm:inline">Beranda</span>
+            <span className="sm:hidden">Kembali</span>
+          </Link>
+          <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
+          <Link to="/semua-pengumuman" className="hover:text-green-700 transition-colors hidden sm:block">
+            Pengumuman
+          </Link>
+          <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
+          <span className="text-gray-900 font-medium truncate max-w-[150px] sm:max-w-[300px] hidden sm:block">
+            {pengumuman.title}
+          </span>
+        </nav>
+        <button onClick={handleShare} className="p-2 -mr-2 text-gray-700 hover:bg-gray-100 hover:text-green-700 rounded-full transition-colors flex-shrink-0" title="Bagikan Pengumuman">
+          <Share2 size={18} />
         </button>
       </div>
 
