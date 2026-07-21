@@ -67,7 +67,7 @@ export default function Hero() {
   // Merge Firestore banners with static fallback items
   const activeItems = banners.length > 0 ? banners.map(b => ({
     image: b.image || b.imageUrl || 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&q=80',
-    category: 'Banner Kemenag',
+    category: 'TOP NEWS',
     title: b.title
   })) : carouselItems;
 
