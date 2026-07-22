@@ -468,7 +468,7 @@ export default function VideoAdmin() {
             <div className="space-y-4">
               <h2 className="font-bold text-gray-800 text-base">Sinkronisasi Otomatis</h2>
               <p className="text-xs text-gray-500 leading-relaxed">
-                Tarik video reels/youtube terbaru Anda secara langsung tanpa menyalin dan menempelkan tautan secara manual.
+                Tarik video Youtube dan Facebook secara langsung tanpa menyalin dan menempelkan tautan secara manual.
               </p>
               
               <button

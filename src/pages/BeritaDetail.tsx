@@ -174,7 +174,7 @@ export default function BeritaDetail() {
             <span className="sm:hidden">Kembali</span>
           </Link>
           <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
-          <Link to="/semua-berita" className="hover:text-green-700 transition-colors hidden sm:block">
+          <Link to="/berita" className="hover:text-green-700 transition-colors hidden sm:block">
             Berita
           </Link>
           <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />

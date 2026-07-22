@@ -19,6 +19,8 @@ import {
   X,
   Image as ImageIcon,
   Upload,
+  RefreshCw,
+  Globe
 } from "lucide-react";
 import { useMediaPickerStore } from "../../store/useMediaPickerStore";
 
@@ -33,11 +35,15 @@ export default function FotoAdmin() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ id: "", title: "", image: "" });
+  
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
   const { openPicker } = useMediaPickerStore();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [syncLogs, setSyncLogs] = useState<string[]>([]);
 
   const fetchData = async () => {
     try {
@@ -53,6 +59,39 @@ export default function FotoAdmin() {
       toast.error("Gagal mengambil data foto");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSyncPhotos = async () => {
+    setIsSyncing(true);
+    setSyncLogs(['Menghubungkan ke server...', 'Memuat kredensial API Facebook...']);
+    toast.info('Memulai sinkronisasi foto otomatis dari API...');
+    
+    try {
+      const res = await fetch('/api/videos/auto-fetch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (res.ok) {
+        const result = await res.json();
+        setSyncLogs(result.logs || []);
+        if (result.fetchedCount > 0) {
+          toast.success(`Sinkronisasi Berhasil! Mengimpor postingan baru.`);
+          fetchData();
+        } else {
+          toast.success('Sinkronisasi selesai. Seluruh foto media sosial Anda sudah mutakhir.');
+        }
+      } else {
+        toast.error('Gagal menjalankan sinkronisasi otomatis.');
+        setSyncLogs(['Koneksi API Gagal. Periksa kembali API settings Anda.']);
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Kesalahan koneksi sinkronisasi');
+      setSyncLogs([`Kesalahan jaringan: ${err.message}`]);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -151,12 +190,23 @@ export default function FotoAdmin() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Kelola Galeri Foto</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSyncPhotos}
+            disabled={isSyncing}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} />
+            <span className="hidden sm:inline">Sync Facebook</span>
+          </button>
+          
         <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <Plus size={16} /> Tambah Data
-        </button>
+            onClick={openAddModal}
+            className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+          >
+            <Plus size={16} /> Tambah Data
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

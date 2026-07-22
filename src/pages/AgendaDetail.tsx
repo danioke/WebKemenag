@@ -136,7 +136,7 @@ export default function AgendaDetail() {
             <span className="sm:hidden">Kembali</span>
           </Link>
           <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
-          <Link to="/semua-agenda" className="hover:text-green-700 transition-colors hidden sm:block">
+          <Link to="/agenda" className="hover:text-green-700 transition-colors hidden sm:block">
             Agenda
           </Link>
           <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
