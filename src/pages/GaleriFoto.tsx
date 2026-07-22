@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { collection, getDocs, query, orderBy } from '../lib/db';
 import { db } from '../lib/db';
 import { ArrowLeft, X, ChevronUp, ChevronDown } from 'lucide-react';
-import FacebookMediaModal from '../components/FacebookMediaModal';
-
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -174,20 +172,56 @@ export default function GaleriFoto() {
         </div>
       </main>
 
-      {/* Facebook-style Modal */}
-      <FacebookMediaModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        mediaUrl={photos[currentIndex]?.image || ''}
-        mediaType="image"
-        title={photos[currentIndex]?.title || ''}
-        date={photos[currentIndex]?.date || 'Baru saja'}
-        authorName="Kemenag OKI"
-        onNext={handleNext}
-        onPrev={handlePrev}
-        hasNext={currentIndex < photos.length - 1}
-        hasPrev={currentIndex > 0}
-      />
+      {/* Fullscreen TikTok-style Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col justify-center items-center">
+          <button 
+            onClick={closeModal}
+            className="absolute top-6 left-6 z-50 text-white p-3 bg-black/40 hover:bg-black/60 backdrop-blur-sm rounded-full transition-colors"
+          >
+            <X size={24} />
+          </button>
+          
+          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-50">
+            <button 
+              onClick={handlePrev}
+              disabled={currentIndex === 0}
+              className="text-white p-3 bg-black/40 hover:bg-black/60 disabled:opacity-30 disabled:cursor-not-allowed backdrop-blur-sm rounded-full transition-colors"
+            >
+              <ChevronUp size={24} />
+            </button>
+            <button 
+              onClick={handleNext}
+              disabled={currentIndex === photos.length - 1}
+              className="text-white p-3 bg-black/40 hover:bg-black/60 disabled:opacity-30 disabled:cursor-not-allowed backdrop-blur-sm rounded-full transition-colors"
+            >
+              <ChevronDown size={24} />
+            </button>
+          </div>
+
+          <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden">
+            <AnimatePresence initial={false} mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.3 }}
+                className="w-full h-full flex flex-col items-center justify-center p-4 max-w-5xl mx-auto"
+              >
+                <img 
+                  src={photos[currentIndex].image} 
+                  alt={photos[currentIndex].title}
+                  className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl"
+                />
+                <div className="mt-6 text-center px-8">
+                  <h3 className="text-white text-xl md:text-2xl font-bold">{photos[currentIndex].title}</h3>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

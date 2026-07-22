@@ -452,46 +452,6 @@ export default function SettingsAdmin() {
           </div>
         </div>
 
-        
-        {/* Integrasi Facebook */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-            <Facebook className="text-blue-600" size={20} />
-            <h3 className="font-bold text-gray-800">Integrasi Facebook (Auto Fetch)</h3>
-          </div>
-          <div className="p-6 space-y-4">
-            <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm border border-blue-200">
-              <p className="font-semibold mb-1">Catatan Penting Integrasi Facebook:</p>
-              <p>Untuk mengambil video (Reels) dan foto secara otomatis beserta sinkronisasi komentar/like, Anda memerlukan <strong>Facebook Page Access Token</strong> dari Facebook Developer Console. Aplikasi Anda juga perlu lolos App Review untuk izin <code>pages_read_engagement</code> dan Webhooks jika ingin fitur komentar sinkron secara real-time.</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Facebook Page ID</label>
-              <input
-                type="text"
-                placeholder="Contoh: 1045982XXXXX"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Page Access Token</label>
-              <input
-                type="password"
-                placeholder="EAAGm0PX..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-            <div className="pt-2">
-              <button
-                type="button"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-                onClick={() => alert("Simulasi: Menguji koneksi dengan Facebook API. (Fitur ini membutuhkan backend API sungguhan dan kredensial yang valid).")}
-              >
-                Uji Koneksi Facebook API
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div className="flex justify-end pt-4 pb-12">
           <button
             type="submit"

@@ -1,0 +1,44 @@
+    });
+  }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 5MB");
+      return;
+    }
+    
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
+    
+    setUploadingField(fieldName);
+    toast.info('Mengunggah gambar...');
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formDataUpload,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setFormData(prev => ({ ...prev, [fieldName]: data.url }));
+        toast.success('Gambar berhasil diunggah');
+      } else {
+        toast.error('Gagal mengunggah gambar');
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan saat mengunggah');
+    } finally {
+      setUploadingField(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    
+    try {
+      await updateSettings(formData);
+      toast.success('Pengaturan berhasil disimpan');

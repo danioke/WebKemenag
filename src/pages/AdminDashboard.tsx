@@ -82,8 +82,7 @@ export default function AdminDashboard() {
   const [editPhoto, setEditPhoto] = useState(profilePhoto);
   const [editPassword, setEditPassword] = useState("");
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-  const isBeritaActive = location.pathname.includes("/admin/berita") || location.pathname.includes("/admin/foto") || location.pathname.includes("/admin/video") || location.pathname.includes("/admin/kategori") || location.pathname.includes("/admin/banner") || location.pathname.includes("/admin/infografis");
-  const [isBeritaOpen, setIsBeritaOpen] = useState(isBeritaActive);
+  const [isBeritaOpen, setIsBeritaOpen] = useState(true);
 
   const handleProfileImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
