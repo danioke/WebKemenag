@@ -191,7 +191,7 @@ export default function MediaAdmin() {
               { id: 'image', label: 'Foto Berita', icon: ImageIcon },
               { id: 'foto_pejabat', label: 'Foto Pejabat', icon: ImageIcon },
               { id: 'foto_staf', label: 'Foto Staf', icon: ImageIcon },
-              { id: 'video', label: 'Video', icon: Video },
+              // { id: 'video', label: 'Video', icon: Video },
               { id: 'pdf', label: 'PDF / Dokumen', icon: FileText }
             ].map(cat => (
               <button
