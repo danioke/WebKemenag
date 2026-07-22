@@ -22,7 +22,7 @@ export default function HomePage() {
         <Hero />
         
         {/* Daily Widgets Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-8 relative z-20 mb-8 sm:mb-16">
+        <section className="w-full mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-8 relative z-20 mb-8 sm:mb-16">
           <ScrollReveal direction="up" amount={0.1}>
             <div className="w-full">
               <JadwalSholatWidget />

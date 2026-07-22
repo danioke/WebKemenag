@@ -16,7 +16,9 @@ interface MediaFile {
 export default function MediaAdmin() {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState('image');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [search, setSearch] = useState('');
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -45,7 +47,12 @@ export default function MediaAdmin() {
 
   useEffect(() => {
     fetchFiles();
+    setCurrentPage(1);
   }, [category]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -160,6 +167,8 @@ export default function MediaAdmin() {
   };
 
   const filteredFiles = files.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+  const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+  const paginatedFiles = filteredFiles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div>
@@ -178,7 +187,7 @@ export default function MediaAdmin() {
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex bg-gray-100 p-1 rounded-lg">
             {[
-              { id: 'all', label: 'Semua', icon: Folder },
+              { id: 'og_image', label: 'OG Images', icon: ImageIcon },
               { id: 'image', label: 'Foto Berita', icon: ImageIcon },
               { id: 'foto_pejabat', label: 'Foto Pejabat', icon: ImageIcon },
               { id: 'foto_staf', label: 'Foto Staf', icon: ImageIcon },
@@ -219,8 +228,9 @@ export default function MediaAdmin() {
               <p>Belum ada media di kategori ini</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {filteredFiles.map(file => (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {paginatedFiles.map(file => (
                 <div key={file.id} className="group relative border border-gray-200 rounded-lg overflow-hidden bg-gray-50 hover:border-green-400 transition-colors">
                   <div className="aspect-square bg-gray-100 flex items-center justify-center relative">
                     {file.mimeType.startsWith('image/') ? (
@@ -248,6 +258,28 @@ export default function MediaAdmin() {
                 </div>
               ))}
             </div>
+            
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center items-center gap-2 pb-2">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 rounded-md border border-gray-200 text-sm font-medium disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Sebelumnya
+                </button>
+                <span className="text-sm text-gray-600 font-medium px-2">
+                  Halaman {currentPage} dari {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 rounded-md border border-gray-200 text-sm font-medium disabled:opacity-50 hover:bg-gray-50"
+                >
+                  Berikutnya
+                </button>
+              </div>
+            )}
           )}
         </div>
       </div>
