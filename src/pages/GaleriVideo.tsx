@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Play, Search, Video } from 'lucide-react';
+import FacebookMediaModal from '../components/FacebookMediaModal';
+
 import { db, collection, getDocs, orderBy, query } from '../lib/db';
 import { Helmet } from 'react-helmet-async';
 
@@ -18,6 +20,31 @@ export default function GaleriVideo() {
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const openModal = (id: string) => {
+    const index = videos.findIndex(v => v.id === id);
+    if (index !== -1) {
+      setCurrentIndex(index);
+      setIsModalOpen(true);
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    document.body.style.overflow = '';
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev < videos.length - 1 ? prev + 1 : prev));
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
   
   useEffect(() => {
     const fetchVideos = async () => {
@@ -76,7 +103,7 @@ export default function GaleriVideo() {
                 <div 
                   key={video.id} 
                   className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer border border-gray-100 group flex flex-col"
-                  onClick={() => navigate(`/galeri-video/${video.id}`)}
+                  onClick={() => openModal(video.id)}
                 >
                   <div className="aspect-video bg-gray-900 relative flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
@@ -119,6 +146,20 @@ export default function GaleriVideo() {
       </main>
       
       <Footer />
+      {/* Facebook-style Modal */}
+      <FacebookMediaModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        mediaUrl={videos[currentIndex]?.videoUrl || ''}
+        mediaType="video"
+        title={videos[currentIndex]?.title || ''}
+        date="Baru saja"
+        authorName="Kemenag OKI"
+        onNext={handleNext}
+        onPrev={handlePrev}
+        hasNext={currentIndex < videos.length - 1}
+        hasPrev={currentIndex > 0}
+      />
     </div>
   );
 }

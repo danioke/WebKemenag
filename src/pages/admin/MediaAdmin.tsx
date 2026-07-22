@@ -280,6 +280,7 @@ export default function MediaAdmin() {
                 </button>
               </div>
             )}
+            </>
           )}
         </div>
       </div>

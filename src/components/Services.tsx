@@ -86,29 +86,28 @@ export default function Services() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, idx) => (
-            <motion.div
+                        <motion.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               onClick={() => handleServiceClick(service)}
-              className={`group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 transition-all ${service.borderColor} cursor-pointer flex flex-col h-full relative overflow-hidden hover:-translate-y-1`}
+              className={`group ${service.color} ${service.hoverColor} p-8 rounded-2xl shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col h-full relative overflow-hidden hover:-translate-y-1 text-white`}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-transparent group-hover:opacity-0 transition-opacity duration-500 z-0 pointer-events-none"></div>
-              <div className={`absolute inset-0 ${service.color.split(' ')[0].replace('50', '100')}/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none`}></div>
-              <div className="absolute -right-12 -top-12 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 group-hover:scale-110 pointer-events-none">
+              <div className="absolute inset-0 bg-white/5 group-hover:opacity-0 transition-opacity duration-500 z-0 pointer-events-none"></div>
+              <div className="absolute -right-12 -top-12 opacity-10 group-hover:opacity-20 transition-all duration-500 group-hover:scale-110 pointer-events-none">
                 <service.icon size={160} strokeWidth={1} />
               </div>
               <div className="relative z-10 flex flex-col h-full">
-                <div className={`w-14 h-14 ${service.color} rounded-xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+                <div className={`w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 backdrop-blur-sm`}>
                   <service.icon size={28} strokeWidth={1.5} />
                 </div>
-                <h4 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h4>
-                <p className="text-gray-600 leading-relaxed flex-grow">
+                <h4 className="text-xl font-bold mb-3">{service.title}</h4>
+                <p className="text-white/90 leading-relaxed flex-grow">
                   {service.description}
                 </p>
-                <div className="mt-6 flex items-center text-sm font-semibold text-green-700 group-hover:text-green-800">
+                <div className="mt-6 flex items-center text-sm font-semibold text-white group-hover:text-amber-200 transition-colors">
                   Selengkapnya <ArrowRight size={16} className="ml-1 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
