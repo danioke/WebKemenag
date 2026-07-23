@@ -14,6 +14,7 @@ export default function VideoDetail() {
   const navigate = useNavigate();
   const [video, setVideo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [playerAspect, setPlayerAspect] = useState<'auto' | 'landscape' | 'portrait'>('auto');
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -26,8 +27,7 @@ export default function VideoDetail() {
         }
       } catch (error) {
         console.error("Error fetching video:", error);
-      } finally {
-        setLoading(false);
+      } finally {        setLoading(false);
       }
     };
     fetchVideo();
@@ -70,19 +70,51 @@ export default function VideoDetail() {
       );
     }
 
-        // Facebook Video Embed
+    // Facebook Video / Reel Embed
     if (url.includes('facebook.com') || url.includes('fb.watch') || url.includes('fb.gg')) {
+      const isReelUrl = url.toLowerCase().includes('/reel/') || 
+                        url.toLowerCase().includes('/reels/') || 
+                        url.toLowerCase().includes('/share/r/') || 
+                        url.toLowerCase().includes('reel');
+      
+      const isPortrait = playerAspect === 'portrait' || (playerAspect === 'auto' && isReelUrl);
       const embedSrc = url.includes('facebook.com/plugins/video.php')
         ? url
         : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`;
+
       return (
-        <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg bg-black flex items-center justify-center">
-          <iframe 
-            src={embedSrc}
-            className="w-full h-full border-0"
-            allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          />
+        <div className="flex flex-col items-center w-full space-y-3">
+          {/* Aspect Ratio Switcher */}
+          <div className="flex items-center gap-2 text-xs bg-gray-100 p-1.5 rounded-xl border border-gray-200">
+            <span className="text-gray-500 font-medium px-2">Format Tampilan:</span>
+            <button
+              onClick={() => setPlayerAspect('landscape')}
+              className={`px-3 py-1 rounded-lg font-bold transition-all ${!isPortrait ? 'bg-white text-emerald-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              Horizontal (16:9)
+            </button>
+            <button
+              onClick={() => setPlayerAspect('portrait')}
+              className={`px-3 py-1 rounded-lg font-bold transition-all ${isPortrait ? 'bg-white text-emerald-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              Tegak / Reel (9:16)
+            </button>
+          </div>
+
+          <div 
+            className={`w-full rounded-2xl overflow-hidden shadow-xl bg-black flex items-center justify-center border border-gray-800 transition-all duration-300 ${
+              isPortrait 
+                ? 'max-w-[420px] aspect-[9/16] h-[640px] max-h-[80vh]' 
+                : 'w-full aspect-video'
+            }`}
+          >
+            <iframe 
+              src={embedSrc}
+              className="w-full h-full border-0"
+              allowFullScreen
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            />
+          </div>
         </div>
       );
     }

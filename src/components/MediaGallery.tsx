@@ -514,11 +514,19 @@ export default function MediaGallery() {
 
                                                     // Facebook Embed
                           if (url.includes('facebook.com') || url.includes('fb.watch') || url.includes('fb.gg')) {
+                            const isReel = url.toLowerCase().includes('/reel/') || 
+                                           url.toLowerCase().includes('/reels/') || 
+                                           url.toLowerCase().includes('/share/r/') || 
+                                           url.toLowerCase().includes('reel');
                             const embedSrc = url.includes('facebook.com/plugins/video.php')
                               ? url
                               : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=${isActive && isModalOpen ? 'true' : 'false'}`;
                             return (
-                              <div className="w-full h-full max-w-[800px] max-h-[85vh] aspect-video flex items-center justify-center p-2">
+                              <div className={`w-full h-full flex items-center justify-center p-2 mx-auto ${
+                                isReel 
+                                  ? 'max-w-[420px] max-h-[85vh] aspect-[9/16]' 
+                                  : 'max-w-[900px] max-h-[85vh] aspect-video'
+                              }`}>
                                 <iframe 
                                   src={embedSrc}
                                   className="w-full h-full border-0 pointer-events-auto rounded-xl shadow-2xl bg-black"
