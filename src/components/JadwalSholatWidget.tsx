@@ -23,11 +23,15 @@ interface Kota {
 }
 
 export default function JadwalSholatWidget() {
-  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, sholatTtdImage, sholatCapImage, logoKemenagUrl, logoDmiUrl, fetchSettings } = useSettingsStore();
+  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, sholatTtdImage, sholatCapImage, sholatTtdDone, logoKemenagUrl, logoDmiUrl, fetchSettings } = useSettingsStore();
 
   const handlePrintPdf = () => {
-    if (!sholatTtdImage || !sholatCapImage) {
-      toast.error('Jadwal belum ditandatangani. Silakan coba beberapa saat lagi.');
+    if (sholatTtdDone === false) {
+      toast.info('Proses tanda tangan & stempel belum selesai. Silakan coba beberapa saat lagi.');
+      return;
+    }
+    if (!sholatTtdImage && !sholatCapImage) {
+      toast.error('File tanda tangan & stempel belum diunggah.');
       return;
     }
     window.print();
@@ -490,25 +494,23 @@ export default function JadwalSholatWidget() {
               </p>
               <p className="font-semibold">{sholatTtdJabatan || 'Kepala'}</p>
               
-              {/* Signature & Cap Stempel Container */}
-              <div className="relative w-full h-20 flex items-center justify-center my-1">
-                {sholatCapImage && (
+              {/* Signature & Cap Stempel Container (1 File) */}
+              <div className="relative w-full h-24 flex items-center justify-center my-1">
+                {sholatTtdImage ? (
+                  <img 
+                    src={sholatTtdImage} 
+                    alt="Tanda Tangan & Cap Stempel" 
+                    className="h-24 max-w-[220px] object-contain relative z-10" 
+                    referrerPolicy="no-referrer"
+                  />
+                ) : sholatCapImage ? (
                   <img 
                     src={sholatCapImage} 
                     alt="Cap Stempel" 
-                    className="absolute left-1 w-20 h-20 object-contain opacity-85 z-0 pointer-events-none" 
+                    className="h-20 max-w-[160px] object-contain relative z-10" 
                     referrerPolicy="no-referrer"
                   />
-                )}
-                {sholatTtdImage && (
-                  <img 
-                    src={sholatTtdImage} 
-                    alt="Tanda Tangan" 
-                    className="h-20 max-w-[150px] object-contain z-10 relative" 
-                    referrerPolicy="no-referrer"
-                  />
-                )}
-                {!sholatTtdImage && !sholatCapImage && (
+                ) : (
                   <div className="print-spacer h-16"></div>
                 )}
               </div>

@@ -6,7 +6,7 @@ import MediaPickerModal from '../../components/MediaPickerModal';
 
 export default function SettingsAdmin() {
   const { 
-    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, sholatTtdImage, sholatCapImage, liveStreaming, updateSettings, fetchSettings 
+    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, sholatTtdImage, sholatCapImage, sholatTtdDone, liveStreaming, updateSettings, fetchSettings 
   } = useSettingsStore();
 
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -32,6 +32,7 @@ export default function SettingsAdmin() {
     sholatTtdJabatan: sholatTtdJabatan || '',
     sholatTtdImage: sholatTtdImage || '',
     sholatCapImage: sholatCapImage || '',
+    sholatTtdDone: sholatTtdDone !== false,
     liveStreaming: { 
       isLive: liveStreaming?.isLive || false,
       youtubeUrl: liveStreaming?.youtubeUrl || '@kemenagokitv5177/live',
@@ -60,6 +61,7 @@ export default function SettingsAdmin() {
         sholatTtdJabatan: store.sholatTtdJabatan || '',
         sholatTtdImage: store.sholatTtdImage || '',
         sholatCapImage: store.sholatCapImage || '',
+        sholatTtdDone: store.sholatTtdDone !== false,
         liveStreaming: { 
           isLive: store.liveStreaming?.isLive || false,
           youtubeUrl: store.liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenagokitv5177/live',
@@ -414,18 +416,18 @@ export default function SettingsAdmin() {
               />
             </div>
 
-            {/* Gambar Tanda Tangan */}
+            {/* Gambar Tanda Tangan & Cap Stempel (1 File) */}
             <div className="pt-2 border-t border-gray-100">
               <div className="flex flex-col sm:flex-row gap-6">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Tanda Tangan Digital</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Tanda Tangan & Cap Stempel (1 File)</label>
                   <div className="flex gap-2 mb-2">
                     <input
                       type="text"
                       value={formData.sholatTtdImage || ''}
                       onChange={(e) => setFormData({...formData, sholatTtdImage: e.target.value})}
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                      placeholder="https://.../tanda-tangan.png"
+                      placeholder="https://.../tanda-tangan-stempel.png"
                     />
                     <button
                       type="button"
@@ -436,49 +438,48 @@ export default function SettingsAdmin() {
                       Pilih Media
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500">Unggah file transparan PNG tanda tangan agar terlihat rapi pada PDF.</p>
+                  <p className="text-xs text-gray-500">Unggah 1 file gambar yang menggabungkan Tanda Tangan & Cap Stempel (rekomendasi format PNG transparan).</p>
                 </div>
-                <div className="w-36 h-20 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
+                <div className="w-40 h-24 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
                   {formData.sholatTtdImage ? (
-                    <img src={formData.sholatTtdImage} alt="Tanda Tangan Preview" className="max-w-full max-h-full object-contain" />
+                    <img src={formData.sholatTtdImage} alt="Tanda Tangan & Stempel Preview" className="max-w-full max-h-full object-contain" />
                   ) : (
-                    <span className="text-xs text-center text-gray-400">Preview TTD</span>
+                    <span className="text-xs text-center text-gray-400">Preview TTD & Cap</span>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Gambar Stempel / Cap */}
-            <div className="pt-2 border-t border-gray-100">
-              <div className="flex flex-col sm:flex-row gap-6">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Stempel / Cap Resmi</label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={formData.sholatCapImage || ''}
-                      onChange={(e) => setFormData({...formData, sholatCapImage: e.target.value})}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
-                      placeholder="https://.../stempel-cap.png"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => openPicker((url) => setFormData({...formData, sholatCapImage: url}))}
-                      className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium cursor-pointer"
-                    >
-                      <Upload size={16} />
-                      Pilih Media
-                    </button>
+            {/* Status Ceklis Tanda Tangan Selesai */}
+            <div className="pt-4 border-t border-gray-100 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Check className={`w-5 h-5 ${formData.sholatTtdDone ? 'text-green-600' : 'text-gray-400'}`} />
+                    <span className="font-bold text-gray-800 text-sm">Status Tanda Tangan & Cap Stempel</span>
                   </div>
-                  <p className="text-xs text-gray-500">Unggah file stempel/cap instansi (rekomendasi PNG transparan).</p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {formData.sholatTtdDone 
+                      ? 'Status Selesai: Tanda Tangan & Cap Stempel sudah siap dan dapat dicetak pada jadwal sholat.' 
+                      : 'Status Dalam Proses: Menampilkan notifikasi proses tanda tangan saat pengguna mencoba mencetak.'}
+                  </p>
                 </div>
-                <div className="w-36 h-20 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
-                  {formData.sholatCapImage ? (
-                    <img src={formData.sholatCapImage} alt="Stempel Cap Preview" className="max-w-full max-h-full object-contain" />
-                  ) : (
-                    <span className="text-xs text-center text-gray-400">Preview Cap</span>
-                  )}
-                </div>
+                
+                <label className="inline-flex items-center gap-3 cursor-pointer select-none bg-white px-3 py-2 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-100 transition-all self-start sm:self-auto">
+                  <input
+                    type="checkbox"
+                    checked={formData.sholatTtdDone}
+                    onChange={(e) => setFormData({ ...formData, sholatTtdDone: e.target.checked })}
+                    className="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500 cursor-pointer"
+                  />
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-md border ${
+                    formData.sholatTtdDone 
+                      ? 'bg-green-100 text-green-800 border-green-200' 
+                      : 'bg-amber-100 text-amber-800 border-amber-200'
+                  }`}>
+                    {formData.sholatTtdDone ? '✓ Sudah Selesai' : '⏳ Proses Tanda Tangan'}
+                  </span>
+                </label>
               </div>
             </div>
           </div>
