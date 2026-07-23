@@ -29,7 +29,7 @@ async function startServer() {
   app.use(express.json({ limit: "100mb" }));
 
   const uploadDir = path.join(process.cwd(), "uploads");
-  const categories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf"];
+  const categories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf", "og_image"];
 
   // Create upload directories if they don't exist
   if (!fs.existsSync(uploadDir)) {
@@ -129,7 +129,7 @@ async function startServer() {
       let ogBuffer: Buffer | null = null;
       const isImage = file.mimetype.startsWith("image/");
       const ogFilename = `${baseName}-${uniqueSuffix}-og${ext}`;
-      const ogRelativeUrl = `/uploads/${category}/${ogFilename}`;
+      const ogRelativeUrl = `/uploads/og_image/${ogFilename}`;
 
       if (isImage) {
         try {
@@ -163,7 +163,11 @@ async function startServer() {
         fs.writeFileSync(path.join(catPath, filename), file.buffer);
         
         if (ogBuffer) {
-          fs.writeFileSync(path.join(catPath, ogFilename), ogBuffer);
+          const ogPath = path.join(uploadDir, "og_image");
+          if (!fs.existsSync(ogPath)) {
+            try { fs.mkdirSync(ogPath, { recursive: true }); } catch (e) { console.warn("Could not create ogPath", e); }
+          }
+          fs.writeFileSync(path.join(ogPath, ogFilename), ogBuffer);
         }
       } catch (writeErr) {
         console.warn("Local disk cache write failed (probably read-only filesystem):", writeErr);
@@ -198,7 +202,7 @@ async function startServer() {
           name: `${baseName}-og${ext}`,
           url: ogRelativeUrl,
           base64: ogFileBase64,
-          category: category,
+          category: "og_image",
           mimetype: ogMimeType,
           size: ogSizeStr,
           createdAt: new Date().toISOString(),
@@ -354,6 +358,8 @@ async function startServer() {
         targetCategories = ["foto_pejabat"];
       } else if (type === "foto_staf") {
         targetCategories = ["foto_staf"];
+      } else if (type === "og_image") {
+        targetCategories = ["og_image"];
       } else {
         targetCategories = ["foto", "video", "pdf", "dokumen", "foto_pejabat", "foto_staf"];
       }
@@ -363,8 +369,9 @@ async function startServer() {
       const resultsMap = new Map<string, any>();
 
       dbFiles.forEach((f) => {
-        // Skip OG images to avoid showing them in the dashboard
-        if (f.isOg || (f.id && f.id.includes("-og."))) {
+        const isOgFile = f.isOg || f.category === "og_image" || (f.id && f.id.includes("-og.")) || (f.url && f.url.includes("/og_image/"));
+        // Skip OG images unless specifically requesting type=og_image
+        if (isOgFile && type !== "og_image") {
           return;
         }
         const cat = f.category || "foto";
@@ -383,14 +390,15 @@ async function startServer() {
 
       // Also read from local disk, merging in anything that is not in DB
       targetCategories.forEach((cat) => {
+        if (cat === "og_image" && type !== "og_image") return;
         const catPath = path.join(uploadDir, cat);
         if (fs.existsSync(catPath)) {
           try {
             const files = fs.readdirSync(catPath);
             files.forEach((filename) => {
               if (filename.startsWith(".")) return;
-              // Skip OG images from local file listings
-              if (filename.includes("-og.")) return;
+              // Skip OG images from local file listings unless type is og_image
+              if (filename.includes("-og.") && type !== "og_image") return;
               if (resultsMap.has(filename)) return; // already in DB, skip
 
               const filePath = path.join(catPath, filename);

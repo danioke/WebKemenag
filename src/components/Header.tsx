@@ -530,25 +530,29 @@ export default function Header() {
                         <AnimatePresence>
                           {activeDropdown === link.name && (
                             <motion.div
-                              initial={{ opacity: 0, y: 10 }}
+                              initial={{ opacity: 0, y: 8 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 10 }}
-                              transition={{ duration: 0.15 }}
-                              className="absolute left-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-50"
+                              exit={{ opacity: 0, y: 6 }}
+                              transition={{ duration: 0.18, ease: 'easeOut' }}
+                              className="absolute left-0 top-full pt-3.5 w-60 z-50"
                             >
-                              {link.subItems?.map((sub, sidx) => {
-                                const SubIcon = (typeof sub.icon === 'string' ? iconMap[sub.icon] : sub.icon) || BookOpen;
-                                return (
-                                  <button
-                                    key={sidx}
-                                    onClick={() => handleItemClick(sub.id, sub.name)}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
-                                  >
-                                    <SubIcon size={16} className="text-green-700 shrink-0" />
-                                    <span>{sub.name}</span>
-                                  </button>
-                                );
-                              })}
+                              <div className="bg-white border border-gray-100 rounded-2xl shadow-xl py-2.5 border-t-2 border-t-green-600 overflow-hidden">
+                                {link.subItems?.map((sub, sidx) => {
+                                  const SubIcon = (typeof sub.icon === 'string' ? iconMap[sub.icon] : sub.icon) || BookOpen;
+                                  return (
+                                    <button
+                                      key={sidx}
+                                      onClick={() => handleItemClick(sub.id, sub.name)}
+                                      className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-800 font-medium transition-colors cursor-pointer"
+                                    >
+                                      <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center text-green-700 shrink-0 group-hover:bg-green-100 transition-colors">
+                                        <SubIcon size={15} className="text-green-700 shrink-0" />
+                                      </div>
+                                      <span className="truncate">{sub.name}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </motion.div>
                           )}
                         </AnimatePresence>

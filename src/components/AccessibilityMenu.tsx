@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 export default function AccessibilityMenu() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [settings, setSettings] = useState({
     fontSize: 100, // percentage
     highContrast: false,
@@ -14,6 +15,22 @@ export default function AccessibilityMenu() {
   });
 
   const isAdminPage = location.pathname.startsWith('/admin') || location.pathname.startsWith('/hmsoke');
+  const isVideoDetailPage = location.pathname.startsWith('/galeri-video/') && location.pathname !== '/galeri-video';
+  const isPhotoDetailPage = location.pathname.startsWith('/galeri-foto/') && location.pathname !== '/galeri-foto';
+
+  useEffect(() => {
+    const checkModal = () => {
+      setIsMediaModalOpen(document.body.getAttribute('data-media-modal') === 'true');
+    };
+    checkModal();
+
+    const observer = new MutationObserver(() => {
+      checkModal();
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['data-media-modal'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     // Apply Font Size
@@ -41,7 +58,7 @@ export default function AccessibilityMenu() {
 
   }, [settings]);
 
-  if (isAdminPage) {
+  if (isAdminPage || isVideoDetailPage || isPhotoDetailPage || isMediaModalOpen) {
     return null;
   }
 

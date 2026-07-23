@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { db, doc, getDoc } from '../lib/db';
-import { ArrowLeft, Play, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Volume2, VolumeX, ChevronRight } from 'lucide-react';
 import ReactPlayer from 'react-player';
 import { Helmet } from 'react-helmet-async';
 
@@ -15,6 +15,8 @@ export default function VideoDetail() {
   const [video, setVideo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [playerAspect, setPlayerAspect] = useState<'auto' | 'landscape' | 'portrait'>('auto');
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -27,7 +29,8 @@ export default function VideoDetail() {
         }
       } catch (error) {
         console.error("Error fetching video:", error);
-      } finally {        setLoading(false);
+      } finally {
+        setLoading(false);
       }
     };
     fetchVideo();
@@ -80,25 +83,49 @@ export default function VideoDetail() {
       const isPortrait = playerAspect === 'portrait' || (playerAspect === 'auto' && isReelUrl);
       const embedSrc = url.includes('facebook.com/plugins/video.php')
         ? url
-        : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=true`;
+        : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=${isPlaying ? 'true' : 'false'}&muted=${isMuted ? 'true' : 'false'}&mute=${isMuted ? '1' : '0'}`;
 
       return (
-        <div className="flex flex-col items-center w-full space-y-3">
-          {/* Aspect Ratio Switcher */}
-          <div className="flex items-center gap-2 text-xs bg-gray-100 p-1.5 rounded-xl border border-gray-200">
-            <span className="text-gray-500 font-medium px-2">Format Tampilan:</span>
-            <button
-              onClick={() => setPlayerAspect('landscape')}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${!isPortrait ? 'bg-white text-emerald-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-            >
-              Horizontal (16:9)
-            </button>
-            <button
-              onClick={() => setPlayerAspect('portrait')}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${isPortrait ? 'bg-white text-emerald-800 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-            >
-              Tegak / Reel (9:16)
-            </button>
+        <div className="flex flex-col items-center w-full space-y-4">
+          {/* Controls toolbar */}
+          <div className="flex flex-wrap items-center justify-between w-full gap-2 text-xs bg-gray-100 p-2 rounded-xl border border-gray-200">
+            {/* Play/Pause & Mute Toggles */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-bold hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                <span>{isPlaying ? 'Jeda Video' : 'Putar Video'}</span>
+              </button>
+
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isMuted ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
+                }`}
+              >
+                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                <span>{isMuted ? 'Suara Senyap (Muted)' : 'Suara Aktif'}</span>
+              </button>
+            </div>
+
+            {/* Format Switcher */}
+            <div className="flex items-center gap-1">
+              <span className="text-gray-500 font-medium px-1 hidden sm:inline">Format:</span>
+              <button
+                onClick={() => setPlayerAspect('landscape')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${!isPortrait ? 'bg-white text-emerald-800 shadow-sm border border-emerald-200' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                Horizontal (16:9)
+              </button>
+              <button
+                onClick={() => setPlayerAspect('portrait')}
+                className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${isPortrait ? 'bg-white text-emerald-800 shadow-sm border border-emerald-200' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                Tegak / Reel (9:16)
+              </button>
+            </div>
           </div>
 
           <div 
@@ -121,18 +148,52 @@ export default function VideoDetail() {
 
     // Default (YouTube, direct MP4, etc)
     return (
-      <div className="rounded-xl overflow-hidden shadow-lg aspect-video bg-black">
-        <Player 
-          url={url}
-          width="100%"
-          height="100%"
-          controls={true}
-          config={{
-            youtube: {
-              playerVars: { showinfo: 0, rel: 0, modestbranding: 1 }
-            }
-          }}
-        />
+      <div className="flex flex-col items-center w-full space-y-4">
+        {/* Controls Toolbar for YouTube / Direct Video */}
+        <div className="flex items-center justify-between w-full gap-2 text-xs bg-gray-100 p-2 rounded-xl border border-gray-200">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-bold hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+              <span>{isPlaying ? 'Jeda Video' : 'Putar Video'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsMuted(!isMuted)}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                isMuted ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
+              }`}
+            >
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              <span>{isMuted ? 'Suara Senyap (Muted)' : 'Suara Aktif'}</span>
+            </button>
+          </div>
+          <span className="text-[11px] text-gray-500 italic hidden sm:inline">Pemutar Otomatis Terhubung</span>
+        </div>
+
+        <div className="w-full rounded-2xl overflow-hidden shadow-lg aspect-video bg-black border border-gray-800">
+          <Player 
+            url={url}
+            width="100%"
+            height="100%"
+            playing={isPlaying}
+            muted={isMuted}
+            controls={true}
+            config={{
+              youtube: {
+                playerVars: { 
+                  autoplay: isPlaying ? 1 : 0, 
+                  mute: isMuted ? 1 : 0,
+                  showinfo: 0, 
+                  rel: 0, 
+                  modestbranding: 1 
+                }
+              }
+            }}
+          />
+        </div>
       </div>
     );
   };

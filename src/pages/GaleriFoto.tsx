@@ -56,14 +56,26 @@ export default function GaleriFoto() {
     if (index !== -1) {
       setCurrentIndex(index);
       setIsModalOpen(true);
-      document.body.style.overflow = 'hidden';
     }
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    document.body.style.overflow = '';
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.setAttribute('data-media-modal', 'true');
+    } else {
+      document.body.style.overflow = '';
+      document.body.removeAttribute('data-media-modal');
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.removeAttribute('data-media-modal');
+    };
+  }, [isModalOpen]);
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev < photos.length - 1 ? prev + 1 : prev));

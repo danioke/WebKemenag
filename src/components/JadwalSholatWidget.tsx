@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, ChevronDown, Moon, Sunrise, Sun, CloudSun, Sunset, MoonStar, X, Calendar, Clock, Printer } from 'lucide-react';
+import { toast } from 'sonner';
 import { useSettingsStore } from '../store/useSettingsStore';
 
 interface Jadwal {
@@ -22,7 +23,15 @@ interface Kota {
 }
 
 export default function JadwalSholatWidget() {
-  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, logoKemenagUrl, logoDmiUrl, fetchSettings } = useSettingsStore();
+  const { sholatTtdNama, sholatTtdNip, sholatTtdJabatan, sholatTtdImage, sholatCapImage, logoKemenagUrl, logoDmiUrl, fetchSettings } = useSettingsStore();
+
+  const handlePrintPdf = () => {
+    if (!sholatTtdImage || !sholatCapImage) {
+      toast.error('Jadwal belum ditandatangani. Silakan lengkapi Tanda Tangan dan Cap Stempel di Pengaturan Dashboard.');
+      return;
+    }
+    window.print();
+  };
   const [jadwal, setJadwal] = useState<Jadwal | null>(null);
   const [kotaList, setKotaList] = useState<Kota[]>([]);
   const [selectedKota, setSelectedKota] = useState<string>("0809"); // OKI default
@@ -385,7 +394,7 @@ export default function JadwalSholatWidget() {
               </span>
               <div className="flex gap-2">
                 <button 
-                  onClick={() => window.print()}
+                  onClick={handlePrintPdf}
                   className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm text-xs"
                 >
                   <Printer size={14} />
@@ -521,8 +530,28 @@ export default function JadwalSholatWidget() {
               </p>
               <p className="font-semibold">{sholatTtdJabatan || 'Kepala'}</p>
               
-              {/* Spacer for signature */}
-              <div className="print-spacer h-16"></div>
+              {/* Signature & Cap Stempel Container */}
+              <div className="relative w-full h-20 flex items-center justify-center my-1">
+                {sholatCapImage && (
+                  <img 
+                    src={sholatCapImage} 
+                    alt="Cap Stempel" 
+                    className="absolute left-1 w-20 h-20 object-contain opacity-85 z-0 pointer-events-none" 
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                {sholatTtdImage && (
+                  <img 
+                    src={sholatTtdImage} 
+                    alt="Tanda Tangan" 
+                    className="h-20 max-w-[150px] object-contain z-10 relative" 
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                {!sholatTtdImage && !sholatCapImage && (
+                  <div className="print-spacer h-16"></div>
+                )}
+              </div>
               
               {/* Name with underline */}
               <p className="font-bold underline uppercase">{sholatTtdNama || '......................................................'}</p>

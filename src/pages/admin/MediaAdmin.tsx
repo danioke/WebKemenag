@@ -16,7 +16,7 @@ interface MediaFile {
 export default function MediaAdmin() {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState('image');
   const [search, setSearch] = useState('');
   const [uploading, setUploading] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -178,7 +178,6 @@ export default function MediaAdmin() {
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex bg-gray-100 p-1 rounded-lg">
             {[
-              { id: 'all', label: 'Semua', icon: Folder },
               { id: 'image', label: 'Foto Berita', icon: ImageIcon },
               { id: 'foto_pejabat', label: 'Foto Pejabat', icon: ImageIcon },
               { id: 'foto_staf', label: 'Foto Staf', icon: ImageIcon },

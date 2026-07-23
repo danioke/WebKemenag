@@ -22,6 +22,8 @@ interface SettingsState {
   sholatTtdNama?: string;
   sholatTtdNip?: string;
   sholatTtdJabatan?: string;
+  sholatTtdImage?: string;
+  sholatCapImage?: string;
   liveStreaming?: {
     isLive: boolean;
     youtubeUrl: string;
@@ -54,6 +56,8 @@ export const useSettingsStore = create<SettingsState>()(
       sholatTtdNama: '',
       sholatTtdNip: '',
       sholatTtdJabatan: '',
+      sholatTtdImage: '',
+      sholatCapImage: '',
       liveStreaming: {
         isLive: false,
         youtubeUrl: 'https://youtube.com/@kemenag_oki/live',

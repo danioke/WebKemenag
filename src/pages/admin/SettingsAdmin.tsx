@@ -6,7 +6,7 @@ import MediaPickerModal from '../../components/MediaPickerModal';
 
 export default function SettingsAdmin() {
   const { 
-    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, liveStreaming, updateSettings, fetchSettings 
+    logoUrl, faviconUrl, ogImageUrl, logoKemenagUrl, logoDmiUrl, siteName, metaDescription, socialMedia, contactInfo, sholatTtdNama, sholatTtdNip, sholatTtdJabatan, sholatTtdImage, sholatCapImage, liveStreaming, updateSettings, fetchSettings 
   } = useSettingsStore();
 
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -30,6 +30,8 @@ export default function SettingsAdmin() {
     sholatTtdNama: sholatTtdNama || '',
     sholatTtdNip: sholatTtdNip || '',
     sholatTtdJabatan: sholatTtdJabatan || '',
+    sholatTtdImage: sholatTtdImage || '',
+    sholatCapImage: sholatCapImage || '',
     liveStreaming: { 
       isLive: liveStreaming?.isLive || false,
       youtubeUrl: liveStreaming?.youtubeUrl || '@kemenagokitv5177/live',
@@ -56,6 +58,8 @@ export default function SettingsAdmin() {
         sholatTtdNama: store.sholatTtdNama || '',
         sholatTtdNip: store.sholatTtdNip || '',
         sholatTtdJabatan: store.sholatTtdJabatan || '',
+        sholatTtdImage: store.sholatTtdImage || '',
+        sholatCapImage: store.sholatCapImage || '',
         liveStreaming: { 
           isLive: store.liveStreaming?.isLive || false,
           youtubeUrl: store.liveStreaming?.youtubeUrl || 'https://youtube.com/@kemenagokitv5177/live',
@@ -372,13 +376,13 @@ export default function SettingsAdmin() {
           </div>
         </div>
 
-        {/* Tanda Tangan Jadwal Sholat */}
+        {/* Tanda Tangan & Cap Stempel Jadwal Sholat */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-2">
             <User className="text-green-700" size={20} />
-            <h3 className="font-bold text-gray-800">Tanda Tangan Jadwal Sholat</h3>
+            <h3 className="font-bold text-gray-800">Tanda Tangan & Cap Stempel Jadwal Sholat</h3>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Jabatan Penandatangan (contoh: Kepala Kantor)</label>
               <input
@@ -408,6 +412,74 @@ export default function SettingsAdmin() {
                 placeholder="197001151997031005"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
               />
+            </div>
+
+            {/* Gambar Tanda Tangan */}
+            <div className="pt-2 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row gap-6">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Tanda Tangan Digital</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={formData.sholatTtdImage || ''}
+                      onChange={(e) => setFormData({...formData, sholatTtdImage: e.target.value})}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                      placeholder="https://.../tanda-tangan.png"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openPicker((url) => setFormData({...formData, sholatTtdImage: url}))}
+                      className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium cursor-pointer"
+                    >
+                      <Upload size={16} />
+                      Pilih Media
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500">Unggah file transparan PNG tanda tangan agar terlihat rapi pada PDF.</p>
+                </div>
+                <div className="w-36 h-20 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
+                  {formData.sholatTtdImage ? (
+                    <img src={formData.sholatTtdImage} alt="Tanda Tangan Preview" className="max-w-full max-h-full object-contain" />
+                  ) : (
+                    <span className="text-xs text-center text-gray-400">Preview TTD</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Gambar Stempel / Cap */}
+            <div className="pt-2 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row gap-6">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Stempel / Cap Resmi</label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={formData.sholatCapImage || ''}
+                      onChange={(e) => setFormData({...formData, sholatCapImage: e.target.value})}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                      placeholder="https://.../stempel-cap.png"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openPicker((url) => setFormData({...formData, sholatCapImage: url}))}
+                      className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium cursor-pointer"
+                    >
+                      <Upload size={16} />
+                      Pilih Media
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500">Unggah file stempel/cap instansi (rekomendasi PNG transparan).</p>
+                </div>
+                <div className="w-36 h-20 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center p-2 overflow-hidden">
+                  {formData.sholatCapImage ? (
+                    <img src={formData.sholatCapImage} alt="Stempel Cap Preview" className="max-w-full max-h-full object-contain" />
+                  ) : (
+                    <span className="text-xs text-center text-gray-400">Preview Cap</span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

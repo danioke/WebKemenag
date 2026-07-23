@@ -134,13 +134,25 @@ export default function MediaGallery() {
       }).catch(console.error);
     }
     setIsModalOpen(true);
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    document.body.style.overflow = '';
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.setAttribute('data-media-modal', 'true');
+    } else {
+      document.body.style.overflow = '';
+      document.body.removeAttribute('data-media-modal');
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.removeAttribute('data-media-modal');
+    };
+  }, [isModalOpen]);
 
   // Listen to modal scroll snap to update current active item index and manage video autoplay
   useEffect(() => {
@@ -520,7 +532,7 @@ export default function MediaGallery() {
                                            url.toLowerCase().includes('reel');
                             const embedSrc = url.includes('facebook.com/plugins/video.php')
                               ? url
-                              : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=${isActive && isModalOpen ? 'true' : 'false'}`;
+                              : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=${isActive && isModalOpen ? 'true' : 'false'}&muted=${isMuted ? 'true' : 'false'}&mute=${isMuted ? '1' : '0'}`;
                             return (
                               <div className={`w-full h-full flex items-center justify-center p-2 mx-auto ${
                                 isReel 

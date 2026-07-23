@@ -20,7 +20,7 @@ interface MediaPickerModalProps {
 export default function MediaPickerModal({ onSelect, onClose }: MediaPickerModalProps) {
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState('image');
   const [search, setSearch] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -94,9 +94,9 @@ export default function MediaPickerModal({ onSelect, onClose }: MediaPickerModal
         <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-white">
           <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto w-full md:w-auto">
             {[
-              { id: 'all', label: 'Semua', icon: Folder },
               { id: 'image', label: 'Foto', icon: ImageIcon },
-              { id: 'video', label: 'Video', icon: Video }
+              { id: 'video', label: 'Video', icon: Video },
+              { id: 'pdf', label: 'Dokumen', icon: FileText }
             ].map(cat => (
               <button
                 key={cat.id}
