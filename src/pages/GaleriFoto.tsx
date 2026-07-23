@@ -121,7 +121,7 @@ export default function GaleriFoto() {
                     onClick={() => openModal(photo.id)}
                     className="group relative rounded-xl overflow-hidden aspect-[4/3] shadow-sm cursor-pointer bg-white"
                   >
-                    <img src={photo.image} alt={photo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                    <img src={photo.image || undefined} alt={photo.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
                       <p className="text-white font-medium text-sm leading-tight">{photo.title}</p>

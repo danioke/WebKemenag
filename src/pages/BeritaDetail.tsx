@@ -223,7 +223,7 @@ export default function BeritaDetail() {
 
           {berita.image && (
             <div className="mb-10 rounded-xl overflow-hidden shadow-sm aspect-video bg-gray-100 relative">
-              <img src={berita.image} alt={berita.title} className="w-full h-full object-cover" />
+              <img src={berita.image || undefined} alt={berita.title} className="w-full h-full object-cover" />
             </div>
           )}
 

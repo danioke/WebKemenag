@@ -3,6 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
 import { db } from '../../lib/db';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, X, Video, Settings2, RefreshCw, Smartphone, Globe, Youtube, Key } from 'lucide-react';
+import { getYouTubeThumbnail } from '../../lib/helpers';
 import ReactPlayer from 'react-player';
 const Player = ReactPlayer as any;
 
@@ -85,6 +86,7 @@ export default function VideoAdmin() {
         await updateDoc(docRef, {
           title: formData.title,
           videoUrl: formData.videoUrl,
+          thumbnail: getYouTubeThumbnail(formData.videoUrl),
           duration: formData.duration || '',
         });
         toast.success('Video berhasil diperbarui');
@@ -92,6 +94,7 @@ export default function VideoAdmin() {
         await addDoc(collection(db, 'videos'), {
           title: formData.title,
           videoUrl: formData.videoUrl,
+          thumbnail: getYouTubeThumbnail(formData.videoUrl),
           duration: formData.duration || '',
           createdAt: serverTimestamp()
         });
@@ -561,7 +564,7 @@ export default function VideoAdmin() {
                 {formData.videoUrl && !formData.videoUrl.includes('tiktok.com') && (
                   <Player 
                     url={formData.videoUrl} 
-                    playing={false}
+                    playing={true} muted={true}
                     onDuration={(dur: number) => {
                       const mins = Math.floor(dur / 60);
                       const secs = Math.floor(dur % 60);

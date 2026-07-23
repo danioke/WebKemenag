@@ -60,7 +60,7 @@ export default function BannerCarousel() {
           >
             <div className="aspect-[21/9] bg-gray-100">
               <img 
-                src={banner.image || banner.imageUrl} 
+                src={banner.image || banner.imageUrl || undefined} 
                 alt={banner.title} 
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
               />

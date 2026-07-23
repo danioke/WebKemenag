@@ -119,7 +119,7 @@ export default function InfografisMarquee() {
                 >
                   <div className="aspect-[3/4] sm:aspect-[4/5] relative overflow-hidden">
                     <img 
-                      src={item.image || item.imageUrl} 
+                      src={item.image || item.imageUrl || undefined} 
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover/item:scale-110"
                     />

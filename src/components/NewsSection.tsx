@@ -95,7 +95,7 @@ export default function NewsSection() {
                 >
                   <Link to={`/berita/${createSlug(news[0].title)}`} className="relative overflow-hidden aspect-[16/10] sm:aspect-[2/1] lg:aspect-[16/10] block">
                     <img 
-                      src={news[0].image} 
+                      src={news[0].image || undefined} 
                       alt={news[0].title} 
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -140,7 +140,7 @@ export default function NewsSection() {
                 >
                   <Link to={`/berita/${createSlug(item.title)}`} className="w-32 sm:w-40 h-auto flex-shrink-0 relative overflow-hidden block">
                     <img 
-                      src={item.image} 
+                      src={item.image || undefined} 
                       alt={item.title} 
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 absolute inset-0"
                     />

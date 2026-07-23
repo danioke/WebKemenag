@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, Image as ImageIcon, Video, ArrowRight, X, ChevronLeft, ChevronRight, Heart, MessageCircle, Share2, Music, VolumeX, Volume2 } from 'lucide-react';
-import { collection, getDocs, query, orderBy } from '../lib/db';
+import { collection, getDocs, query, orderBy, doc, updateDoc } from '../lib/db';
 import { db } from '../lib/db';
 import { Link } from 'react-router-dom';
+import { getYouTubeThumbnail } from '../lib/helpers';
 import { toast } from 'sonner';
 
 interface PhotoData {
@@ -36,11 +37,22 @@ export default function MediaGallery() {
   // Fullscreen TikTok Snapping Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalActiveIndex, setModalActiveIndex] = useState(0);
+  const [activePlayingIndex, setActivePlayingIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setActivePlayingIndex(modalActiveIndex), 300);
+    return () => clearTimeout(timer);
+  }, [modalActiveIndex]);
   const [isMuted, setIsMuted] = useState(true);
 
   // TikTok Interactions state
   const [likedItems, setLikedItems] = useState<Record<string, boolean>>({});
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<Record<string, any[]>>({});
+  const [newComment, setNewComment] = useState('');
+  const [dynamicDurations, setDynamicDurations] = useState<Record<string, string>>({});
 
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
@@ -59,13 +71,17 @@ export default function MediaGallery() {
 
         // Populate initial likes random count to look alive
         const initialLikes: Record<string, number> = {};
+        const initialViews: Record<string, number> = {};
         photoData.forEach(p => {
-          initialLikes[p.id] = Math.floor(Math.random() * 200) + 50;
+          initialLikes[p.id] = (p as any).likes || Math.floor(Math.random() * 200) + 50;
+          initialViews[p.id] = (p as any).views || Math.floor(Math.random() * 1000) + 200;
         });
         videoData.forEach(v => {
-          initialLikes[v.id] = Math.floor(Math.random() * 500) + 120;
+          initialLikes[v.id] = (v as any).likes || Math.floor(Math.random() * 500) + 120;
+          initialViews[v.id] = (v as any).views || Math.floor(Math.random() * 2000) + 300;
         });
         setLikeCounts(initialLikes);
+        setViewCounts(initialViews);
 
       } catch (error) {
         console.error("Error fetching media:", error);
@@ -108,6 +124,15 @@ export default function MediaGallery() {
 
   const openModal = (index: number) => {
     setModalActiveIndex(index);
+    
+    // Increment Views
+    const item = (activeTab === 'foto' ? photos : videos)[index];
+    if (item) {
+      setViewCounts(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
+      updateDoc(doc(db, activeTab === 'foto' ? 'photos' : 'videos', item.id), {
+        views: (item.views || 0) + 1
+      }).catch(console.error);
+    }
     setIsModalOpen(true);
     document.body.style.overflow = 'hidden'; // Prevent background scrolling
   };
@@ -156,6 +181,11 @@ export default function MediaGallery() {
   const toggleLike = (id: string) => {
     const isLiked = !!likedItems[id];
     setLikedItems(prev => ({ ...prev, [id]: !isLiked }));
+    
+    // Update DB
+    updateDoc(doc(db, activeTab === 'foto' ? 'photos' : 'videos', id), {
+      likes: (likeCounts[id] || 0) + (isLiked ? -1 : 1)
+    }).catch(console.error);
     setLikeCounts(prev => ({
       ...prev,
       [id]: isLiked ? (prev[id] || 1) - 1 : (prev[id] || 0) + 1
@@ -301,7 +331,7 @@ export default function MediaGallery() {
                           onClick={() => openModal(idx)}
                           className="group relative rounded-2xl overflow-hidden aspect-video shadow-sm cursor-pointer border border-gray-100 min-w-[280px] sm:min-w-[360px] md:min-w-[420px] flex-shrink-0 snap-start"
                         >
-                          <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+                          <img src={video.thumbnail || getYouTubeThumbnail(video.videoUrl || '') || undefined} alt={video.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                             <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 group-hover:scale-110 transition-transform shadow-lg">
                               <Play size={24} className="ml-1" fill="currentColor" />
@@ -358,6 +388,66 @@ export default function MediaGallery() {
               {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             </button>
           )}
+
+          
+          {/* Comments Panel */}
+          <AnimatePresence>
+            {showComments && (
+              <motion.div 
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="absolute right-0 top-0 bottom-0 w-80 bg-zinc-900 border-l border-white/10 z-50 flex flex-col"
+              >
+                <div className="p-4 border-b border-white/10 flex justify-between items-center">
+                  <h3 className="text-white font-bold text-sm">Komentar</h3>
+                  <button onClick={() => setShowComments(false)} className="text-gray-400 hover:text-white">
+                    <X size={18} />
+                  </button>
+                </div>
+                
+                <div className="flex-grow overflow-y-auto p-4 space-y-4">
+                  {(comments[activeMediaArray[modalActiveIndex]?.id] || []).length === 0 ? (
+                    <div className="text-center text-gray-500 text-sm py-10">Belum ada komentar. Jadilah yang pertama!</div>
+                  ) : (
+                    (comments[activeMediaArray[modalActiveIndex]?.id] || []).map((c, i) => (
+                      <div key={i} className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-emerald-700 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                          {c.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 font-bold">{c.name}</p>
+                          <p className="text-sm text-gray-200 mt-0.5">{c.text}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="p-4 border-t border-white/10">
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Tambahkan komentar..."
+                      className="flex-grow bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 placeholder-gray-500"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && newComment.trim()) {
+                          const id = activeMediaArray[modalActiveIndex]?.id;
+                          const c = { name: 'Pengunjung', text: newComment };
+                          setComments(prev => ({ ...prev, [id]: [...(prev[id] || []), c] }));
+                          setNewComment('');
+                          toast.success('Komentar ditambahkan');
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Vertical Scroll Snapping Container */}
           <div 
@@ -429,9 +519,16 @@ export default function MediaGallery() {
                                 url={url}
                                 width="100%"
                                 height="100%"
+                                style={{ position: "absolute", top: 0, left: 0 }}
                                 playing={isActive && isModalOpen}
                                 loop={true}
                                 muted={isMuted}
+                                onDuration={(dur) => {
+                                  const mins = Math.floor(dur / 60);
+                                  const secs = Math.floor(dur % 60);
+                                  const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                                  setDynamicDurations(prev => ({ ...prev, [video.id]: formatted }));
+                                }}
                                 controls={true}
                                 config={{
                                   youtube: {
@@ -444,7 +541,7 @@ export default function MediaGallery() {
 
                           return (
                             <div className="relative w-full h-full flex items-center justify-center">
-                              <img src={video.thumbnail} className="opacity-50 object-contain w-full h-full" alt="" />
+                              <img src={video.thumbnail || getYouTubeThumbnail(video.videoUrl || "") || undefined} className="opacity-50 object-contain w-full h-full" alt="" />
                               <div className="absolute text-center text-white">
                                 <Video size={48} className="mx-auto mb-2 text-gray-500" />
                                 <p className="text-sm">Link video tidak tersedia.</p>
@@ -481,7 +578,7 @@ export default function MediaGallery() {
 
                     {/* Comments button (placeholder counter) */}
                     <button 
-                      onClick={() => toast.success('Fitur interaksi komentar khusus anggota diaktifkan.')}
+                      onClick={() => setShowComments(!showComments)}
                       className="flex flex-col items-center gap-1 group cursor-pointer focus:outline-none"
                     >
                       <div className="w-12 h-12 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/10 group-hover:scale-105 active:scale-95 transition-all">
@@ -511,9 +608,10 @@ export default function MediaGallery() {
                     <h4 className="text-sm font-bold text-gray-100 max-w-xl line-clamp-2 md:text-base leading-snug">
                       {item.title}
                     </h4>
+                    <p className="text-xs text-gray-300 mt-1">{viewCounts[item.id] || 0} tayangan</p>
                     {activeTab === 'video' && (
                       <span className="inline-block text-[11px] bg-white/10 text-white px-2 py-0.5 rounded-md mt-2 font-mono">
-                        Durasi: {(item as VideoData).duration}
+                        Durasi: {dynamicDurations[item.id] || (item as VideoData).duration}
                       </span>
                     )}
 

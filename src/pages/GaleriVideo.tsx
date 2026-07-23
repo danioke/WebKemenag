@@ -5,10 +5,12 @@ import Footer from '../components/Footer';
 import { Play, Search, Video } from 'lucide-react';
 import { db, collection, getDocs, orderBy, query } from '../lib/db';
 import { Helmet } from 'react-helmet-async';
+import { getYouTubeThumbnail } from '../lib/helpers';
 
 interface VideoData {
   id: string;
   title: string;
+  thumbnail?: string;
   duration?: string;
   videoUrl: string;
 }
@@ -79,10 +81,18 @@ export default function GaleriVideo() {
                   onClick={() => navigate(`/galeri-video/${video.id}`)}
                 >
                   <div className="aspect-video bg-gray-900 relative flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
                     
-                    {/* Placeholder for video thumbnail, since we don't have explicit thumbnails */}
-                    <div className="z-20 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600/90 transition-all duration-300">
+                    {(video.thumbnail || getYouTubeThumbnail(video.videoUrl)) && (
+                      <img 
+                        src={video.thumbnail || getYouTubeThumbnail(video.videoUrl) || undefined} 
+                        alt={video.title}
+                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                      />
+                    )}
+                    
+                    {/* Play Button Overlay */}
+                    <div className="z-20 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center group-hover:scale-110 group-hover:bg-red-600/90 transition-all duration-300">
                       <Play className="text-white ml-1" size={28} fill="currentColor" />
                     </div>
                     
