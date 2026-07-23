@@ -232,6 +232,20 @@ export default function VideoAdmin() {
       return <div className="p-4 text-center text-sm text-gray-500 bg-black/80 w-full h-full flex items-center justify-center">Gunakan link TikTok lengkap.</div>;
     }
 
+    // Facebook
+    if (url.includes('facebook.com') || url.includes('fb.watch') || url.includes('fb.gg')) {
+      const embedSrc = url.includes('facebook.com/plugins/video.php')
+        ? url
+        : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=false`;
+      return (
+        <iframe 
+          src={embedSrc}
+          className="w-full h-full border-0 pointer-events-none"
+          allowFullScreen
+        />
+      );
+    }
+
     return (
       <div className="w-full h-full pointer-events-none bg-black">
         <Player 
