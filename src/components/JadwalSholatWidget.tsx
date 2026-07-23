@@ -27,7 +27,7 @@ export default function JadwalSholatWidget() {
 
   const handlePrintPdf = () => {
     if (!sholatTtdImage || !sholatCapImage) {
-      toast.error('Jadwal belum ditandatangani. Silakan lengkapi Tanda Tangan dan Cap Stempel di Pengaturan Dashboard.');
+      toast.error('Jadwal belum ditandatangani. Silakan coba beberapa saat lagi.');
       return;
     }
     window.print();
