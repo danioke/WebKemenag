@@ -88,48 +88,48 @@
     visibility: visible !important;
   }
 
-  /* Tighten spacing for print */
+  /* Expand table and typography layout to fit A4 paper length cleanly */
   #printable-schedule .print-kop {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding-bottom: 2px !important;
+    padding-bottom: 3px !important;
     margin-bottom: 6px !important;
     border-bottom: 3px double black !important;
   }
 
   #printable-schedule .print-title {
-    margin-bottom: 4px !important;
+    margin-bottom: 6px !important;
     text-align: center !important;
   }
   
   #printable-schedule .print-title h1 {
-    font-size: 11px !important;
+    font-size: 12px !important;
     margin-bottom: 1px !important;
     font-weight: bold !important;
     text-transform: uppercase !important;
   }
   
   #printable-schedule .print-title h2 {
-    font-size: 10px !important;
+    font-size: 11px !important;
     margin-bottom: 1px !important;
     font-weight: bold !important;
     text-transform: uppercase !important;
   }
   
   #printable-schedule .print-title h3 {
-    font-size: 8.5px !important;
-    margin-top: 1px !important;
+    font-size: 9.5px !important;
+    margin-top: 2px !important;
     font-weight: bold !important;
     text-transform: uppercase !important;
   }
 
   #printable-schedule .print-hadits {
-    padding: 3px 6px !important;
-    margin-bottom: 4px !important;
+    padding: 4px 8px !important;
+    margin-bottom: 6px !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    max-width: 90% !important;
+    max-width: 92% !important;
     border: 1px solid black !important;
     border-radius: 4px !important;
     text-align: center !important;
@@ -137,31 +137,32 @@
   }
 
   #printable-schedule .print-hadits p {
-    font-size: 8px !important;
-    line-height: 1.2 !important;
+    font-size: 8.5px !important;
+    line-height: 1.25 !important;
   }
 
   /* Tighten coordinates bar */
   #printable-schedule .print-coordinates {
     display: flex !important;
     justify-content: space-between !important;
-    margin-bottom: 4px !important;
-    padding-bottom: 1px !important;
-    font-size: 7.5px !important;
+    margin-bottom: 6px !important;
+    padding-bottom: 2px !important;
+    font-size: 8.5px !important;
     border-bottom: 1px solid black !important;
     font-weight: bold !important;
   }
 
-  /* Force compact table layout on print */
+  /* Prayer schedule table sizing adjusted to fit full paper length */
   #printable-schedule .print-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 8px !important;
+    table-layout: auto !important;
   }
 
   #printable-schedule .print-table th {
-    padding: 2px 1px !important;
-    font-size: 7.5px !important;
+    padding: 4.5px 3px !important;
+    font-size: 9px !important;
     font-weight: bold !important;
     background-color: #f3f4f6 !important;
     -webkit-print-color-adjust: exact;
@@ -171,9 +172,9 @@
   }
 
   #printable-schedule .print-table td {
-    padding: 1.5px 1px !important;
-    font-size: 7px !important;
-    line-height: 1 !important;
+    padding: 3.5px 3px !important;
+    font-size: 8.5px !important;
+    line-height: 1.2 !important;
     border: 1px solid black !important;
   }
 
@@ -181,19 +182,20 @@
   #printable-schedule .print-footer {
     display: flex !important;
     justify-content: space-between !important;
-    margin-top: 6px !important;
+    margin-top: 8px !important;
+    page-break-inside: avoid !important;
   }
 
   #printable-schedule .print-notes {
     width: 55% !important;
-    font-size: 7.5px !important;
-    line-height: 1.2 !important;
+    font-size: 8px !important;
+    line-height: 1.25 !important;
   }
 
   #printable-schedule .print-sig {
     width: 35% !important;
-    font-size: 7.5px !important;
-    line-height: 1.2 !important;
+    font-size: 8.5px !important;
+    line-height: 1.25 !important;
     text-align: center !important;
     display: flex !important;
     flex-direction: column !important;
@@ -201,7 +203,7 @@
   }
 
   #printable-schedule .print-spacer {
-    height: 35px !important; /* Shorter signature space to fit inside A4 */
+    height: 40px !important;
   }
 }
 
