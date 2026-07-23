@@ -31,7 +31,22 @@ export default function MediaAdmin() {
       const res = await fetch(`/api/files?type=${category}&t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
-        setFiles(data.files || (Array.isArray(data) ? data : []));
+        const rawFiles: MediaFile[] = data.files || (Array.isArray(data) ? data : []);
+        const filteredFiles = rawFiles.filter(f => {
+          const lowerName = (f.name || '').toLowerCase();
+          const lowerId = (f.id || '').toLowerCase();
+          const lowerUrl = (f.url || '').toLowerCase();
+          return (
+            !lowerName.includes('og_image') &&
+            !lowerName.startsWith('og_') &&
+            !lowerName.includes('dummy') &&
+            !lowerId.includes('og_image') &&
+            !lowerId.includes('dummy') &&
+            !lowerUrl.includes('/og_image/') &&
+            f.size !== '0 KB'
+          );
+        });
+        setFiles(filteredFiles);
         if (data.appUrl) setAppUrl(data.appUrl);
       } else {
         toast.error('Gagal memuat media');

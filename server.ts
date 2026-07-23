@@ -477,9 +477,48 @@ async function startServer() {
       const dbFiles = await readCollection("uploaded_files");
       const resultsMap = new Map<string, any>();
 
+      const isOgOrSystemFile = (item: { id?: string; name?: string; url?: string; category?: string; isOg?: boolean; size?: string }) => {
+        const nameLower = String(item.name || "").toLowerCase();
+        const idLower = String(item.id || "").toLowerCase();
+        const urlLower = String(item.url || "").toLowerCase();
+        const catLower = String(item.category || "").toLowerCase();
+
+        return (
+          item.isOg ||
+          catLower === "og_image" ||
+          urlLower.includes("/og_image/") ||
+          urlLower.includes("-og.") ||
+          idLower.includes("-og.") ||
+          idLower.includes("og_image") ||
+          idLower.startsWith("og_") ||
+          nameLower.includes("og_image") ||
+          nameLower.startsWith("og_") ||
+          idLower.includes("dummy") ||
+          nameLower.includes("dummy") ||
+          item.size === "0 KB"
+        );
+      };
+
+      // Clean up any old dummy or misplaced og_image records from DB if found
+      try {
+        if (!useMySQL) {
+          const dirty = dbFiles.some(f => isOgOrSystemFile(f) && f.category !== "og_image");
+          if (dirty) {
+            const cleaned = dbFiles.filter(f => !isOgOrSystemFile(f) || f.category === "og_image");
+            await writeCollection("uploaded_files", cleaned);
+          }
+        } else if (pool) {
+          await pool.query(
+            `DELETE FROM collections WHERE collection_name = 'uploaded_files' AND (LOWER(id) LIKE '%og_image%' OR LOWER(id) LIKE '%dummy%')`
+          );
+        }
+      } catch (cleanErr) {
+        console.warn("DB cleanup for og_image/dummy records failed:", cleanErr);
+      }
+
       dbFiles.forEach((f) => {
-        const isOgFile = f.isOg || f.category === "og_image" || (f.id && f.id.includes("-og.")) || (f.url && f.url.includes("/og_image/"));
-        // Skip OG images unless specifically requesting type=og_image
+        const isOgFile = isOgOrSystemFile(f);
+        // Skip OG images and system dummy files unless specifically requesting type=og_image
         if (isOgFile && type !== "og_image") {
           return;
         }
@@ -506,8 +545,16 @@ async function startServer() {
             const files = fs.readdirSync(catPath);
             files.forEach((filename) => {
               if (filename.startsWith(".")) return;
-              // Skip OG images from local file listings unless type is og_image
-              if (filename.includes("-og.") && type !== "og_image") return;
+              const lowerName = filename.toLowerCase();
+              // Skip OG images and dummy files from local file listings unless type is og_image
+              if (
+                (lowerName.includes("-og.") || 
+                 lowerName.includes("og_image") || 
+                 lowerName.startsWith("og_") || 
+                 lowerName.includes("dummy")) && 
+                type !== "og_image"
+              ) return;
+
               if (resultsMap.has(filename)) return; // already in DB, skip
 
               const filePath = path.join(catPath, filename);

@@ -61,12 +61,30 @@ export default function MediaGallery() {
       try {
         const photoQ = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
         const photoSnap = await getDocs(photoQ);
-        const photoData = photoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as PhotoData));
+        const photoData = photoSnap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as PhotoData))
+          .filter(p => {
+            const title = (p.title || '').toLowerCase();
+            const img = (p.image || '').toLowerCase();
+            const id = (p.id || '').toLowerCase();
+            return !title.includes('og_image') && !title.includes('dummy') &&
+                   !img.includes('og_image') && !img.includes('dummy') &&
+                   !id.includes('og_image') && !id.includes('dummy');
+          });
         setPhotos(photoData);
 
         const videoQ = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
         const videoSnap = await getDocs(videoQ);
-        const videoData = videoSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as VideoData));
+        const videoData = videoSnap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as VideoData))
+          .filter(v => {
+            const title = (v.title || '').toLowerCase();
+            const url = (v.videoUrl || '').toLowerCase();
+            const id = (v.id || '').toLowerCase();
+            return !title.includes('og_image') && !title.includes('dummy') &&
+                   !url.includes('og_image') && !url.includes('dummy') &&
+                   !id.includes('og_image') && !id.includes('dummy');
+          });
         setVideos(videoData);
 
         // Populate initial likes random count to look alive
