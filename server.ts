@@ -343,6 +343,115 @@ async function startServer() {
   });
 
   // Get files endpoint
+  app.get("/api/koordinat", async (req, res) => {
+    try {
+      const q = String(req.query.q || "").trim();
+      if (!q) {
+        return res.status(400).json({ status: false, error: "Query parameter q is required" });
+      }
+
+      let cleanName = q
+        .replace(/^KAB\.\s*/i, "")
+        .replace(/^KOTA\s*/i, "")
+        .replace(/^KABUPATEN\s*/i, "")
+        .trim();
+
+      let lat = -3.37; // Default OKI / Kayuagung
+      let lon = 104.83;
+      let found = false;
+
+      // 1. Try Open-Meteo Geocoding
+      try {
+        const omUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanName)}&count=1&language=id&format=json`;
+        const omRes = await fetch(omUrl);
+        if (omRes.ok) {
+          const omData = await omRes.json();
+          if (omData.results && omData.results.length > 0) {
+            lat = omData.results[0].latitude;
+            lon = omData.results[0].longitude;
+            found = true;
+          }
+        }
+      } catch (e) {
+        console.warn("Open-Meteo geocoding failed:", e);
+      }
+
+      // 2. If not found, try Nominatim with custom User-Agent
+      if (!found) {
+        try {
+          const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanName + ", Indonesia")}&format=json&limit=1`;
+          const nomRes = await fetch(nomUrl, {
+            headers: { "User-Agent": "KemenagApp/1.0 (contact@kemenag.go.id)" }
+          });
+          if (nomRes.ok) {
+            const nomData = await nomRes.json();
+            if (nomData && nomData.length > 0) {
+              lat = parseFloat(nomData[0].lat);
+              lon = parseFloat(nomData[0].lon);
+              found = true;
+            }
+          }
+        } catch (e) {
+          console.warn("Nominatim geocoding failed:", e);
+        }
+      }
+
+      // Format Lintang
+      const absLat = Math.abs(lat);
+      const latDeg = Math.floor(absLat);
+      const latMin = Math.round((absLat - latDeg) * 60);
+      const latDir = lat >= 0 ? "LU" : "LS";
+      const lintangStr = `${latDeg}°${latMin}' ${latDir}`;
+
+      // Format Bujur
+      const absLon = Math.abs(lon);
+      const lonDeg = Math.floor(absLon);
+      const lonMin = Math.round((absLon - lonDeg) * 60);
+      const lonDir = lon >= 0 ? "BT" : "BB";
+      const bujurStr = `${lonDeg}°${lonMin}' ${lonDir}`;
+
+      // Calculate Arah Kiblat & Distance to Ka'bah (Lat: 21.422487, Lon: 39.826206)
+      const kaabaLat = 21.422487 * (Math.PI / 180);
+      const kaabaLon = 39.826206 * (Math.PI / 180);
+      const userLat = lat * (Math.PI / 180);
+      const userLon = lon * (Math.PI / 180);
+
+      const y = Math.sin(kaabaLon - userLon);
+      const x = Math.cos(userLat) * Math.tan(kaabaLat) - Math.sin(userLat) * Math.cos(kaabaLon - userLon);
+      let qiblaRad = Math.atan2(y, x);
+      let qiblaDegTotal = (qiblaRad * (180 / Math.PI) + 360) % 360;
+
+      const qiblaDeg = Math.floor(qiblaDegTotal);
+      const qiblaMin = Math.round((qiblaDegTotal - qiblaDeg) * 60);
+
+      // Haversine distance
+      const R = 6371; // Earth radius in km
+      const dLat = kaabaLat - userLat;
+      const dLon = kaabaLon - userLon;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(userLat) * Math.cos(kaabaLat) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = (R * c).toFixed(3);
+
+      const arahKiblatStr = `${qiblaDeg}°${qiblaMin}' Jarak Ka'bah : ${distance} KM`;
+
+      res.json({
+        status: true,
+        query: cleanName,
+        lat,
+        lon,
+        lintang: lintangStr,
+        bujur: bujurStr,
+        arahKiblat: arahKiblatStr
+      });
+    } catch (err: any) {
+      console.error("Error in /api/koordinat:", err);
+      res.status(500).json({ status: false, error: err.message });
+    }
+  });
+
+  // Get files endpoint
   app.get("/api/files", async (req, res) => {
     try {
       const type = req.query.type || "all";

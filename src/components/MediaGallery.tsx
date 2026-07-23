@@ -526,13 +526,52 @@ export default function MediaGallery() {
 
                                                     // Facebook Embed
                           if (url.includes('facebook.com') || url.includes('fb.watch') || url.includes('fb.gg')) {
-                            const isReel = url.toLowerCase().includes('/reel/') || 
-                                           url.toLowerCase().includes('/reels/') || 
-                                           url.toLowerCase().includes('/share/r/') || 
-                                           url.toLowerCase().includes('reel');
-                            const embedSrc = url.includes('facebook.com/plugins/video.php')
-                              ? url
-                              : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=${isActive && isModalOpen ? 'true' : 'false'}&muted=${isMuted ? 'true' : 'false'}&mute=${isMuted ? '1' : '0'}`;
+                            let cleanFbUrl = url;
+                            if (url.includes('facebook.com/plugins/video.php')) {
+                              try {
+                                const urlObj = new URL(url);
+                                const hrefParam = urlObj.searchParams.get('href');
+                                if (hrefParam) cleanFbUrl = decodeURIComponent(hrefParam);
+                              } catch (e) {
+                                // fallback
+                              }
+                            }
+
+                            const isReel = cleanFbUrl.toLowerCase().includes('/reel/') || 
+                                           cleanFbUrl.toLowerCase().includes('/reels/') || 
+                                           cleanFbUrl.toLowerCase().includes('/share/r/') || 
+                                           cleanFbUrl.toLowerCase().includes('reel');
+
+                            if (Player && typeof Player.canPlay === 'function' && Player.canPlay(cleanFbUrl)) {
+                              return (
+                                <div className={`w-full h-full flex items-center justify-center p-2 mx-auto relative ${
+                                  isReel 
+                                    ? 'max-w-[420px] max-h-[85vh] aspect-[9/16]' 
+                                    : 'max-w-[900px] max-h-[85vh] aspect-video'
+                                }`}>
+                                  <Player 
+                                    url={cleanFbUrl}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ position: "absolute", top: 0, left: 0 }}
+                                    playing={isActive && isModalOpen}
+                                    loop={true}
+                                    muted={isMuted}
+                                    controls={true}
+                                    config={{
+                                      facebook: {
+                                        attributes: {
+                                          'data-autoplay': isActive && isModalOpen ? 'true' : 'false',
+                                          'data-show-text': 'false'
+                                        }
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }
+
+                            const embedSrc = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(cleanFbUrl)}&show_text=false&autoplay=${isActive && isModalOpen ? 'true' : 'false'}&muted=${isMuted ? 'true' : 'false'}&mute=${isMuted ? '1' : '0'}`;
                             return (
                               <div className={`w-full h-full flex items-center justify-center p-2 mx-auto ${
                                 isReel 
@@ -540,6 +579,7 @@ export default function MediaGallery() {
                                   : 'max-w-[900px] max-h-[85vh] aspect-video'
                               }`}>
                                 <iframe 
+                                  key={`${cleanFbUrl}-${isMuted}-${isActive && isModalOpen}`}
                                   src={embedSrc}
                                   className="w-full h-full border-0 pointer-events-auto rounded-xl shadow-2xl bg-black"
                                   allowFullScreen

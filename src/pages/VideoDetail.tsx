@@ -75,15 +75,88 @@ export default function VideoDetail() {
 
     // Facebook Video / Reel Embed
     if (url.includes('facebook.com') || url.includes('fb.watch') || url.includes('fb.gg')) {
-      const isReelUrl = url.toLowerCase().includes('/reel/') || 
-                        url.toLowerCase().includes('/reels/') || 
-                        url.toLowerCase().includes('/share/r/') || 
-                        url.toLowerCase().includes('reel');
+      let cleanFbUrl = url;
+      if (url.includes('facebook.com/plugins/video.php')) {
+        try {
+          const urlObj = new URL(url);
+          const hrefParam = urlObj.searchParams.get('href');
+          if (hrefParam) cleanFbUrl = decodeURIComponent(hrefParam);
+        } catch (e) {
+          // fallback
+        }
+      }
+
+      const isReelUrl = cleanFbUrl.toLowerCase().includes('/reel/') || 
+                        cleanFbUrl.toLowerCase().includes('/reels/') || 
+                        cleanFbUrl.toLowerCase().includes('/share/r/') || 
+                        cleanFbUrl.toLowerCase().includes('reel');
       
       const isPortrait = playerAspect === 'portrait' || (playerAspect === 'auto' && isReelUrl);
-      const embedSrc = url.includes('facebook.com/plugins/video.php')
-        ? url
-        : `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&autoplay=${isPlaying ? 'true' : 'false'}&muted=${isMuted ? 'true' : 'false'}&mute=${isMuted ? '1' : '0'}`;
+
+      if (Player && typeof Player.canPlay === 'function' && Player.canPlay(cleanFbUrl)) {
+        return (
+          <div className="flex flex-col items-center w-full space-y-4">
+            {/* Controls toolbar */}
+            <div className="flex flex-wrap items-center justify-between w-full gap-2 text-xs bg-gray-100 p-2 rounded-xl border border-gray-200">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-700 text-white font-bold hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                  <span>{isPlaying ? 'Jeda Video' : 'Putar Video'}</span>
+                </button>
+
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    isMuted ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-white text-gray-800 border border-gray-200 shadow-sm'
+                  }`}
+                >
+                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  <span>{isMuted ? 'Suara Senyap (Muted)' : 'Suara Aktif'}</span>
+                </button>
+              </div>
+
+              {/* Format Switcher */}
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500 font-medium px-1 hidden sm:inline">Format:</span>
+                <button
+                  onClick={() => setPlayerAspect('landscape')}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${!isPortrait ? 'bg-white text-emerald-800 shadow-sm border border-emerald-200' : 'text-gray-600 hover:text-gray-900'}`}
+                >
+                  Horizontal (16:9)
+                </button>
+                <button
+                  onClick={() => setPlayerAspect('portrait')}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${isPortrait ? 'bg-white text-emerald-800 shadow-sm border border-emerald-200' : 'text-gray-600 hover:text-gray-900'}`}
+                >
+                  Tegak / Reel (9:16)
+                </button>
+              </div>
+            </div>
+
+            <div 
+              className={`w-full rounded-2xl overflow-hidden shadow-xl bg-black flex items-center justify-center border border-gray-800 transition-all duration-300 relative ${
+                isPortrait 
+                  ? 'max-w-[420px] aspect-[9/16] h-[640px] max-h-[80vh]' 
+                  : 'w-full aspect-video'
+              }`}
+            >
+              <Player 
+                url={cleanFbUrl}
+                width="100%"
+                height="100%"
+                playing={isPlaying}
+                muted={isMuted}
+                controls={true}
+              />
+            </div>
+          </div>
+        );
+      }
+
+      const embedSrc = `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(cleanFbUrl)}&show_text=false&autoplay=${isPlaying ? 'true' : 'false'}&muted=${isMuted ? 'true' : 'false'}&mute=${isMuted ? '1' : '0'}`;
 
       return (
         <div className="flex flex-col items-center w-full space-y-4">
@@ -136,6 +209,7 @@ export default function VideoDetail() {
             }`}
           >
             <iframe 
+              key={`${cleanFbUrl}-${isMuted}-${isPlaying}`}
               src={embedSrc}
               className="w-full h-full border-0"
               allowFullScreen

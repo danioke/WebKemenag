@@ -46,9 +46,9 @@ export default function JadwalSholatWidget() {
   const [monthlyJadwal, setMonthlyJadwal] = useState<Jadwal[]>([]);
   const [loadingMonthly, setLoadingMonthly] = useState(false);
 
-  const [lintang, setLintang] = useState<string>("3°22' LS");
-  const [bujur, setBujur] = useState<string>("104°49' BT");
-  const [arahKiblat, setArahKiblat] = useState<string>("294°43' Jarak Ka'bah : 7610.561 KM");
+  const [lintang, setLintang] = useState<string>("");
+  const [bujur, setBujur] = useState<string>("");
+  const [arahKiblat, setArahKiblat] = useState<string>("");
 
   useEffect(() => {
     fetchSettings();
@@ -98,62 +98,22 @@ export default function JadwalSholatWidget() {
   }, [selectedKota]);
 
   useEffect(() => {
+    let cityName = "OGAN KOMERING ILIR";
     const selectedKotaObj = kotaList.find(k => k.id === selectedKota);
-    if (!selectedKotaObj) return;
+    if (selectedKotaObj) {
+      cityName = selectedKotaObj.lokasi;
+    }
 
-    // Bersihkan nama kota (misal: "KAB. OGAN KOMERING ILIR" -> "OGAN KOMERING ILIR")
-    const cleanCityName = selectedKotaObj.lokasi
-      .replace('KAB. ', '')
-      .replace('KOTA ', '');
-    
-    // Fetch coordinates from Nominatim
-    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanCityName + ', Indonesia')}&format=json&limit=1`)
+    fetch(`/api/koordinat?q=${encodeURIComponent(cityName)}`)
       .then(res => res.json())
       .then(data => {
-        if (data && data.length > 0) {
-          const lat = parseFloat(data[0].lat);
-          const lon = parseFloat(data[0].lon);
-          
-          // Format lintang bujur
-          const latDeg = Math.floor(Math.abs(lat));
-          const latMin = Math.floor((Math.abs(lat) - latDeg) * 60);
-          const latDir = lat >= 0 ? 'LU' : 'LS';
-          
-          const lonDeg = Math.floor(Math.abs(lon));
-          const lonMin = Math.floor((Math.abs(lon) - lonDeg) * 60);
-          const lonDir = lon >= 0 ? 'BT' : 'BB';
-          
-          setLintang(`${latDeg}°${latMin}' ${latDir}`);
-          setBujur(`${lonDeg}°${lonMin}' ${lonDir}`);
-
-          // Hitung arah kiblat (Ka'bah Lat: 21.4225, Lon: 39.8262)
-          const kaabaLat = 21.422487 * (Math.PI / 180);
-          const kaabaLon = 39.826206 * (Math.PI / 180);
-          const userLat = lat * (Math.PI / 180);
-          const userLon = lon * (Math.PI / 180);
-
-          const y = Math.sin(kaabaLon - userLon);
-          const x = Math.cos(userLat) * Math.tan(kaabaLat) - Math.sin(userLat) * Math.cos(kaabaLon - userLon);
-          let qibla = Math.atan2(y, x) * (180 / Math.PI);
-          if (qibla < 0) qibla += 360;
-
-          const qiblaDeg = Math.floor(qibla);
-          const qiblaMin = Math.floor((qibla - qiblaDeg) * 60);
-
-          // Hitung jarak ke Ka'bah (Rumus Haversine)
-          const R = 6371; // Earth radius in km
-          const dLat = kaabaLat - userLat;
-          const dLon = kaabaLon - userLon;
-          const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(userLat) * Math.cos(kaabaLat) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-          const distance = (R * c).toFixed(3);
-
-          setArahKiblat(`${qiblaDeg}°${qiblaMin}' Jarak Ka'bah : ${distance} KM`);
+        if (data.status) {
+          if (data.lintang) setLintang(data.lintang);
+          if (data.bujur) setBujur(data.bujur);
+          if (data.arahKiblat) setArahKiblat(data.arahKiblat);
         }
       })
-      .catch(err => console.error("Error fetching coordinates:", err));
+      .catch(err => console.error("Error fetching koordinat API:", err));
   }, [selectedKota, kotaList]);
 
   // Fetch monthly schedule when modal opens
