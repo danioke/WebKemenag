@@ -1390,6 +1390,30 @@ async function startServer() {
   app.put("/api/db/:collection/:id", updateHandler);
   app.post("/api/db/:collection/:id", updateHandler);
 
+  // DELETE a document by ID
+  const deleteDocHandler = async (req: any, res: any) => {
+    const { collection: collectionName, id } = req.params;
+    const release = await acquireLock(collectionName);
+    try {
+      if (useMySQL && pool) {
+        await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
+      } else {
+        const items = await readCollection(collectionName);
+        const filtered = items.filter((i: any) => i.id !== id);
+        await writeCollection(collectionName, filtered);
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error(`Error DELETE /api/db/${collectionName}/${id}:`, err);
+      res.status(500).json({ error: err.message });
+    } finally {
+      release();
+    }
+  };
+
+  app.post("/api/db/:collection/:id/delete", deleteDocHandler);
+  app.delete("/api/db/:collection/:id", deleteDocHandler);
+
   // GET 2FA status for an email
   app.get("/api/auth/2fa/status", async (req, res) => {
     try {
