@@ -76,6 +76,7 @@ import MediaAdmin from "./admin/MediaAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import SubscribersAdmin from "./admin/SubscribersAdmin";
 import TwoFactorAdmin from "./admin/TwoFactorAdmin";
+import IntegrasiAdmin from "./admin/IntegrasiAdmin";
 import { useSettingsStore } from "../store/useSettingsStore";
 
 export default function AdminDashboard() {
@@ -208,6 +209,7 @@ export default function AdminDashboard() {
     { name: "Navigasi", path: "/admin/navigasi", icon: Navigation },
     { name: "User Admin", path: "/admin/users", icon: Users },
     { name: "Layanan Utama", path: "/admin/layanan", icon: Briefcase },
+    { name: "Integrasi Sistem", path: "/admin/integrasi", icon: Globe },
     { name: "Pengumuman", path: "/admin/pengumuman", icon: FileText },
     { name: "Agenda", path: "/admin/agenda", icon: Calendar },
     {
@@ -443,6 +445,7 @@ export default function AdminDashboard() {
             <Route path="/profil" element={<ProfilAdmin />} />
             <Route path="/users" element={<UserAdmin />} />
             <Route path="/layanan" element={<LayananAdmin />} />
+            <Route path="/integrasi" element={<IntegrasiAdmin />} />
             <Route path="/kategori" element={<KategoriAdmin />} />
             <Route path="/laporan" element={<LaporanAdmin />} />
             <Route path="/2fa" element={<TwoFactorAdmin />} />
