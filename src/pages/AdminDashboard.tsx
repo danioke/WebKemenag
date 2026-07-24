@@ -38,6 +38,24 @@ import {
   Settings,
   Mail,
   ShieldCheck,
+  Eye,
+  Database,
+  Activity,
+  Globe,
+  Printer,
+  RotateCcw,
+  Search,
+  Filter,
+  Clock,
+  Monitor,
+  CheckCircle2,
+  AlertTriangle,
+  Server,
+  BarChart3,
+  RefreshCw,
+  Trash2,
+  ExternalLink,
+  ShieldAlert,
 } from "lucide-react";
 import PengumumanAdmin from "./admin/PengumumanAdmin";
 import BeritaAdmin from "./admin/BeritaAdmin";
@@ -622,13 +640,39 @@ export default function AdminDashboard() {
 function DashboardHome() {
   const [dbStatus, setDbStatus] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [counts, setCounts] = useState({ pengumuman: 0, agenda: 0, berita: 0 });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [pingMs, setPingMs] = useState<number | null>(null);
+
+  // Stats for counter cards
+  const [visitorStats, setVisitorStats] = useState<any>({
+    news: { count: 0, totalViews: 0 },
+    photos: { count: 0, totalViews: 0 },
+    agendas: { count: 0, totalViews: 0 },
+    infografis: { count: 0, totalViews: 0 },
+    videos: { count: 0, totalViews: 0 },
+    halaman: { count: 0, totalViews: 0 },
+    totalVisitorLogs: 0,
+    uniqueIps: 0,
+    recentLogs: []
+  });
+
+  // Filters & Visitor Logs
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [contentTypeFilter, setContentTypeFilter] = useState<string>("semua");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [visitorLogs, setVisitorLogs] = useState<any[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState<boolean>(false);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
+  const [isResettingLogs, setIsResettingLogs] = useState<boolean>(false);
 
   const fetchDbStatus = () => {
     setIsRefreshing(true);
+    const startPing = Date.now();
     fetch("/api/db-status?t=" + Date.now())
       .then((res) => res.json())
       .then((data) => {
+        setPingMs(Date.now() - startPing);
         setDbStatus(data);
         setIsRefreshing(false);
       })
@@ -638,137 +682,794 @@ function DashboardHome() {
       });
   };
 
-  const fetchCounts = async () => {
+  const handleSyncMongo = async () => {
+    setIsSyncing(true);
     try {
-      const [pengumumanSnap, agendaSnap, beritaSnap] = await Promise.all([
-        getDocs(collection(db, "announcements")),
-        getDocs(collection(db, "agendas")),
-        getDocs(collection(db, "news")),
-      ]);
-      setCounts({
-        pengumuman: pengumumanSnap.length || pengumumanSnap.size || 0,
-        agenda: agendaSnap.length || agendaSnap.size || 0,
-        berita: beritaSnap.length || beritaSnap.size || 0,
-      });
-    } catch (error) {
-      console.error("Error fetching counts:", error);
+      const res = await fetch("/api/db/sync-to-mongodb", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Migrasi ke MongoDB berhasil!");
+        fetchVisitorStats();
+      } else {
+        toast.error(data.error || "Gagal migrasi data ke MongoDB.");
+      }
+    } catch (err: any) {
+      toast.error("Gagal melakukan koneksi migrasi.");
+    } finally {
+      setIsSyncing(false);
     }
+  };
+
+  const fetchVisitorStats = async () => {
+    try {
+      const res = await fetch("/api/visitor/stats?t=" + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        setVisitorStats(data);
+      }
+    } catch (err) {
+      console.error("Error fetching visitor stats:", err);
+    }
+  };
+
+  const fetchFilteredVisitorLogs = async () => {
+    setIsLoadingLogs(true);
+    try {
+      let url = `/api/visitor/logs?t=${Date.now()}&limit=500`;
+      if (startDate) url += `&startDate=${startDate}`;
+      if (endDate) url += `&endDate=${endDate}`;
+      if (contentTypeFilter && contentTypeFilter !== "semua") url += `&contentType=${contentTypeFilter}`;
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const logs = await res.json();
+        setVisitorLogs(logs);
+      }
+    } catch (err) {
+      console.error("Error fetching visitor logs:", err);
+    } finally {
+      setIsLoadingLogs(false);
+    }
+  };
+
+  const handleResetVisitorLogs = async () => {
+    setIsResettingLogs(true);
+    try {
+      const res = await fetch("/api/visitor/logs", { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Data rekam pengunjung berhasil di-reset!");
+        setShowResetConfirmModal(false);
+        fetchVisitorStats();
+        fetchFilteredVisitorLogs();
+      } else {
+        toast.error(data.error || "Gagal mereset data pengunjung.");
+      }
+    } catch (err) {
+      toast.error("Gagal koneksi ke server saat reset data.");
+    } finally {
+      setIsResettingLogs(false);
+    }
+  };
+
+  const handlePrintReport = () => {
+    const printWindow = window.open("", "_blank", "width=900,height=800");
+    if (!printWindow) {
+      toast.error("Gagal membuka jendela cetak. Izinkan pop-up di browser Anda.");
+      return;
+    }
+
+    const filteredLogsForPrint = visitorLogs.filter(l => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        (l.title || "").toLowerCase().includes(q) ||
+        (l.ip || "").toLowerCase().includes(q) ||
+        (l.browserOs || "").toLowerCase().includes(q) ||
+        (l.contentType || "").toLowerCase().includes(q)
+      );
+    });
+
+    const periodeText = startDate || endDate
+      ? `${startDate ? new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Awal'} s.d. ${endDate ? new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Sekarang'}`
+      : 'Keseluruhan Data Terrekam';
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="id">
+      <head>
+        <meta charset="UTF-8">
+        <title>Laporan Rekam Pengunjung & Pembaca Konten - Kemenag OKI</title>
+        <style>
+          body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #000; margin: 20px; line-height: 1.3; }
+          .kop { text-align: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 20px; }
+          .kop h2 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
+          .kop h3 { margin: 2px 0; font-size: 13pt; font-weight: bold; }
+          .kop p { margin: 0; font-size: 9pt; font-style: italic; }
+          .title { text-align: center; margin-bottom: 20px; }
+          .title h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; text-decoration: underline; }
+          .title p { margin: 4px 0 0 0; font-size: 10pt; font-style: italic; }
+          .summary-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+          .summary-card { border: 1px solid #333; padding: 8px 12px; border-radius: 4px; flex: 1; min-width: 120px; text-align: center; font-size: 10pt; }
+          .summary-card strong { display: block; font-size: 14pt; color: #000; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 9pt; }
+          table, th, td { border: 1px solid #333; }
+          th { background-color: #f2f2f2; padding: 6px; font-weight: bold; text-align: center; }
+          td { padding: 5px 8px; vertical-align: top; }
+          .ttd-container { display: flex; justify-content: space-between; margin-top: 40px; page-break-inside: avoid; }
+          .ttd-box { width: 220px; text-align: center; font-size: 10pt; }
+          .ttd-space { height: 65px; }
+          @media print {
+            body { margin: 0; }
+            @page { size: A4 portrait; margin: 1.5cm; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="kop">
+          <h2>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
+          <h3>KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
+          <p>Jl. Lintas Timur Kayuagung, Kabupaten Ogan Komering Ilir, Sumatera Selatan 30618</p>
+          <p>Website: humas.kemenagoki.id | Email: humas@kemenagoki.id</p>
+        </div>
+
+        <div class="title">
+          <h4>LAPORAN REKAM JEJAK PENGUNJUNG & PEMBACA KONTEN WEBSITE</h4>
+          <p>Periode Laporan: ${periodeText}</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card">Total Pembaca Berita<strong>${visitorStats.news?.totalViews || 0}x</strong></div>
+          <div class="summary-card">Total Lihat Foto<strong>${visitorStats.photos?.totalViews || 0}x</strong></div>
+          <div class="summary-card">Total Akses Agenda<strong>${visitorStats.agendas?.totalViews || 0}x</strong></div>
+          <div class="summary-card">Total Infografis<strong>${visitorStats.infografis?.totalViews || 0}x</strong></div>
+          <div class="summary-card">Total Putar Video<strong>${visitorStats.videos?.totalViews || 0}x</strong></div>
+          <div class="summary-card">Total Layanan<strong>${visitorStats.halaman?.totalViews || 0}x</strong></div>
+        </div>
+
+        <p style="font-size: 10pt; font-weight: bold; margin-bottom: 8px;">
+          Rincian Aktivitas Pembukaan Konten Terakhir (${filteredLogsForPrint.length} Rekam Log Ditampilkan):
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th width="4%">No</th>
+              <th width="32%">Judul Postingan / Halaman</th>
+              <th width="12%">Kategori</th>
+              <th width="16%">Alamat IP</th>
+              <th width="18%">Browser & OS</th>
+              <th width="18%">Waktu Akses</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${
+              filteredLogsForPrint.length === 0
+                ? `<tr><td colspan="6" style="text-align: center; padding: 15px; color: #666;">Belum ada rekam data pengunjung pada periode ini.</td></tr>`
+                : filteredLogsForPrint.map((item, idx) => `
+                  <tr>
+                    <td style="text-align: center;">${idx + 1}</td>
+                    <td><strong>${item.title || "Halaman Website"}</strong></td>
+                    <td style="text-align: center;">${item.contentType || "Halaman"}</td>
+                    <td style="text-align: center; font-family: monospace;">${item.ip || "127.0.0.1"}</td>
+                    <td>${item.browserOs || item.browser || "Unknown"}</td>
+                    <td style="text-align: center;">${new Date(item.timestamp).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })} WIB</td>
+                  </tr>
+                `).join("")
+            }
+          </tbody>
+        </table>
+
+        <div class="ttd-container">
+          <div class="ttd-box">
+            <p>Mengetahui,<br><strong>Kasubbag Tata Usaha</strong></p>
+            <div class="ttd-space"></div>
+            <p style="text-decoration: underline; font-weight: bold; margin-bottom: 0;">(............................................)</p>
+            <p style="font-size: 8pt; margin-top: 2px;">NIP. ........................................</p>
+          </div>
+          <div class="ttd-box">
+            <p>Kayuagung, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}<br><strong>Pengelola Tim Humas</strong></p>
+            <div class="ttd-space"></div>
+            <p style="text-decoration: underline; font-weight: bold; margin-bottom: 0;">(............................................)</p>
+            <p style="font-size: 8pt; margin-top: 2px;">NIP. ........................................</p>
+          </div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   useEffect(() => {
     fetchDbStatus();
-    fetchCounts();
+    fetchVisitorStats();
+    fetchFilteredVisitorLogs();
   }, []);
 
+  useEffect(() => {
+    fetchFilteredVisitorLogs();
+  }, [startDate, endDate, contentTypeFilter]);
+
+  const filteredLogs = visitorLogs.filter((l) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (l.title || "").toLowerCase().includes(q) ||
+      (l.ip || "").toLowerCase().includes(q) ||
+      (l.browserOs || "").toLowerCase().includes(q) ||
+      (l.contentType || "").toLowerCase().includes(q)
+    );
+  });
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <button
-          onClick={fetchDbStatus}
-          disabled={isRefreshing}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-sm font-medium flex items-center gap-2 disabled:opacity-50"
-        >
-          {isRefreshing ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-          )}
-          Refresh Status Database
-        </button>
+    <div className="space-y-8 pb-12">
+      {/* Top Header Bar */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-black text-gray-900">Dashboard Utama</h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              Sistem Operasional
+            </span>
+          </div>
+          <p className="text-sm text-gray-600">
+            Monitoring real-time status database, statistik pembaca konten, serta rekam log aktivitas pengunjung.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full md:w-auto">
+          <button
+            onClick={() => {
+              fetchDbStatus();
+              fetchVisitorStats();
+              fetchFilteredVisitorLogs();
+              toast.success("Data dashboard diperbarui!");
+            }}
+            disabled={isRefreshing}
+            className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+            Refresh Data
+          </button>
+        </div>
       </div>
 
-      {dbStatus && (
-        <div
-          className={`mb-6 p-4 rounded-xl border ${dbStatus.useMySQL ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"}`}
-        >
-          <h2
-            className={`font-semibold ${dbStatus.useMySQL ? "text-green-800" : "text-amber-800"} flex items-center gap-2`}
-          >
-            <div
-              className={`w-3 h-3 rounded-full ${dbStatus.useMySQL ? "bg-green-500" : "bg-amber-500 animate-pulse"}`}
-            ></div>
-            Status Database
-          </h2>
-          {dbStatus.useMySQL ? (
-            <p className="text-sm text-green-700 mt-1">
-              Terhubung ke MySQL ({dbStatus.host})
-            </p>
-          ) : (
-            <div className="mt-2 text-sm">
-              <p className="text-amber-700 font-medium mb-1">
-                Peringatan: Menggunakan penyimpanan sementara (JSON)
-              </p>
-              <p className="text-amber-600 mb-2">
-                Data Anda akan hilang saat server di-restart! Website belum
-                menggunakan database hosting.
-              </p>
-              {dbStatus.error && (
-                <div className="bg-white/60 p-3 rounded-md font-mono text-xs text-red-600 break-all border border-amber-100">
-                  <strong>Error MySQL:</strong> {dbStatus.error}
+      {/* CARD 1: Status Database & Kesehatan Website */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
+              <Database size={18} />
+            </div>
+            <div>
+              <h2 className="font-bold text-sm tracking-wide text-white">Status Database & Kesehatan Sistem</h2>
+              <p className="text-xs text-slate-400">Penyimpanan utama dan kualitas koneksi server</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold">
+            {pingMs !== null && (
+              <span className="px-2.5 py-1 bg-slate-800 text-emerald-400 rounded-md border border-slate-700 flex items-center gap-1 font-mono">
+                <Activity size={12} /> Ping: {pingMs} ms
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6">
+          {dbStatus && (
+            <div>
+              {dbStatus.useMySQL ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-start gap-3">
+                    <div className="p-2.5 bg-emerald-500 text-white rounded-lg shadow-sm">
+                      <Server size={20} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider block">Database Aktif</span>
+                      <p className="text-sm font-extrabold text-emerald-950 mt-0.5">MySQL Hostinger (cPanel)</p>
+                      <span className="inline-block mt-1 text-xs text-emerald-700 font-mono">Host: {dbStatus.mysqlHost || 'Terhubung'}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-green-50/80 border border-green-200 flex items-start gap-3">
+                    <div className="p-2.5 bg-green-600 text-white rounded-lg shadow-sm">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-green-700 uppercase tracking-wider block">Status Koneksi</span>
+                      <p className="text-sm font-extrabold text-green-950 mt-0.5 flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                        Terhubung & Normal
+                      </p>
+                      <span className="inline-block mt-1 text-xs text-green-700">Tabel Collections Terverifikasi</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
+                    <div className="p-2.5 bg-slate-700 text-white rounded-lg shadow-sm">
+                      <Activity size={20} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Kesehatan Website</span>
+                      <p className="text-sm font-extrabold text-slate-900 mt-0.5">100% Online</p>
+                      <span className="inline-block mt-1 text-xs text-slate-500">API Endpoint Berjalan Stabil</span>
+                    </div>
+                  </div>
+                </div>
+              ) : dbStatus.useMongoDB ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200 flex items-start gap-3">
+                    <div className="p-2.5 bg-blue-600 text-white rounded-lg shadow-sm">
+                      <Database size={20} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block">Database Aktif</span>
+                      <p className="text-sm font-extrabold text-blue-950 mt-0.5">MongoDB Atlas Cloud</p>
+                      <span className="inline-block mt-1 text-xs text-blue-700 font-mono">DB: {dbStatus.databaseName}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-green-50/80 border border-green-200 flex items-start gap-3">
+                    <div className="p-2.5 bg-green-600 text-white rounded-lg shadow-sm">
+                      <CheckCircle2 size={20} />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-green-700 uppercase tracking-wider block">Status Koneksi</span>
+                      <p className="text-sm font-extrabold text-green-950 mt-0.5 flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                        Terhubung & Normal
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-amber-800 block">Migrasi Data</span>
+                      <p className="text-xs text-amber-700">Pindahkan data lokal ke cloud</p>
+                    </div>
+                    <button
+                      onClick={handleSyncMongo}
+                      disabled={isSyncing}
+                      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold shadow-sm"
+                    >
+                      {isSyncing ? "Memindahkan..." : "Migrasi Data"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-amber-500 text-white rounded-lg shrink-0">
+                      <AlertTriangle size={20} />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-bold text-sm text-amber-950">
+                        Status Database: Menggunakan Penyimpanan File Lokal Sementara (JSON)
+                      </h3>
+                      <p className="text-xs text-amber-800">
+                        Server belum terhubung ke MySQL Hostinger. Tambahkan variabel <code>DB_HOST</code>, <code>DB_USER</code>, <code>DB_PASSWORD</code>, dan <code>DB_NAME</code> di file <code>.env</code> Anda.
+                      </p>
+                      {dbStatus.error && (
+                        <p className="text-xs font-mono bg-white/80 p-2 rounded border border-amber-200 text-red-700 break-all mt-1">
+                          Pesan Error: {dbStatus.error}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
-              <p className="text-amber-700 mt-2 text-xs">
-                <strong>Solusi:</strong> Pastikan password benar dan IP server
-                aplikasi ini (tertera pada pesan error di atas) sudah diizinkan
-                (Remote MySQL / IP Whitelist) di cPanel/hPanel Anda. Sangat
-                disarankan untuk mengizinkan semua IP (<code>%</code>) karena IP
-                server aplikasi dapat berubah-ubah.
-              </p>
             </div>
           )}
         </div>
-      )}
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-6 rounded-2xl shadow-lg border border-emerald-400/30 text-white relative overflow-hidden group hover:shadow-xl transition-all">
-          <div className="absolute -right-6 -top-6 text-emerald-400/20 group-hover:scale-110 transition-transform duration-500">
-            <FileText size={120} strokeWidth={1.5} />
-          </div>
-          <div className="relative z-10">
-            <div className="text-emerald-50 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
-              <FileText size={16} /> Total Pengumuman
-            </div>
-            <div className="text-4xl font-extrabold tracking-tight">{counts.pengumuman}</div>
+      {/* COUNTER CARDS: 6 Cards showing Content Items & Total Reader Views */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
+              <BarChart3 size={20} className="text-emerald-700" />
+              Statistik Konten & Total Pembaca
+            </h2>
+            <p className="text-xs text-gray-500">Jumlah item konten publikasi beserta akumulasi pembaca/pengakses</p>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-amber-500 to-orange-500 p-6 rounded-2xl shadow-lg border border-amber-400/30 text-white relative overflow-hidden group hover:shadow-xl transition-all">
-          <div className="absolute -right-6 -top-6 text-amber-400/20 group-hover:scale-110 transition-transform duration-500">
-            <Calendar size={120} strokeWidth={1.5} />
-          </div>
-          <div className="relative z-10">
-            <div className="text-amber-50 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
-              <Calendar size={16} /> Total Agenda
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* 1. Berita Terkini */}
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden group hover:shadow-lg transition-all">
+            <div className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform">
+              <FileText size={100} />
             </div>
-            <div className="text-4xl font-extrabold tracking-tight">{counts.agenda}</div>
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-100 flex items-center gap-1.5">
+                    <FileText size={15} /> Berita Terkini
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                    Publikasi
+                  </span>
+                </div>
+                <div className="text-3xl font-black">{visitorStats.news?.count || 0} <span className="text-xs font-semibold text-emerald-200">Artikel</span></div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs">
+                <span className="text-emerald-100 flex items-center gap-1 font-semibold">
+                  <Eye size={14} /> Total Dibaca
+                </span>
+                <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded-md">
+                  {(visitorStats.news?.totalViews || 0).toLocaleString('id-ID')}x
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-6 rounded-2xl shadow-lg border border-blue-400/30 text-white relative overflow-hidden group hover:shadow-xl transition-all">
-          <div className="absolute -right-6 -top-6 text-blue-400/20 group-hover:scale-110 transition-transform duration-500">
-            <FileText size={120} strokeWidth={1.5} />
-          </div>
-          <div className="relative z-10">
-            <div className="text-blue-50 text-sm font-semibold uppercase tracking-wider mb-2 flex items-center gap-2">
-              <FileText size={16} /> Total Berita
+          {/* 2. Galeri Foto */}
+          <div className="bg-gradient-to-br from-indigo-600 to-blue-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden group hover:shadow-lg transition-all">
+            <div className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform">
+              <ImageIcon size={100} />
             </div>
-            <div className="text-4xl font-extrabold tracking-tight">{counts.berita}</div>
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-100 flex items-center gap-1.5">
+                    <ImageIcon size={15} /> Galeri Foto
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                    Dokumentasi
+                  </span>
+                </div>
+                <div className="text-3xl font-black">{visitorStats.photos?.count || 0} <span className="text-xs font-semibold text-indigo-200">Album</span></div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs">
+                <span className="text-indigo-100 flex items-center gap-1 font-semibold">
+                  <Eye size={14} /> Total Dilihat
+                </span>
+                <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded-md">
+                  {(visitorStats.photos?.totalViews || 0).toLocaleString('id-ID')}x
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Agenda Kegiatan */}
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 rounded-2xl shadow-md relative overflow-hidden group hover:shadow-lg transition-all">
+            <div className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform">
+              <Calendar size={100} />
+            </div>
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-100 flex items-center gap-1.5">
+                    <Calendar size={15} /> Agenda Kegiatan
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                    Jadwal
+                  </span>
+                </div>
+                <div className="text-3xl font-black">{visitorStats.agendas?.count || 0} <span className="text-xs font-semibold text-amber-200">Agenda</span></div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs">
+                <span className="text-amber-100 flex items-center gap-1 font-semibold">
+                  <Eye size={14} /> Total Diakses
+                </span>
+                <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded-md">
+                  {(visitorStats.agendas?.totalViews || 0).toLocaleString('id-ID')}x
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Infografis & Pengumuman */}
+          <div className="bg-gradient-to-br from-purple-600 to-fuchsia-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden group hover:shadow-lg transition-all">
+            <div className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform">
+              <BarChart3 size={100} />
+            </div>
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-100 flex items-center gap-1.5">
+                    <BarChart3 size={15} /> Infografis & Pengumuman
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                    Informasi
+                  </span>
+                </div>
+                <div className="text-3xl font-black">{visitorStats.infografis?.count || 0} <span className="text-xs font-semibold text-purple-200">Berkas</span></div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs">
+                <span className="text-purple-100 flex items-center gap-1 font-semibold">
+                  <Eye size={14} /> Total Dibaca
+                </span>
+                <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded-md">
+                  {(visitorStats.infografis?.totalViews || 0).toLocaleString('id-ID')}x
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Galeri Video */}
+          <div className="bg-gradient-to-br from-rose-600 to-pink-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden group hover:shadow-lg transition-all">
+            <div className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform">
+              <Video size={100} />
+            </div>
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-rose-100 flex items-center gap-1.5">
+                    <Video size={15} /> Galeri Video
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                    Multimedia
+                  </span>
+                </div>
+                <div className="text-3xl font-black">{visitorStats.videos?.count || 0} <span className="text-xs font-semibold text-rose-200">Video</span></div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs">
+                <span className="text-rose-100 flex items-center gap-1 font-semibold">
+                  <Eye size={14} /> Total Diputar
+                </span>
+                <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded-md">
+                  {(visitorStats.videos?.totalViews || 0).toLocaleString('id-ID')}x
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 6. Halaman & Link Layanan */}
+          <div className="bg-gradient-to-br from-cyan-600 to-blue-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden group hover:shadow-lg transition-all">
+            <div className="absolute -right-4 -bottom-4 text-white/10 group-hover:scale-110 transition-transform">
+              <Globe size={100} />
+            </div>
+            <div className="relative z-10 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-100 flex items-center gap-1.5">
+                    <Globe size={15} /> Halaman & Layanan
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-sm">
+                    Portal
+                  </span>
+                </div>
+                <div className="text-3xl font-black">{visitorStats.halaman?.count || 0} <span className="text-xs font-semibold text-cyan-200">Layanan</span></div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between text-xs">
+                <span className="text-cyan-100 flex items-center gap-1 font-semibold">
+                  <Eye size={14} /> Total Dikunjungi
+                </span>
+                <span className="font-extrabold bg-white/20 px-2 py-0.5 rounded-md">
+                  {(visitorStats.halaman?.totalViews || 0).toLocaleString('id-ID')}x
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* SECTION: Rekam Pengunjung & Cetak Laporan */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+          <div>
+            <h2 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
+              <Users size={20} className="text-emerald-700" />
+              Laporan & Rekam Jejak Pengunjung
+            </h2>
+            <p className="text-xs text-gray-500">
+              Menampilkan riwayat pembaca postingan terakhir beserta alamat IP dan jenis browser pengunjung.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handlePrintReport}
+              className="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <Printer size={15} /> Cetak Laporan Pengunjung
+            </button>
+
+            <button
+              onClick={() => setShowResetConfirmModal(true)}
+              className="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Trash2 size={15} /> Reset Data Pengunjung
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Controls Bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Tanggal Mulai
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Tanggal Selesai
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Kategori Konten
+            </label>
+            <select
+              value={contentTypeFilter}
+              onChange={(e) => setContentTypeFilter(e.target.value)}
+              className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value="semua">Semua Konten</option>
+              <option value="Berita">Berita Terkini</option>
+              <option value="Foto">Galeri Foto</option>
+              <option value="Agenda">Agenda Kegiatan</option>
+              <option value="Infografis">Infografis & Pengumuman</option>
+              <option value="Video">Galeri Video</option>
+              <option value="Halaman">Halaman & Layanan</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Cari Judul / IP / Browser
+            </label>
+            <div className="relative">
+              <Search size={14} className="absolute left-2.5 top-2.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Kata kunci..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Tabel Pengunjung Postingan Terakhir */}
+        <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-gray-200">
+                <th className="p-3 w-12 text-center">#</th>
+                <th className="p-3">Judul Postingan / Halaman</th>
+                <th className="p-3 w-32">Kategori</th>
+                <th className="p-3 w-36">Alamat IP</th>
+                <th className="p-3 w-48">Browser & OS</th>
+                <th className="p-3 w-44 text-right">Waktu Diakses</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 text-gray-800">
+              {isLoadingLogs ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">
+                    <div className="inline-block w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Memuat data pengunjung...
+                  </td>
+                </tr>
+              ) : filteredLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">
+                    Belum ada rekam data pengunjung yang sesuai dengan filter.
+                  </td>
+                </tr>
+              ) : (
+                filteredLogs.map((item, idx) => (
+                  <tr key={item.id || idx} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="p-3 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                    <td className="p-3 font-semibold text-gray-900">
+                      {item.title || "Halaman Utama Website"}
+                    </td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        item.contentType === 'Berita' ? 'bg-emerald-100 text-emerald-800' :
+                        item.contentType === 'Foto' ? 'bg-blue-100 text-blue-800' :
+                        item.contentType === 'Agenda' ? 'bg-amber-100 text-amber-800' :
+                        item.contentType === 'Infografis' ? 'bg-purple-100 text-purple-800' :
+                        item.contentType === 'Video' ? 'bg-rose-100 text-rose-800' :
+                        'bg-slate-100 text-slate-800'
+                      }`}>
+                        {item.contentType || "Halaman"}
+                      </span>
+                    </td>
+                    <td className="p-3 font-mono text-[11px] text-slate-700 flex items-center gap-1.5">
+                      <Globe size={12} className="text-slate-400 shrink-0" />
+                      {item.ip || "127.0.0.1"}
+                    </td>
+                    <td className="p-3 text-slate-600 flex items-center gap-1.5">
+                      <Monitor size={12} className="text-slate-400 shrink-0" />
+                      <span className="truncate max-w-[180px]" title={item.userAgent}>
+                        {item.browserOs || item.browser || "Browser Lain"}
+                      </span>
+                    </td>
+                    <td className="p-3 text-right font-mono text-[11px] text-slate-500">
+                      {new Date(item.timestamp).toLocaleString("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                      })} WIB
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
+          <span>Menampilkan <strong>{filteredLogs.length}</strong> log akses pengunjung</span>
+          <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+            {visitorStats.uniqueIps || 0} Alamat IP Unik Terdeteksi
+          </span>
+        </div>
+      </div>
+
+      {/* RESET CONFIRMATION MODAL */}
+      {showResetConfirmModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4 border border-rose-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+              <AlertTriangle size={26} />
+            </div>
+
+            <div className="text-center space-y-1">
+              <h3 className="font-extrabold text-gray-900 text-lg">Reset Rekam Data Pengunjung?</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Pembersihan log dilakukan untuk mengoptimalkan performa dan ruang penyimpanan server. Seluruh log riwayat akses pengunjung akan dikosongkan.
+              </p>
+            </div>
+
+            <div className="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
+              <p className="font-bold">⚠️ Catatan Penting:</p>
+              <p>
+                Penghapusan ini hanya membersihkan log lalu lintas pengunjung, dan <strong>tidak menghapus artikel berita, foto, agenda, atau berkas</strong> Anda.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                onClick={() => setShowResetConfirmModal(false)}
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleResetVisitorLogs}
+                disabled={isResettingLogs}
+                className="flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors cursor-pointer shadow-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isResettingLogs ? "Mereset..." : "Ya, Reset Log"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

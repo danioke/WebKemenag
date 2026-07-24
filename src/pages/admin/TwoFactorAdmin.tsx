@@ -160,6 +160,9 @@ export default function TwoFactorAdmin() {
             <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               Autentikasi 2 Langkah (2FA)
             </h1>
+            <p className="text-sm text-gray-600 mt-0.5">
+              Lindungi akun login administrator <span className="font-semibold text-gray-800">({currentUserEmail})</span> dengan kode sekali pakai dari Google Authenticator / Authy.
+            </p>
           </div>
         </div>
 

@@ -41,6 +41,14 @@ export default function PengumumanDetail() {
         if (foundDoc) {
           setPengumuman(foundDoc);
           
+          import('../lib/visitor').then(({ recordVisitorView }) => {
+            recordVisitorView({
+              contentId: foundDoc.id,
+              title: foundDoc.title,
+              contentType: 'Infografis'
+            });
+          });
+          
           // Fetch others
           const otherQ = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(5));
           const otherSnap = await getDocs(otherQ);

@@ -43,6 +43,14 @@ export default function AgendaDetail() {
         if (foundDoc) {
           setAgenda(foundDoc);
           
+          import('../lib/visitor').then(({ recordVisitorView }) => {
+            recordVisitorView({
+              contentId: foundDoc.id,
+              title: foundDoc.title,
+              contentType: 'Agenda'
+            });
+          });
+          
           // Fetch other agendas
           const otherQ = query(collection(db, 'agendas'), orderBy('createdAt', 'desc'), limit(5));
           const otherSnap = await getDocs(otherQ);

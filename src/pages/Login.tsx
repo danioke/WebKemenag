@@ -158,9 +158,8 @@ export default function Login() {
                   <ShieldCheck size={32} />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900">Verifikasi Autentikator (2FA)</h3>
-                <p className="text-xs text-gray-600 mt-1">
-                  Masukkan 6 digit kode dari aplikasi <strong>Google Authenticator</strong> / <strong>Authy</strong> di HP Anda untuk akun <span className="font-semibold text-gray-800">{twoFactorEmail}</span>.
-                </p>
+              
+              
               </div>
 
               <form onSubmit={handleVerify2FA} className="space-y-5">

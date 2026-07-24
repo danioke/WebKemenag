@@ -25,7 +25,16 @@ export default function VideoDetail() {
         const docRef = doc(db, 'videos', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setVideo({ id: docSnap.id, ...docSnap.data() });
+          const videoData = { id: docSnap.id, ...docSnap.data() };
+          setVideo(videoData);
+
+          import('../lib/visitor').then(({ recordVisitorView }) => {
+            recordVisitorView({
+              contentId: videoData.id,
+              title: videoData.title || "Video Humas Kemenag OKI",
+              contentType: 'Video'
+            });
+          });
         }
       } catch (error) {
         console.error("Error fetching video:", error);

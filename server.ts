@@ -1,5 +1,6 @@
 import express from "express";
 import mysql from "mysql2/promise";
+import { MongoClient, Db } from "mongodb";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -684,47 +685,75 @@ async function startServer() {
     return path.join(dbDir, `${collection}.json`);
   }
 
+  let mongoClient: MongoClient | null = null;
+  let mongoDb: Db | null = null;
+  let useMongoDB = false;
+
   let pool: mysql.Pool | null = null;
   let useMySQL = false;
   let dbConnectionError: string | null = null;
 
   async function initDB() {
-    if (!process.env.DB_HOST || !process.env.DB_USER) {
-      console.log("MySQL credentials not provided, using local JSON fallback.");
-      dbConnectionError = "Kredensial MySQL tidak lengkap di pengaturan";
-      return;
+    // 1. Prioritaskan MySQL (Hostinger / cPanel) jika DB_HOST & DB_USER diisi
+    if (process.env.DB_HOST && process.env.DB_USER) {
+      try {
+        console.log("Connecting to MySQL (Hostinger)...");
+        const testPool = mysql.createPool({
+          host: process.env.DB_HOST,
+          user: process.env.DB_USER,
+          password: process.env.DB_PASSWORD || '',
+          database: process.env.DB_NAME || 'my_database',
+          waitForConnections: true,
+          connectionLimit: 10,
+          queueLimit: 0
+        });
+
+        const connection = await testPool.getConnection();
+        await connection.query(`
+          CREATE TABLE IF NOT EXISTS collections (
+            id VARCHAR(255) NOT NULL,
+            collection_name VARCHAR(255) NOT NULL,
+            data JSON NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (collection_name, id)
+          )
+        `);
+        connection.release();
+        console.log("Connected to MySQL (Hostinger) database and verified collections table.");
+        pool = testPool;
+        useMySQL = true;
+        dbConnectionError = null;
+        return;
+      } catch (err: any) {
+        console.error("MySQL connection error:", err.message);
+        dbConnectionError = "Error MySQL: " + err.message;
+        console.log("MySQL connection failed. Checking fallback options...");
+      }
     }
 
-    try {
-      const testPool = mysql.createPool({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD || '',
-        database: process.env.DB_NAME || 'my_database',
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0
-      });
+    // 2. Coba MongoDB jika MONGODB_URI diisi
+    if (process.env.MONGODB_URI) {
+      try {
+        console.log("Connecting to MongoDB...");
+        mongoClient = new MongoClient(process.env.MONGODB_URI);
+        await mongoClient.connect();
+        const dbName = process.env.MONGODB_DB_NAME || "kemenag_oki";
+        mongoDb = mongoClient.db(dbName);
+        useMongoDB = true;
+        dbConnectionError = null;
+        console.log(`Connected to MongoDB database "${dbName}" successfully.`);
+        return;
+      } catch (mongoErr: any) {
+        console.error("MongoDB connection error:", mongoErr.message);
+        if (!dbConnectionError) {
+          dbConnectionError = "Error MongoDB: " + mongoErr.message;
+        }
+      }
+    }
 
-      const connection = await testPool.getConnection();
-      await connection.query(`
-        CREATE TABLE IF NOT EXISTS collections (
-          id VARCHAR(255) NOT NULL,
-          collection_name VARCHAR(255) NOT NULL,
-          data JSON NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          PRIMARY KEY (collection_name, id)
-        )
-      `);
-      connection.release();
-      console.log("Connected to MySQL database and verified collections table.");
-      pool = testPool;
-      useMySQL = true;
-      dbConnectionError = null;
-    } catch (err: any) {
-      console.error("MySQL connection error:", err.message);
-      dbConnectionError = err.message;
-      console.log("Falling back to local JSON file storage.");
+    if (!process.env.DB_HOST && !process.env.MONGODB_URI) {
+      console.log("Database credentials (DB_HOST or MONGODB_URI) not provided, using local JSON fallback.");
+      dbConnectionError = "Kredensial database MySQL Hostinger (DB_HOST & DB_USER) belum dikonfigurasi.";
     }
   }
 
@@ -733,10 +762,221 @@ async function startServer() {
 
   app.get("/api/db-status", (req, res) => {
     res.json({
+      activeDatabase: useMongoDB ? "mongodb" : useMySQL ? "mysql" : "json",
+      useMongoDB,
       useMySQL,
       error: dbConnectionError,
-      host: process.env.DB_HOST
+      mongodbUriConfigured: !!process.env.MONGODB_URI,
+      mysqlHost: process.env.DB_HOST,
+      databaseName: process.env.MONGODB_DB_NAME || process.env.DB_NAME || "kemenag_oki"
     });
+  });
+
+  // User Agent parser helper
+  function parseUserAgent(ua: string = ""): { browser: string; os: string; full: string } {
+    let browser = "Browser Lain";
+    let os = "OS Tidak Dikenal";
+
+    if (/Windows/i.test(ua)) os = "Windows";
+    else if (/Android/i.test(ua)) os = "Android";
+    else if (/iPhone|iPad|iPod/i.test(ua)) os = "iOS";
+    else if (/Mac OS/i.test(ua)) os = "macOS";
+    else if (/Linux/i.test(ua)) os = "Linux";
+
+    if (/Edg/i.test(ua)) browser = "Microsoft Edge";
+    else if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = "Google Chrome";
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+    else if (/Firefox/i.test(ua)) browser = "Mozilla Firefox";
+    else if (/Opera|OPR/i.test(ua)) browser = "Opera";
+
+    return { browser, os, full: `${browser} (${os})` };
+  }
+
+  // Record a visitor view event
+  app.post("/api/visitor/record", async (req, res) => {
+    try {
+      const { contentId, title, contentType = "Halaman" } = req.body || {};
+      const rawIp = (req.headers["x-forwarded-for"] as string || req.socket.remoteAddress || "127.0.0.1").split(",")[0].trim();
+      const ip = rawIp === "::1" || rawIp === "::ffff:127.0.0.1" ? "127.0.0.1" : rawIp;
+      
+      const uaHeader = req.headers["user-agent"] || "";
+      const parsedUA = parseUserAgent(uaHeader);
+
+      const logDoc = {
+        id: "vlog_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+        contentId: contentId || "",
+        title: title || "Halaman Utama / Website",
+        contentType: contentType, // 'Berita', 'Foto', 'Agenda', 'Infografis', 'Video', 'Halaman'
+        ip: ip,
+        browser: parsedUA.browser,
+        os: parsedUA.os,
+        browserOs: parsedUA.full,
+        userAgent: uaHeader,
+        timestamp: new Date().toISOString()
+      };
+
+      const release = await acquireLock("visitor_logs");
+      try {
+        const logs = await readCollection("visitor_logs");
+        logs.unshift(logDoc); // newest first
+        // Limit max 2000 items automatically to prevent extreme file sizes
+        if (logs.length > 2000) {
+          logs.splice(2000);
+        }
+        await writeCollection("visitor_logs", logs);
+      } finally {
+        release();
+      }
+
+      res.json({ success: true, log: logDoc });
+    } catch (err: any) {
+      console.error("Error in /api/visitor/record:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Get visitor logs with optional date range filter
+  app.get("/api/visitor/logs", async (req, res) => {
+    try {
+      const { startDate, endDate, contentType, limit = "500" } = req.query;
+      let logs = await readCollection("visitor_logs");
+
+      if (contentType && contentType !== "semua") {
+        logs = logs.filter((l: any) => l.contentType === contentType);
+      }
+
+      if (startDate) {
+        const start = new Date(String(startDate) + "T00:00:00.000Z").getTime();
+        logs = logs.filter((l: any) => new Date(l.timestamp).getTime() >= start);
+      }
+
+      if (endDate) {
+        const end = new Date(String(endDate) + "T23:59:59.999Z").getTime();
+        logs = logs.filter((l: any) => new Date(l.timestamp).getTime() <= end);
+      }
+
+      const maxLimit = parseInt(String(limit), 10) || 500;
+      res.json(logs.slice(0, maxLimit));
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Get visitor statistics summary
+  app.get("/api/visitor/stats", async (req, res) => {
+    try {
+      const [
+        newsItems,
+        photoItems,
+        agendaItems,
+        announcementItems,
+        videoItems,
+        serviceItems,
+        visitorLogs
+      ] = await Promise.all([
+        readCollection("news"),
+        readCollection("photos"),
+        readCollection("agendas"),
+        readCollection("announcements"),
+        readCollection("videos"),
+        readCollection("services"),
+        readCollection("visitor_logs")
+      ]);
+
+      const sumViews = (items: any[]) => items.reduce((acc, curr) => acc + (Number(curr.views) || 0), 0);
+
+      // Also count reads logged in visitor_logs per type
+      const logReadsPerType = (type: string) => visitorLogs.filter((l: any) => l.contentType === type).length;
+
+      const newsViews = Math.max(sumViews(newsItems), logReadsPerType("Berita"));
+      const photoViews = Math.max(sumViews(photoItems), logReadsPerType("Foto"));
+      const agendaViews = Math.max(sumViews(agendaItems), logReadsPerType("Agenda"));
+      const announcementViews = Math.max(sumViews(announcementItems), logReadsPerType("Infografis"));
+      const videoViews = Math.max(sumViews(videoItems), logReadsPerType("Video"));
+      const serviceViews = Math.max(sumViews(serviceItems), logReadsPerType("Halaman"));
+
+      const uniqueIps = new Set(visitorLogs.map((l: any) => l.ip)).size;
+
+      res.json({
+        news: { count: newsItems.length, totalViews: newsViews },
+        photos: { count: photoItems.length, totalViews: photoViews },
+        agendas: { count: agendaItems.length, totalViews: agendaViews },
+        infografis: { count: announcementItems.length, totalViews: announcementViews },
+        videos: { count: videoItems.length, totalViews: videoViews },
+        halaman: { count: serviceItems.length, totalViews: serviceViews },
+        totalVisitorLogs: visitorLogs.length,
+        uniqueIps,
+        recentLogs: visitorLogs.slice(0, 100)
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Reset / clear visitor logs to protect performance
+  app.delete("/api/visitor/logs", async (req, res) => {
+    try {
+      const release = await acquireLock("visitor_logs");
+      try {
+        await writeCollection("visitor_logs", []);
+      } finally {
+        release();
+      }
+      res.json({ success: true, message: "Seluruh data rekam pengunjung berhasil di-reset!" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Migrasi data dari file JSON lokal ke MongoDB Atlas
+  app.post("/api/db/sync-to-mongodb", async (req, res) => {
+    if (!useMongoDB || !mongoDb) {
+      return res.status(400).json({ error: "Koneksi MongoDB belum aktif. Atur MONGODB_URI di .env terlebih dahulu." });
+    }
+
+    try {
+      const knownCollections = [
+        "announcements", "agendas", "news", "photos", "videos",
+        "services", "categories", "officials", "staff",
+        "two_factor_auth", "allowed_users", "settings",
+        "video_api_settings", "newsletter_subscribers",
+        "newsletter_sent_logs", "uploaded_files"
+      ];
+
+      const results: Record<string, number> = {};
+
+      for (const colName of knownCollections) {
+        const filePath = getCollectionPath(colName);
+        if (fs.existsSync(filePath)) {
+          try {
+            const rawData = fs.readFileSync(filePath, "utf8");
+            const items = JSON.parse(rawData);
+            if (Array.isArray(items) && items.length > 0) {
+              const col = mongoDb.collection(colName);
+              await col.deleteMany({});
+              const cleanData = items.map(item => ({
+                ...item,
+                id: item.id || Math.random().toString(36).substring(2, 15)
+              }));
+              await col.insertMany(cleanData);
+              results[colName] = items.length;
+            } else {
+              results[colName] = 0;
+            }
+          } catch (fileErr: any) {
+            console.warn(`Gagal membaca ${colName}.json untuk migrasi:`, fileErr.message);
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "Migrasi data JSON ke MongoDB Atlas berhasil diselesaikan!",
+        syncedCollections: results
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
   
@@ -805,7 +1045,18 @@ async function startServer() {
   }
 
   async function readCollection(collection: string): Promise<any[]> {
-    if (useMySQL && pool) {
+    if (useMongoDB && mongoDb) {
+      try {
+        const docs = await mongoDb.collection(collection).find({}).toArray();
+        return docs.map(doc => {
+          const { _id, ...rest } = doc;
+          return { id: doc.id || _id?.toString(), ...rest };
+        });
+      } catch (err: any) {
+        console.error(`Error reading collection ${collection} from MongoDB:`, err.message);
+        throw err;
+      }
+    } else if (useMySQL && pool) {
       try {
         const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ?', [collection]);
         return (rows as any[]).map(r => parseDBData(r.data));
@@ -828,7 +1079,25 @@ async function startServer() {
   }
 
   async function writeCollection(collection: string, data: any[]) {
-    if (useMySQL && pool) {
+    if (useMongoDB && mongoDb) {
+      try {
+        const col = mongoDb.collection(collection);
+        await col.deleteMany({});
+        if (data.length > 0) {
+          const cleanData = data.map(item => {
+            const doc = { ...item };
+            if (!doc.id) {
+              doc.id = Math.random().toString(36).substring(2, 15);
+            }
+            return doc;
+          });
+          await col.insertMany(cleanData);
+        }
+      } catch (err: any) {
+        console.error(`Error writing collection ${collection} to MongoDB:`, err.message);
+        throw err;
+      }
+    } else if (useMySQL && pool) {
       let connection;
       try {
         connection = await pool.getConnection();

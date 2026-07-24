@@ -81,6 +81,14 @@ export default function BeritaDetail() {
               views: (foundDoc.views || 0) + 1
             }).catch(e => console.error("Error updating views", e));
           });
+
+          import('../lib/visitor').then(({ recordVisitorView }) => {
+            recordVisitorView({
+              contentId: foundDoc.id,
+              title: foundDoc.title,
+              contentType: 'Berita'
+            });
+          });
           
           // Fetch other news (latest 5, excluding current)
           const otherQ = query(collection(db, 'news'), orderBy('createdAt', 'desc'));
