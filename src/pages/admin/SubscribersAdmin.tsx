@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db } from '../../lib/db';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Mail, Search, RefreshCw, X, Send, Eye, FileText, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Mail, Search, RefreshCw, X, Send, Eye, FileText, CheckCircle2, AlertCircle, XCircle, Server } from 'lucide-react';
 
 interface Subscriber {
   id: string;
@@ -228,6 +228,28 @@ export default function SubscribersAdmin() {
         </button>
       </div>
 
+      {/* Info Banner Konfigurasi SMTP Nodemailer */}
+      <div className="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start gap-4">
+        <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl shrink-0">
+          <Server size={22} />
+        </div>
+        <div className="flex-1 text-xs sm:text-sm text-amber-900 leading-relaxed">
+          <p className="font-bold text-amber-950 flex items-center gap-1.5 text-sm mb-1">
+            <AlertCircle size={16} className="text-amber-700" /> Status Pengiriman Email (Nodemailer)
+          </p>
+          <p>
+            Modul <strong>Nodemailer</strong> sudah terpasang dan siap digunakan di backend server. Jika pengiriman buletin masih berstatus <strong>Gagal</strong>, pastikan variabel lingkungan (environment variables) SMTP di file <code>.env</code> hosting/server Anda sudah diisi dengan kredensial server email yang valid:
+          </p>
+          <div className="mt-2.5 bg-amber-100/60 p-2.5 rounded-xl font-mono text-[11px] text-amber-950 space-y-1 overflow-x-auto border border-amber-200">
+            <div>SMTP_HOST=smtp.gmail.com <span className="text-amber-700 font-sans italic">(atau mail.kemenagoki.id)</span></div>
+            <div>SMTP_PORT=587 <span className="text-amber-700 font-sans italic">(atau 465 untuk SSL)</span></div>
+            <div>SMTP_USER=humas@kemenagoki.id</div>
+            <div>SMTP_PASS=kunci_password_app_anda</div>
+            <div>SMTP_FROM="Humas Kemenag OKI" &lt;humas@kemenagoki.id&gt;</div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Subscribers Panel */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:col-span-1 flex flex-col h-fit">
@@ -375,10 +397,17 @@ export default function SubscribersAdmin() {
                         {log.sentAt ? new Date(log.sentAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-'}
                       </td>
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-green-50 text-green-700 px-2 py-0.5 rounded-full border border-green-100">
-                          <CheckCircle2 size={10} />
-                          {log.status || 'Berhasil'}
-                        </span>
+                        {String(log.status || '').toLowerCase().includes('gagal') ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-red-50 text-red-700 px-2 py-0.5 rounded-full border border-red-100 max-w-[180px] truncate" title={log.status}>
+                            <XCircle size={11} className="shrink-0" />
+                            <span className="truncate">{log.status}</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-green-50 text-green-700 px-2 py-0.5 rounded-full border border-green-100">
+                            <CheckCircle2 size={11} className="shrink-0" />
+                            {log.status || 'Terkirim'}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3.5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">

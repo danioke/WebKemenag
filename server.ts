@@ -322,7 +322,9 @@ async function startServer() {
           logItem.status = 'Terkirim (Manual)';
           console.log(`[NEWSLETTER] Email successfully sent to ${sub.email}`);
           sentCount++;
-        } catch (emailErr) {
+        } catch (emailErr: any) {
+          const errMsg = emailErr?.message || 'Gagal koneksi SMTP';
+          logItem.status = `Gagal: ${errMsg}`;
           console.error(`[NEWSLETTER] Failed to send email to ${sub.email}:`, emailErr);
         }
         
@@ -1139,6 +1141,8 @@ async function startServer() {
     try {
       const { collection: collectionName } = req.params;
       const items = await readCollection(collectionName);
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       res.json(items);
     } catch (err: any) {
       console.error(`Error in GET /api/db/${req.params.collection}:`, err);
@@ -1152,6 +1156,7 @@ async function startServer() {
       const { collection: collectionName, id } = req.params;
       const items = await readCollection(collectionName);
       const item = items.find((i) => i.id === id);
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
       if (item) {
         res.json(item);
       } else {
@@ -1266,7 +1271,9 @@ async function startServer() {
                 });
                 logItem.status = 'Terkirim (Otomatis)';
                 console.log(`[NEWSLETTER] Email successfully sent to ${sub.email}`);
-              } catch (emailErr) {
+              } catch (emailErr: any) {
+                const errMsg = emailErr?.message || 'Gagal koneksi SMTP';
+                logItem.status = `Gagal: ${errMsg}`;
                 console.error(`[NEWSLETTER] Failed to send email to ${sub.email}:`, emailErr);
               }
               
