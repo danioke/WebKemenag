@@ -75,6 +75,7 @@ import MediaAdmin from "./admin/MediaAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import SubscribersAdmin from "./admin/SubscribersAdmin";
 import TwoFactorAdmin from "./admin/TwoFactorAdmin";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -638,6 +639,7 @@ export default function AdminDashboard() {
 }
 
 function DashboardHome() {
+  const { logoKemenagUrl, logoUrl, fetchSettings } = useSettingsStore();
   const [dbStatus, setDbStatus] = useState<any>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -774,6 +776,8 @@ function DashboardHome() {
       ? `${startDate ? new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Awal'} s.d. ${endDate ? new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Sekarang'}`
       : 'Keseluruhan Data Terrekam';
 
+    const logoSrc = logoKemenagUrl || logoUrl || 'https://kuatelukgelam.kemenagoki.id/assets/img/logo.png';
+
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="id">
@@ -782,10 +786,12 @@ function DashboardHome() {
         <title>Laporan Rekam Pengunjung & Pembaca Konten - Kemenag OKI</title>
         <style>
           body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; color: #000; margin: 20px; line-height: 1.3; }
-          .kop { text-align: center; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 20px; }
-          .kop h2 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
-          .kop h3 { margin: 2px 0; font-size: 13pt; font-weight: bold; }
-          .kop p { margin: 0; font-size: 9pt; font-style: italic; }
+          .kop { display: flex; align-items: center; justify-content: center; gap: 15px; border-bottom: 3px double #000; padding-bottom: 8px; margin-bottom: 20px; text-align: center; }
+          .kop-logo { width: 75px; height: 75px; object-fit: contain; shrink-0: 0; }
+          .kop-text { flex: 1; text-align: center; }
+          .kop-text h2 { margin: 0; font-size: 13pt; font-weight: bold; text-transform: uppercase; }
+          .kop-text h3 { margin: 2px 0; font-size: 12pt; font-weight: bold; }
+          .kop-text p { margin: 0; font-size: 9pt; font-style: italic; }
           .title { text-align: center; margin-bottom: 20px; }
           .title h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; text-decoration: underline; }
           .title p { margin: 4px 0 0 0; font-size: 10pt; font-style: italic; }
@@ -807,10 +813,13 @@ function DashboardHome() {
       </head>
       <body>
         <div class="kop">
-          <h2>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
-          <h3>KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
-          <p>Jl. Lintas Timur Kayuagung, Kabupaten Ogan Komering Ilir, Sumatera Selatan 30618</p>
-          <p>Website: humas.kemenagoki.id | Email: humas@kemenagoki.id</p>
+          ${logoSrc ? `<img src="${logoSrc}" class="kop-logo" alt="Logo Kemenag" />` : ''}
+          <div class="kop-text">
+            <h2>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h2>
+            <h3>KANTOR KEMENTERIAN AGAMA KABUPATEN OGAN KOMERING ILIR</h3>
+            <p>Jl. Jalan Letnan Mukhtar Saleh No.087 Kayuagung 30611</p>
+            <p>Website: https://kemenagoki.id | Email: humas@kemenagoki.id</p>
+          </div>
         </div>
 
         <div class="title">
@@ -893,6 +902,7 @@ function DashboardHome() {
     fetchDbStatus();
     fetchVisitorStats();
     fetchFilteredVisitorLogs();
+    fetchSettings();
   }, []);
 
   useEffect(() => {

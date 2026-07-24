@@ -33,7 +33,7 @@ interface WPPost {
 
 export default function WordPressImporter() {
   const navigate = useNavigate();
-  const [wpUrl, setWpUrl] = useState('https://sumsel.kemenag.go.id');
+  const [wpUrl, setWpUrl] = useState('https://kemenagoki.id');
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<WPPost[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
