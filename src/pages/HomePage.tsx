@@ -38,11 +38,27 @@ export default function HomePage() {
           <Services />
         </ScrollReveal>
         
-        {/* Zona Integritas Wilayah Bebas Korupsi (WBK) - Modern Design Banner */}
+        <ScrollReveal direction="up" amount={0.1}>
+          <NewsSection />
+        </ScrollReveal>
+        
+        <ScrollReveal direction="up" amount={0.1}>
+          <InfografisMarquee />
+        </ScrollReveal>
+        
+        <ScrollReveal direction="up" amount={0.1}>
+          <Pengumuman />
+        </ScrollReveal>
+
+          <ScrollReveal direction="up" amount={0.1}>
+          <Agenda />
+        </ScrollReveal>
+        
+         {/* Zona Integritas Wilayah Bebas Korupsi (WBK) - Modern Design Banner */}
         <section className="bg-gradient-to-r from-green-800 via-green-900 to-green-950 text-white py-16 relative overflow-hidden shadow-inner">
           <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
-          <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-green-700/10 rounded-full blur-3xl"></div>
-          <div className="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute -left-16 -bottom-16 w-64 h-64 bg-green-700/10 rounded-full blur-sm"></div>
+          <div className="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/10 rounded-full blur-sm"></div>
           
           <ScrollReveal direction="up" amount={0.4}>
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex flex-col items-center">
@@ -76,22 +92,6 @@ export default function HomePage() {
             </div>
           </ScrollReveal>
         </section>
-
-        <ScrollReveal direction="up" amount={0.1}>
-          <NewsSection />
-        </ScrollReveal>
-        
-        <ScrollReveal direction="up" amount={0.1}>
-          <Pengumuman />
-        </ScrollReveal>
-
-          <ScrollReveal direction="up" amount={0.1}>
-          <Agenda />
-        </ScrollReveal>
-        
-        <ScrollReveal direction="up" amount={0.1}>
-          <InfografisMarquee />
-        </ScrollReveal>
         
         <ScrollReveal direction="up" amount={0.1}>
           <MediaGallery />
