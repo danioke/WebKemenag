@@ -37,6 +37,7 @@ import {
   Folder,
   Settings,
   Mail,
+  ShieldCheck,
 } from "lucide-react";
 import PengumumanAdmin from "./admin/PengumumanAdmin";
 import BeritaAdmin from "./admin/BeritaAdmin";
@@ -55,6 +56,7 @@ import LaporanAdmin from "./admin/LaporanAdmin";
 import MediaAdmin from "./admin/MediaAdmin";
 import SettingsAdmin from "./admin/SettingsAdmin";
 import SubscribersAdmin from "./admin/SubscribersAdmin";
+import TwoFactorAdmin from "./admin/TwoFactorAdmin";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -201,6 +203,7 @@ export default function AdminDashboard() {
       ],
     },
     { name: "Laporan", path: "/admin/laporan", icon: FileText },
+    { name: "Keamanan 2FA", path: "/admin/2fa", icon: ShieldCheck },
     { name: "Pelanggan Buletin", path: "/admin/subscribers", icon: Mail },
     { name: "Pengaturan", path: "/admin/settings", icon: Settings },
   ];
@@ -422,6 +425,7 @@ export default function AdminDashboard() {
             <Route path="/layanan" element={<LayananAdmin />} />
             <Route path="/kategori" element={<KategoriAdmin />} />
             <Route path="/laporan" element={<LaporanAdmin />} />
+            <Route path="/2fa" element={<TwoFactorAdmin />} />
             <Route path="/subscribers" element={<SubscribersAdmin />} />
           </Routes>
         </main>

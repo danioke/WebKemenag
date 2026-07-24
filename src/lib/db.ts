@@ -474,7 +474,7 @@ export class AuthProvider {
 }
 
 // Modified login function to use password instead of login
-export const loginWithPassword = async (email: string, password: string): Promise<boolean> => {
+export const loginWithPassword = async (email: string, password: string): Promise<{ success?: boolean; twoFactorRequired?: boolean; email?: string }> => {
   try {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
@@ -484,6 +484,38 @@ export const loginWithPassword = async (email: string, password: string): Promis
       body: JSON.stringify({ email, password })
     });
     
+    if (res.ok) {
+      const data = await res.json();
+      if (data.twoFactorRequired) {
+        return { twoFactorRequired: true, email: data.email };
+      }
+      currentUser = { ...data, emailVerified: true };
+      localStorage.setItem('app_mock_user', JSON.stringify(currentUser));
+      localStorage.setItem('mock_admin_session', 'true');
+      if (authListener) {
+        authListener(currentUser);
+      }
+      return { success: true };
+    } else {
+      const errData = await res.json();
+      throw new Error(errData.error || 'Password salah!');
+    }
+  } catch (error: any) {
+    console.error('Login error:', error);
+    throw error;
+  }
+};
+
+export const verify2FACode = async (email: string, code: string): Promise<boolean> => {
+  try {
+    const res = await fetch('/api/auth/verify-2fa', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, code })
+    });
+
     if (res.ok) {
       const user = await res.json();
       currentUser = { ...user, emailVerified: true };
@@ -495,10 +527,10 @@ export const loginWithPassword = async (email: string, password: string): Promis
       return true;
     } else {
       const errData = await res.json();
-      throw new Error(errData.error || 'Password salah!');
+      throw new Error(errData.error || 'Kode 2FA salah!');
     }
   } catch (error: any) {
-    console.error('Login error:', error);
+    console.error('2FA verification error:', error);
     throw error;
   }
 };

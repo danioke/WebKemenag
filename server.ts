@@ -9,6 +9,8 @@ import multer from "multer";
 import { createServer as createViteServer } from "vite";
 import sharp from "sharp";
 import nodemailer from "nodemailer";
+import speakeasy from "speakeasy";
+import QRCode from "qrcode";
 
 // Helper function to create transporter
 const getTransporter = () => {
@@ -1117,6 +1119,195 @@ async function startServer() {
     }
   });
 
+  // GET 2FA status for an email
+  app.get("/api/auth/2fa/status", async (req, res) => {
+    try {
+      const email = String(req.query.email || "").toLowerCase().trim();
+      if (!email) return res.status(400).json({ error: "Email diperlukan" });
+      const records = await readCollection("two_factor_auth");
+      const rec = records.find((r: any) => (r.email === email || r.id === email) && r.twoFactorEnabled);
+      res.json({ twoFactorEnabled: !!rec });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Generate 2FA Secret & QR Code
+  app.post("/api/auth/2fa/setup", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: "Email diperlukan" });
+      const cleanEmail = String(email).toLowerCase().trim();
+      const secret = speakeasy.generateSecret({
+        name: `Kemenag OKI (${cleanEmail})`,
+        issuer: "Kemenag OKI"
+      });
+      const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url || "");
+      res.json({
+        secret: secret.base32,
+        qrCodeUrl,
+        otpauth_url: secret.otpauth_url
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Enable 2FA after verifying code
+  app.post("/api/auth/2fa/enable", async (req, res) => {
+    try {
+      const { email, secret, code } = req.body;
+      if (!email || !secret || !code) {
+        return res.status(400).json({ error: "Email, secret, dan kode 2FA wajib diisi" });
+      }
+      const cleanEmail = String(email).toLowerCase().trim();
+      const verified = speakeasy.totp.verify({
+        secret,
+        encoding: "base32",
+        token: String(code).trim(),
+        window: 1
+      });
+
+      if (!verified) {
+        return res.status(400).json({
+          success: false,
+          error: "Kode 2FA tidak valid. Pastikan 6 digit angka dari aplikasi Autentikator sesuai dan waktu jam di HP Anda sudah akurat."
+        });
+      }
+
+      const release = await acquireLock("two_factor_auth");
+      try {
+        const records = await readCollection("two_factor_auth");
+        const idx = records.findIndex((r: any) => r.email === cleanEmail || r.id === cleanEmail);
+        const newRec = {
+          id: cleanEmail,
+          email: cleanEmail,
+          twoFactorEnabled: true,
+          twoFactorSecret: secret,
+          updatedAt: new Date().toISOString()
+        };
+        if (idx >= 0) {
+          records[idx] = newRec;
+        } else {
+          records.push(newRec);
+        }
+        await writeCollection("two_factor_auth", records);
+      } finally {
+        release();
+      }
+
+      res.json({ success: true, message: "2FA Autentikator berhasil diaktifkan!" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Disable 2FA
+  app.post("/api/auth/2fa/disable", async (req, res) => {
+    try {
+      const { email, code } = req.body;
+      const cleanEmail = String(email || "").toLowerCase().trim();
+      const records = await readCollection("two_factor_auth");
+      const rec = records.find((r: any) => (r.email === cleanEmail || r.id === cleanEmail) && r.twoFactorEnabled);
+
+      if (!rec || !rec.twoFactorSecret) {
+        return res.status(400).json({ error: "2FA belum diaktifkan untuk akun ini." });
+      }
+
+      const verified = speakeasy.totp.verify({
+        secret: rec.twoFactorSecret,
+        encoding: "base32",
+        token: String(code).trim(),
+        window: 1
+      });
+
+      if (!verified) {
+        return res.status(400).json({
+          error: "Kode 2FA tidak valid. Konfirmasi penonaktifan gagal."
+        });
+      }
+
+      const release = await acquireLock("two_factor_auth");
+      try {
+        const updated = records.filter((r: any) => r.email !== cleanEmail && r.id !== cleanEmail);
+        await writeCollection("two_factor_auth", updated);
+      } finally {
+        release();
+      }
+
+      res.json({ success: true, message: "2FA Autentikator berhasil dinonaktifkan." });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Verify 2FA code during login
+  app.post("/api/auth/verify-2fa", async (req, res) => {
+    try {
+      const { email, code } = req.body;
+      if (!email || !code) {
+        return res.status(400).json({ error: "Email dan Kode 2FA diperlukan." });
+      }
+      const cleanEmail = String(email).toLowerCase().trim();
+      const records = await readCollection("two_factor_auth");
+      const rec = records.find((r: any) => (r.email === cleanEmail || r.id === cleanEmail) && r.twoFactorEnabled);
+
+      if (!rec || !rec.twoFactorSecret) {
+        return res.status(400).json({ error: "Pengaturan 2FA tidak ditemukan untuk akun ini." });
+      }
+
+      const verified = speakeasy.totp.verify({
+        secret: rec.twoFactorSecret,
+        encoding: "base32",
+        token: String(code).trim(),
+        window: 1
+      });
+
+      if (!verified) {
+        return res.status(401).json({ error: "Kode Autentikator (2FA) salah atau telah kadaluarsa! Silakan periksa aplikasi Autentikator Anda." });
+      }
+
+      // Reconstruct user object
+      let authenticatedUser = null;
+      if (cleanEmail === "anisreza498@gmail.com" || cleanEmail.includes("admin")) {
+        authenticatedUser = {
+          uid: "admin-uid",
+          email: email,
+          displayName: "Super Admin (Anis Reza)",
+          role: "Super Admin",
+        };
+      } else {
+        try {
+          const users = await readCollection("allowed_users");
+          const foundUser = users.find(u => u.email?.toLowerCase() === cleanEmail);
+          if (foundUser) {
+            authenticatedUser = {
+              uid: foundUser.id || "user-uid",
+              email: foundUser.email,
+              displayName: foundUser.name || foundUser.email,
+              role: foundUser.role || "Admin",
+            };
+          }
+        } catch (dbErr) {
+          console.warn("Failed reading allowed_users on 2fa verify:", dbErr);
+        }
+      }
+
+      if (!authenticatedUser) {
+        authenticatedUser = {
+          uid: "user-uid",
+          email: email,
+          displayName: email,
+          role: "Admin",
+        };
+      }
+
+      res.json(authenticatedUser);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.post("/api/auth/login", async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -1150,6 +1341,18 @@ async function startServer() {
       }
 
       if (authenticatedUser) {
+        const cleanEmail = authenticatedUser.email.toLowerCase().trim();
+        const records = await readCollection("two_factor_auth");
+        const rec = records.find((r: any) => (r.email === cleanEmail || r.id === cleanEmail) && r.twoFactorEnabled);
+
+        if (rec && rec.twoFactorSecret) {
+          return res.json({
+            twoFactorRequired: true,
+            email: authenticatedUser.email,
+            message: "Verifikasi 2FA Autentikator diperlukan."
+          });
+        }
+
         res.json(authenticatedUser);
       } else {
         res.status(401).json({ error: "Email atau Password salah!" });
