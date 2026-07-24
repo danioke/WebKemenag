@@ -734,7 +734,7 @@ async function startServer() {
           CREATE TABLE IF NOT EXISTS collections (
             id VARCHAR(255) NOT NULL,
             collection_name VARCHAR(255) NOT NULL,
-            data JSON NOT NULL,
+            data LONGTEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (collection_name, id)
           )
