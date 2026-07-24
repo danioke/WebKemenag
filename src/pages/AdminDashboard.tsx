@@ -1068,22 +1068,50 @@ function DashboardHome() {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-500 text-white rounded-lg shrink-0">
-                      <AlertTriangle size={20} />
+                    <div className="p-2 bg-emerald-600 text-white rounded-lg shrink-0">
+                      <CheckCircle2 size={20} />
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="font-bold text-sm text-amber-950">
-                        Status Database: Menggunakan Penyimpanan File Lokal Sementara (JSON)
-                      </h3>
-                      <p className="text-xs text-amber-800">
-                        Server belum terhubung ke MySQL Hostinger. Tambahkan variabel <code>DB_HOST</code>, <code>DB_USER</code>, <code>DB_PASSWORD</code>, dan <code>DB_NAME</code> di file <code>.env</code> Anda.
+                    <div className="space-y-1.5 w-full">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                          Status Penyimpanan: File Lokal JSON (Aktif & Normal)
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-full">100% Operational</span>
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Aplikasi saat ini menggunakan penyimpanan file JSON lokal. Seluruh data (berita, pengumuman, agenda, foto, video, dll) tersimpan aman dan aplikasi dapat digunakan secara penuh.
                       </p>
-                      {dbStatus.error && (
-                        <p className="text-xs font-mono bg-white/80 p-2 rounded border border-amber-200 text-red-700 break-all mt-1">
-                          Pesan Error: {dbStatus.error}
-                        </p>
+
+                      {dbStatus.error ? (
+                        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-900 space-y-1">
+                          <p className="text-xs font-bold text-red-800 flex items-center gap-1.5">
+                            <AlertTriangle size={14} className="text-red-600" />
+                            Catatan Koneksi MySQL Hostinger:
+                          </p>
+                          <p className="text-xs font-mono bg-white p-2 rounded border border-red-100 text-red-700 break-all">
+                            {dbStatus.error}
+                          </p>
+                          <p className="text-[11px] text-red-700 leading-normal mt-1">
+                            <strong>Solusi Hostinger cPanel:</strong>
+                            <br />1. Pastikan Nama User DB & Password di file <code>.env</code> sudah sesuai persis dengan yang ada di cPanel MySQL.
+                            <br />2. Buka menu <strong>Remote MySQL</strong> di Hostinger/cPanel, lalu tambahkan Host/IP <code>%</code> (Wildcard) atau IP server Anda agar akses database diizinkan dari luar.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs">
+                          <span className="font-bold text-amber-900">Ingin Menggunakan MySQL Hostinger?</span>
+                          <p className="text-[11px] text-amber-800 mt-0.5">
+                            Tambahkan variabel berikut pada file <code>.env</code> di server Hostinger/cPanel Anda:
+                            <code className="block bg-amber-100/70 p-1.5 rounded text-amber-950 font-mono mt-1">
+                              DB_HOST=localhost<br />
+                              DB_USER=u239881393_usernodeb<br />
+                              DB_PASSWORD=PasswordDatabaseAnda<br />
+                              DB_NAME=u239881393_namadatabase
+                            </code>
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>

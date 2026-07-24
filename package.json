@@ -55,7 +55,7 @@
     "@types/react-google-recaptcha": "^2.1.9",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
-    "puppeteer": "^25.3.0",
+    "puppeteer": "^22.15.0",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2"

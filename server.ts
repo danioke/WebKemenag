@@ -774,7 +774,7 @@ async function startServer() {
 
     if (!process.env.DB_HOST && !process.env.MONGODB_URI) {
       console.log("Database credentials (DB_HOST or MONGODB_URI) not provided, using local JSON fallback.");
-      dbConnectionError = "Kredensial database MySQL Hostinger (DB_HOST & DB_USER) belum dikonfigurasi.";
+      dbConnectionError = null;
     }
   }
 
