@@ -1075,27 +1075,30 @@ async function startServer() {
         });
       } catch (err: any) {
         console.error(`Error reading collection ${collection} from MongoDB:`, err.message);
-        throw err;
+        useMongoDB = false;
       }
-    } else if (useMySQL && pool) {
+    }
+    
+    if (useMySQL && pool) {
       try {
         const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ?', [collection]);
         return (rows as any[]).map(r => parseDBData(r.data));
       } catch (err: any) {
-        console.error(`Error reading collection ${collection} from MySQL:`, err.message);
-        throw err;
+        console.error(`Error reading collection ${collection} from MySQL, falling back to JSON:`, err.message);
+        dbConnectionError = "Error MySQL: " + err.message;
+        useMySQL = false;
       }
-    } else {
-      const filePath = getCollectionPath(collection);
-      if (!fs.existsSync(filePath)) {
-        return [];
-      }
-      try {
-        return JSON.parse(fs.readFileSync(filePath, "utf8"));
-      } catch (e) {
-        console.error(`Error reading collection ${collection} from JSON:`, e);
-        throw e;
-      }
+    }
+
+    const filePath = getCollectionPath(collection);
+    if (!fs.existsSync(filePath)) {
+      return [];
+    }
+    try {
+      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    } catch (e: any) {
+      console.error(`Error reading collection ${collection} from JSON:`, e.message || e);
+      return [];
     }
   }
 
@@ -1114,11 +1117,14 @@ async function startServer() {
           });
           await col.insertMany(cleanData);
         }
+        return;
       } catch (err: any) {
         console.error(`Error writing collection ${collection} to MongoDB:`, err.message);
-        throw err;
+        useMongoDB = false;
       }
-    } else if (useMySQL && pool) {
+    }
+
+    if (useMySQL && pool) {
       let connection;
       try {
         connection = await pool.getConnection();
@@ -1136,21 +1142,22 @@ async function startServer() {
         }
         
         await connection.commit();
+        return;
       } catch (err: any) {
         if (connection) await connection.rollback();
-        console.error(`Error writing collection ${collection} to MySQL:`, err.message);
-        throw err;
+        console.error(`Error writing collection ${collection} to MySQL, falling back to JSON:`, err.message);
+        dbConnectionError = "Error MySQL: " + err.message;
+        useMySQL = false;
       } finally {
         if (connection) connection.release();
       }
-    } else {
-      const filePath = getCollectionPath(collection);
-      try {
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
-      } catch (err) {
-        console.error(`Error writing collection ${collection} to JSON file:`, err);
-        throw err;
-      }
+    }
+
+    const filePath = getCollectionPath(collection);
+    try {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
+    } catch (err) {
+      console.error(`Error writing collection ${collection} to JSON file:`, err);
     }
   }
 
@@ -1200,10 +1207,19 @@ async function startServer() {
       };
 
       if (useMySQL && pool) {
-        await pool.query(
-          'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
-          [id, collectionName, JSON.stringify(newItem)]
-        );
+        try {
+          await pool.query(
+            'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?)',
+            [id, collectionName, JSON.stringify(newItem)]
+          );
+        } catch (mysqlErr: any) {
+          console.error(`MySQL insert failed for ${collectionName}, falling back to JSON:`, mysqlErr.message);
+          useMySQL = false;
+          dbConnectionError = "Error MySQL: " + mysqlErr.message;
+          const items = await readCollection(collectionName);
+          items.push(newItem);
+          await writeCollection(collectionName, items);
+        }
       } else {
         const items = await readCollection(collectionName);
         items.push(newItem);
@@ -1333,18 +1349,32 @@ async function startServer() {
       const data = req.body;
 
       if (useMySQL && pool) {
-        // Read existing first
-        const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
-        let existingData = {};
-        if (Array.isArray(rows) && rows.length > 0) {
-          existingData = parseDBData((rows as any[])[0].data);
+        try {
+          // Read existing first
+          const [rows] = await pool.query('SELECT data FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
+          let existingData = {};
+          if (Array.isArray(rows) && rows.length > 0) {
+            existingData = parseDBData((rows as any[])[0].data);
+          }
+          const updatedItem = { ...existingData, ...data, id };
+          
+          await pool.query(
+            'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE data = VALUES(data)',
+            [id, collectionName, JSON.stringify(updatedItem)]
+          );
+        } catch (mysqlErr: any) {
+          console.error(`MySQL update failed for ${collectionName}, falling back to JSON:`, mysqlErr.message);
+          useMySQL = false;
+          dbConnectionError = "Error MySQL: " + mysqlErr.message;
+          const items = await readCollection(collectionName);
+          const index = items.findIndex((i) => i.id === id);
+          if (index !== -1) {
+            items[index] = { ...items[index], ...data, id };
+          } else {
+            items.push({ ...data, id });
+          }
+          await writeCollection(collectionName, items);
         }
-        const updatedItem = { ...existingData, ...data, id };
-        
-        await pool.query(
-          'INSERT INTO collections (id, collection_name, data) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE data = VALUES(data)',
-          [id, collectionName, JSON.stringify(updatedItem)]
-        );
       } else {
         const items = await readCollection(collectionName);
         const index = items.findIndex((i) => i.id === id);
@@ -1372,7 +1402,13 @@ async function startServer() {
     const release = await acquireLock(collectionName);
     try {
       if (useMySQL && pool) {
-        await pool.query('DELETE FROM collections WHERE collection_name = ?', [collectionName]);
+        try {
+          await pool.query('DELETE FROM collections WHERE collection_name = ?', [collectionName]);
+        } catch (mysqlErr: any) {
+          useMySQL = false;
+          dbConnectionError = "Error MySQL: " + mysqlErr.message;
+          await writeCollection(collectionName, []);
+        }
       } else {
         await writeCollection(collectionName, []);
       }
@@ -1396,7 +1432,15 @@ async function startServer() {
     const release = await acquireLock(collectionName);
     try {
       if (useMySQL && pool) {
-        await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
+        try {
+          await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
+        } catch (mysqlErr: any) {
+          useMySQL = false;
+          dbConnectionError = "Error MySQL: " + mysqlErr.message;
+          const items = await readCollection(collectionName);
+          const filtered = items.filter((i: any) => i.id !== id);
+          await writeCollection(collectionName, filtered);
+        }
       } else {
         const items = await readCollection(collectionName);
         const filtered = items.filter((i: any) => i.id !== id);
