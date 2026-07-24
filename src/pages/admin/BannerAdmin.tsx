@@ -12,6 +12,7 @@ import {
 } from "../../lib/db";
 import { db } from "../../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../../lib/swal";
 import { useMediaPickerStore } from "../../store/useMediaPickerStore";
 import {
   Plus,
@@ -122,14 +123,18 @@ export default function BannerAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus banner ini?")) {
+    const confirmed = await showAlert.confirm(
+      "Hapus Banner?",
+      "Apakah Anda yakin ingin menghapus banner ini?"
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, "banners", id));
-        toast.success("Banner berhasil dihapus");
+        showToast.success("Banner berhasil dihapus");
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error("Gagal menghapus banner");
+        showAlert.error("Gagal", "Gagal menghapus banner");
       }
     }
   };

@@ -3,6 +3,7 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
 import { db } from '../../lib/db';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Mail, Search, RefreshCw, X, Send, Eye, FileText, CheckCircle2, AlertCircle, XCircle, Server } from 'lucide-react';
+import { showAlert, showToast } from '../../lib/swal';
 
 interface Subscriber {
   id: string;
@@ -92,56 +93,74 @@ export default function SubscribersAdmin() {
       await updateDoc(doc(db, 'newsletter_subscribers', selectedSub.id), {
         email: editEmail.trim()
       });
-      toast.success('Alamat email pelanggan berhasil diperbarui');
+      showToast.success('Alamat email pelanggan berhasil diperbarui');
       setIsEditModalOpen(false);
       fetchSubscribers();
     } catch (err) {
       console.error(err);
-      toast.error('Gagal memperbarui email');
+      showToast.error('Gagal memperbarui email');
     }
   };
 
   const handleDeleteSub = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus pelanggan ini dari buletin?')) {
+    const confirmed = await showAlert.confirm(
+      'Hapus Pelanggan?',
+      'Apakah Anda yakin ingin menghapus pelanggan ini dari daftar buletin?'
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, 'newsletter_subscribers', id));
-        toast.success('Pelanggan berhasil dihapus');
+        showToast.success('Pelanggan berhasil dihapus');
         fetchSubscribers();
       } catch (err) {
         console.error(err);
-        toast.error('Gagal menghapus pelanggan');
+        showToast.error('Gagal menghapus pelanggan');
       }
-    };
+    }
   };
 
   const handleDeleteLog = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus riwayat ini?')) {
+    const confirmed = await showAlert.confirm(
+      'Hapus Riwayat?',
+      'Apakah Anda yakin ingin menghapus catatan riwayat pengiriman ini?'
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, 'newsletter_sent_logs', id));
-        toast.success('Riwayat berhasil dihapus');
+        showToast.success('Riwayat berhasil dihapus');
         fetchSentLogs();
       } catch (err) {
         console.error(err);
-        toast.error('Gagal menghapus riwayat');
+        showToast.error('Gagal menghapus riwayat');
       }
-    };
+    }
   };
 
   const handleClearLogs = async () => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus SEMUA riwayat pengiriman buletin? Tindakan ini tidak dapat dibatalkan.')) {
+    const confirmed = await showAlert.confirm(
+      'Bersihkan SEMUA Riwayat?',
+      'Apakah Anda yakin ingin menghapus SEMUA catatan riwayat pengiriman buletin? Tindakan ini tidak dapat dibatalkan.'
+    );
+    if (confirmed) {
       try {
-        const response = await fetch('/api/db/newsletter_sent_logs/clear', {
-          method: 'POST'
-        });
-        if (response.ok) {
-          toast.success('Semua riwayat pengiriman berhasil dibersihkan');
-          fetchSentLogs();
-        } else {
-          toast.error('Gagal membersihkan riwayat');
+        // 1. Delete all logs via client db helper
+        if (sentLogs.length > 0) {
+          await Promise.all(sentLogs.map(log => deleteDoc(doc(db, 'newsletter_sent_logs', log.id))));
         }
+        // 2. Call server clear route
+        await fetch('/api/db/newsletter_sent_logs/clear', { method: 'POST' });
+        
+        // 3. Reset local storage fallback
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('mock_db_newsletter_sent_logs', JSON.stringify([]));
+        }
+
+        setSentLogs([]);
+        showAlert.success('Berhasil Dibersihkan!', 'Semua riwayat pengiriman buletin telah dihapus.');
+        fetchSentLogs();
       } catch (err) {
         console.error(err);
-        toast.error('Terjadi kesalahan saat membersihkan riwayat');
+        showAlert.error('Gagal!', 'Terjadi kesalahan saat membersihkan riwayat.');
       }
     }
   };
@@ -149,20 +168,19 @@ export default function SubscribersAdmin() {
   const handleManualSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualSubject || !manualTitle || !manualContent) {
-      toast.error('Subjek, Judul, dan Konten berita wajib diisi!');
+      showToast.error('Form Belum Lengkap', 'Subjek, Judul, dan Konten berita wajib diisi!');
       return;
     }
 
     if (subscribers.length === 0) {
-      toast.warning('Belum ada pelanggan yang terdaftar untuk dikirimi buletin');
+      showAlert.warning('Tidak Ada Pelanggan', 'Belum ada pelanggan yang terdaftar untuk dikirimi buletin.');
       return;
     }
 
     setIsSending(true);
-    toast.info('Mengirim buletin ke seluruh pelanggan...');
+    showToast.info('Mengirimkan Buletin...', 'Sedang memproses pengiriman ke seluruh pelanggan.');
 
     try {
-      // Direct call to server endpoint
       const response = await fetch('/api/newsletter/send', {
         method: 'POST',
         headers: {
@@ -180,7 +198,10 @@ export default function SubscribersAdmin() {
         throw new Error('Gagal mengirim buletin ke server');
       }
 
-      toast.success(`Berhasil mengirimkan buletin ke ${subscribers.length} pelanggan!`);
+      showAlert.success(
+        'Pengiriman Berhasil!',
+        `Buletin telah berhasil dikirimkan ke ${subscribers.length} pelanggan.`
+      );
       setIsManualModalOpen(false);
       setManualSubject('');
       setManualTitle('');
@@ -188,7 +209,7 @@ export default function SubscribersAdmin() {
       fetchSentLogs();
     } catch (err) {
       console.error(err);
-      toast.error('Gagal mengirimkan buletin');
+      showAlert.error('Pengiriman Gagal', 'Gagal mengirimkan buletin. Pastikan konfigurasi SMTP di server sudah benar.');
     } finally {
       setIsSending(false);
     }

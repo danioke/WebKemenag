@@ -138,7 +138,7 @@ if (typeof window !== 'undefined') {
             const method = init?.method || 'GET';
             
             if (method === 'GET') {
-              if (docId) {
+              if (docId && docId !== 'clear') {
                 const localItems = getLocalCollection(collectionName);
                 const found = localItems.find((item: any) => item.id === docId);
                 if (found) {
@@ -151,7 +151,10 @@ if (typeof window !== 'undefined') {
                 return new Response(JSON.stringify(localItems), { status: 200, headers: { 'Content-Type': 'application/json' } });
               }
             } else if (method === 'POST') {
-              if (isDelete && docId) {
+              if (docId === 'clear') {
+                saveLocalCollection(collectionName, []);
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+              } else if (isDelete && docId) {
                 let localItems = getLocalCollection(collectionName);
                 localItems = localItems.filter((i: any) => i.id !== docId);
                 saveLocalCollection(collectionName, localItems);

@@ -17,6 +17,7 @@ import {
   doc,
 } from "../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../lib/swal";
 import {
   LayoutDashboard,
   FileText,
@@ -735,20 +736,26 @@ function DashboardHome() {
   };
 
   const handleResetVisitorLogs = async () => {
+    const confirmed = await showAlert.confirm(
+      "Reset Rekam Pengunjung?",
+      "Apakah Anda yakin ingin menghapus seluruh log data riwayat pengunjung? Tindakan ini tidak dapat dibatalkan."
+    );
+    if (!confirmed) return;
+
     setIsResettingLogs(true);
     try {
       const res = await fetch("/api/visitor/logs", { method: "DELETE" });
       const data = await res.json();
       if (res.ok) {
-        toast.success(data.message || "Data rekam pengunjung berhasil di-reset!");
+        showAlert.success("Berhasil Reset", data.message || "Data rekam pengunjung berhasil dibersihkan!");
         setShowResetConfirmModal(false);
         fetchVisitorStats();
         fetchFilteredVisitorLogs();
       } else {
-        toast.error(data.error || "Gagal mereset data pengunjung.");
+        showAlert.error("Gagal Reset", data.error || "Gagal mereset data pengunjung.");
       }
     } catch (err) {
-      toast.error("Gagal koneksi ke server saat reset data.");
+      showAlert.error("Kesalahan Server", "Gagal koneksi ke server saat mereset data.");
     } finally {
       setIsResettingLogs(false);
     }

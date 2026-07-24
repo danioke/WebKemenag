@@ -1347,35 +1347,6 @@ async function startServer() {
     }
   };
 
-  // DELETE a document by ID
-  // Route definitions using POST to bypass strict hosting web servers that block PUT/DELETE
-  app.put("/api/db/:collection/:id", updateHandler);
-  app.post("/api/db/:collection/:id", updateHandler);
-
-  const deleteDbHandler = async (req: any, res: any) => {
-    const { collection: collectionName, id } = req.params;
-    const release = await acquireLock(collectionName);
-    try {
-      if (useMySQL && pool) {
-        await pool.query('DELETE FROM collections WHERE collection_name = ? AND id = ?', [collectionName, id]);
-      } else {
-        let items = await readCollection(collectionName);
-        items = items.filter((i) => i.id !== id);
-        await writeCollection(collectionName, items);
-      }
-      res.json({ success: true });
-    } catch (err: any) {
-      console.error(`Error DELETE /api/db/${collectionName}/${id}:`, err);
-      res.status(500).json({ error: err.message });
-    } finally {
-      release();
-    }
-  };
-
-  // POST local authentication login
-  app.delete("/api/db/:collection/:id", deleteDbHandler);
-  app.post("/api/db/:collection/:id/delete", deleteDbHandler);
-
   // Clear all documents in a collection
   app.post("/api/db/:collection/clear", async (req, res) => {
     const { collection: collectionName } = req.params;
@@ -1394,6 +1365,11 @@ async function startServer() {
       release();
     }
   });
+
+  // UPDATE a document by ID
+  // Route definitions using POST to bypass strict hosting web servers that block PUT/DELETE
+  app.put("/api/db/:collection/:id", updateHandler);
+  app.post("/api/db/:collection/:id", updateHandler);
 
   // GET 2FA status for an email
   app.get("/api/auth/2fa/status", async (req, res) => {

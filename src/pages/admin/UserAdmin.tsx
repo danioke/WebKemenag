@@ -3,6 +3,7 @@ import { db, auth } from '../../lib/db';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from '../../lib/db';
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, Users, Search, Mail, UserCheck, Shield, X, Check, Loader2 } from 'lucide-react';
+import { showAlert, showToast } from '../../lib/swal';
 
 interface AllowedUser {
   id: string;
@@ -96,7 +97,7 @@ export default function UserAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email.trim()) {
-      toast.error('Email tidak boleh kosong');
+      showToast.error('Email tidak boleh kosong');
       return;
     }
 
@@ -116,12 +117,12 @@ export default function UserAdmin() {
           updateData.password = formData.password;
         }
         await updateDoc(docRef, updateData);
-        toast.success('User berhasil diperbarui');
+        showAlert.success('Berhasil', 'User administrator berhasil diperbarui');
       } else {
         // Check for duplicates
         const exists = users.some(u => u.email.toLowerCase() === normalizedEmail);
         if (exists) {
-          toast.error('Email ini sudah terdaftar');
+          showToast.error('Email ini sudah terdaftar');
           setSubmitting(false);
           return;
         }
@@ -134,13 +135,13 @@ export default function UserAdmin() {
           password: formData.password,
           createdAt: serverTimestamp()
         });
-        toast.success('User baru berhasil ditambahkan');
+        showAlert.success('Berhasil', 'User administrator baru berhasil ditambahkan');
       }
       setIsModalOpen(false);
       fetchUsers();
     } catch (error) {
       console.error(error);
-      toast.error('Gagal menyimpan data user');
+      showAlert.error('Gagal', 'Gagal menyimpan data user');
     } finally {
       setSubmitting(false);
     }
@@ -149,26 +150,29 @@ export default function UserAdmin() {
   const handleDelete = async (id: string, email: string) => {
     const currentUserEmail = auth.currentUser?.email?.toLowerCase();
     if (email.toLowerCase() === 'anisreza498@gmail.com') {
-      toast.error('Email super user default tidak dapat dihapus demi keamanan sistem.');
+      showAlert.error('Akses Ditolak', 'Email super user default tidak dapat dihapus demi keamanan sistem.');
       return;
     }
 
     if (email.toLowerCase() === currentUserEmail) {
-      toast.error('Anda tidak dapat menghapus akun Anda sendiri demi alasan keamanan.');
+      showAlert.error('Akses Ditolak', 'Anda tidak dapat menghapus akun Anda sendiri demi alasan keamanan.');
       return;
     }
 
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus akses untuk ${email}?`)) {
-      return;
-    }
+    const confirmed = await showAlert.confirm(
+      'Hapus User?',
+      `Apakah Anda yakin ingin menghapus hak akses administrator untuk ${email}?`
+    );
+
+    if (!confirmed) return;
 
     try {
       await deleteDoc(doc(db, 'allowed_users', id));
-      toast.success('Akses user berhasil dihapus');
+      showToast.success('Akses user berhasil dihapus');
       fetchUsers();
     } catch (error) {
       console.error(error);
-      toast.error('Gagal menghapus user');
+      showAlert.error('Gagal', 'Gagal menghapus user');
     }
   };
 

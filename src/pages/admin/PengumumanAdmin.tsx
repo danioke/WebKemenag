@@ -13,6 +13,7 @@ import {
 } from "../../lib/db";
 import { db, auth } from "../../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../../lib/swal";
 import { useMediaPickerStore } from "../../store/useMediaPickerStore";
 import { Plus, Edit, Trash2, FileText, X, Upload } from "lucide-react";
 
@@ -155,19 +156,23 @@ export default function PengumumanAdmin() {
       !auth.currentUser &&
       localStorage.getItem("mock_admin_session") !== "true"
     ) {
-      toast.error(
-        "Anda sedang menggunakan Mode Akses Instan. Login untuk menghapus.",
+      showToast.error(
+        "Anda sedang menggunakan Mode Akses Instan. Login untuk menghapus."
       );
       return;
     }
-    if (window.confirm("Apakah Anda yakin ingin menghapus pengumuman ini?")) {
+    const confirmed = await showAlert.confirm(
+      "Hapus Pengumuman?",
+      "Apakah Anda yakin ingin menghapus pengumuman ini?"
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, "announcements", id));
-        toast.success("Pengumuman berhasil dihapus");
+        showToast.success("Pengumuman berhasil dihapus");
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error("Gagal menghapus pengumuman");
+        showAlert.error("Gagal", "Gagal menghapus pengumuman");
       }
     }
   };

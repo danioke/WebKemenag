@@ -3,6 +3,7 @@ import { db, auth } from "../../lib/db";
 import { useMediaPickerStore } from "../../store/useMediaPickerStore";
 import { doc, getDoc, setDoc } from "../../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../../lib/swal";
 import RichTextEditor from "../../components/RichTextEditor";
 import {
   Plus,
@@ -512,11 +513,15 @@ export default function LayananAdmin() {
     setIsStafModalOpen(false);
   };
 
-  const handleDeleteStaf = (id: string) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus staf ini?")) {
+  const handleDeleteStaf = async (id: string) => {
+    const confirmed = await showAlert.confirm(
+      "Hapus Staf?",
+      "Apakah Anda yakin ingin menghapus staf ini?"
+    );
+    if (confirmed) {
       setStaf((prev) => prev.filter((s) => s.id !== id));
-      toast.success(
-        "Staf terhapus dari daftar (klik 'Simpan Perubahan' untuk menerapkan)",
+      showToast.success(
+        "Staf terhapus dari daftar (klik 'Simpan Perubahan' untuk menerapkan)"
       );
     }
   };

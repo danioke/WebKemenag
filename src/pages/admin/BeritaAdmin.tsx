@@ -13,6 +13,7 @@ import {
 } from "../../lib/db";
 import { db, auth } from "../../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../../lib/swal";
 import {
   Plus,
   Edit,
@@ -197,31 +198,30 @@ export default function BeritaAdmin() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (
       !auth.currentUser &&
       localStorage.getItem("mock_admin_session") !== "true"
     ) {
-      toast.error(
-        "Anda sedang menggunakan Mode Akses Instan. Login untuk menghapus.",
+      showToast.error(
+        "Anda sedang menggunakan Mode Akses Instan. Login untuk menghapus."
       );
       return;
     }
-    setConfirmModal({
-      isOpen: true,
-      title: "Hapus Berita",
-      message: "Apakah Anda yakin ingin menghapus berita ini?",
-      onConfirm: async () => {
-        try {
-          await deleteDoc(doc(db, "news", id));
-          toast.success("Berita berhasil dihapus");
-          fetchData();
-        } catch (error) {
-          console.error(error);
-          toast.error("Gagal menghapus berita");
-        }
-      },
-    });
+    const confirmed = await showAlert.confirm(
+      "Hapus Berita?",
+      "Apakah Anda yakin ingin menghapus berita ini secara permanen?"
+    );
+    if (confirmed) {
+      try {
+        await deleteDoc(doc(db, "news", id));
+        showToast.success("Berita berhasil dihapus");
+        fetchData();
+      } catch (error) {
+        console.error(error);
+        showAlert.error("Gagal", "Gagal menghapus berita");
+      }
+    }
   };
 
   const openAddModal = () => {

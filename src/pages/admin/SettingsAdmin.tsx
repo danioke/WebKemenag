@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { Save, Image as ImageIcon, Globe, Facebook, Instagram, Youtube, MapPin, Phone, Mail, Check, User, Upload, Radio } from 'lucide-react';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import MediaPickerModal from '../../components/MediaPickerModal';
+import { showAlert, showToast } from '../../lib/swal';
 
 export default function SettingsAdmin() {
   const { 
@@ -78,7 +79,7 @@ export default function SettingsAdmin() {
     
     try {
       await updateSettings(formData);
-      toast.success('Pengaturan berhasil disimpan');
+      showAlert.success('Pengaturan Disimpan', 'Pengaturan website berhasil diperbarui.');
       
       // Update document title and favicon
       document.title = formData.siteName;
@@ -90,7 +91,7 @@ export default function SettingsAdmin() {
         document.getElementsByTagName('head')[0].appendChild(link);
       }
     } catch (error) {
-      toast.error('Gagal menyimpan pengaturan');
+      showAlert.error('Gagal Menyimpan', 'Terjadi kesalahan saat menyimpan pengaturan.');
     } finally {
       setIsSaving(false);
     }

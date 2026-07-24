@@ -12,6 +12,7 @@ import {
 } from "../../lib/db";
 import { db } from "../../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../../lib/swal";
 import { useMediaPickerStore } from "../../store/useMediaPickerStore";
 import {
   Plus,
@@ -125,14 +126,18 @@ export default function InfografisAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus infografis ini?")) {
+    const confirmed = await showAlert.confirm(
+      "Hapus Infografis?",
+      "Apakah Anda yakin ingin menghapus infografis ini?"
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, "infographics", id));
-        toast.success("Infografis berhasil dihapus");
+        showToast.success("Infografis berhasil dihapus");
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error("Gagal menghapus infografis");
+        showAlert.error("Gagal", "Gagal menghapus infografis");
       }
     }
   };

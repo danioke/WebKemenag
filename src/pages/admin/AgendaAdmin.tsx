@@ -3,6 +3,7 @@ import { formatAgendaFullDate } from '../../lib/utils';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
+import { showAlert, showToast } from '../../lib/swal';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 
 interface Agenda {
@@ -97,14 +98,18 @@ export default function AgendaAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus agenda ini?')) {
+    const confirmed = await showAlert.confirm(
+      'Hapus Agenda?',
+      'Apakah Anda yakin ingin menghapus agenda ini?'
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, 'agendas', id));
-        toast.success('Agenda berhasil dihapus');
+        showToast.success('Agenda berhasil dihapus');
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error('Gagal menghapus agenda');
+        showAlert.error('Gagal', 'Gagal menghapus agenda');
       }
     }
   };

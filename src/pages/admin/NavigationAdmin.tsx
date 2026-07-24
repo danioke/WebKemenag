@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query, writeBatch } from '../../lib/db';
 import { db, auth } from '../../lib/db';
 import { toast } from 'sonner';
+import { showAlert, showToast } from '../../lib/swal';
 import { Plus, Edit, Trash2, Save, MoveUp, MoveDown, RefreshCw, X, Award, FileText, Users, Navigation, BookOpen, ShieldCheck, Heart, GraduationCap, Building2, HelpCircle, MapPin, Mail, Phone, PlusCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import RichTextEditor from '../../components/RichTextEditor';
 
@@ -1336,13 +1337,18 @@ export default function NavigationAdmin() {
                         <label className="block text-sm font-medium text-gray-700">Isi Konten Detail (Modal Popup HTML)</label>
                     <button 
                       type="button" 
-                      onClick={() => {
+                      onClick={async () => {
                         if (!isHtmlMode) {
                           setIsHtmlMode(true);
                         } else {
                           const hasComplexHtml = subForm.content && (subForm.content.includes('class=') || subForm.content.includes('<div') || subForm.content.includes('grid') || subForm.content.includes('rounded'));
                           if (hasComplexHtml) {
-                            if (window.confirm("Peringatan: Konten Anda memiliki kode HTML/Card kustom. Menggunakan Visual Editor dapat menghapus kelas CSS, layout grid, dan gaya card secara permanen. Apakah Anda yakin ingin beralih ke Visual Editor?")) {
+                            const confirmed = await showAlert.confirm(
+                              "Beralih ke Visual Editor?",
+                              "Peringatan: Konten Anda memiliki kode HTML/Card kustom. Menggunakan Visual Editor dapat mengubah gaya CSS atau layout secara permanen.",
+                              "Ya, Beralih"
+                            );
+                            if (confirmed) {
                               setIsHtmlMode(false);
                             }
                           } else {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db } from '../../lib/db';
 import { toast } from 'sonner';
+import { showAlert, showToast } from '../../lib/swal';
 import { Plus, Edit, Trash2, X, Tag } from 'lucide-react';
 
 interface Kategori {
@@ -66,13 +67,17 @@ export default function KategoriAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
+    const confirmed = await showAlert.confirm(
+      'Hapus Kategori?',
+      'Apakah Anda yakin ingin menghapus kategori ini?'
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, 'categories', id));
-        toast.success('Kategori berhasil dihapus');
+        showToast.success('Kategori berhasil dihapus');
         fetchData();
       } catch (error) {
-        toast.error('Gagal menghapus kategori');
+        showAlert.error('Gagal', 'Gagal menghapus kategori');
       }
     }
   };

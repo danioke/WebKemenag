@@ -146,9 +146,10 @@ export default function MediaGallery() {
     // Increment Views
     const item = (activeTab === 'foto' ? photos : videos)[index];
     if (item) {
+      const currentViews = (item as any).views || 0;
       setViewCounts(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
       updateDoc(doc(db, activeTab === 'foto' ? 'photos' : 'videos', item.id), {
-        views: (item.views || 0) + 1
+        views: currentViews + 1
       }).catch(console.error);
     }
     setIsModalOpen(true);

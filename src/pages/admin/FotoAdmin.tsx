@@ -12,6 +12,7 @@ import {
 } from "../../lib/db";
 import { db } from "../../lib/db";
 import { toast } from "sonner";
+import { showAlert, showToast } from "../../lib/swal";
 import {
   Plus,
   Edit,
@@ -164,14 +165,18 @@ export default function FotoAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus foto ini?")) {
+    const confirmed = await showAlert.confirm(
+      "Hapus Foto?",
+      "Apakah Anda yakin ingin menghapus foto galeri ini?"
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, "photos", id));
-        toast.success("Foto berhasil dihapus");
+        showToast.success("Foto berhasil dihapus");
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error("Gagal menghapus foto");
+        showAlert.error("Gagal", "Gagal menghapus foto");
       }
     }
   };

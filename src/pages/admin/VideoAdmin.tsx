@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, orderBy, query } from '../../lib/db';
 import { db } from '../../lib/db';
 import { toast } from 'sonner';
+import { showAlert, showToast } from '../../lib/swal';
 import { Plus, Edit, Trash2, X, Video, Settings2, RefreshCw, Smartphone, Globe, Youtube, Key } from 'lucide-react';
 import { getYouTubeThumbnail } from '../../lib/helpers';
 import ReactPlayer from 'react-player';
@@ -184,14 +185,18 @@ export default function VideoAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus video ini?')) {
+    const confirmed = await showAlert.confirm(
+      'Hapus Video?',
+      'Apakah Anda yakin ingin menghapus galeri video ini?'
+    );
+    if (confirmed) {
       try {
         await deleteDoc(doc(db, 'videos', id));
-        toast.success('Video berhasil dihapus');
+        showToast.success('Video berhasil dihapus');
         fetchData();
       } catch (error) {
         console.error(error);
-        toast.error('Gagal menghapus video');
+        showAlert.error('Gagal', 'Gagal menghapus video');
       }
     }
   };
