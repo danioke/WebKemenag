@@ -194,22 +194,35 @@ export default function SubscribersAdmin() {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Gagal mengirim buletin ke server');
+      const resData = await response.json().catch(() => ({}));
+
+      if (!response.ok || !resData.success) {
+        const errorMsg = resData.error || resData.details || 'Gagal koneksi server SMTP';
+        
+        if (errorMsg.includes('535') || errorMsg.includes('authentication failed') || errorMsg.includes('Invalid login')) {
+          showAlert.error(
+            'Gagal Otentikasi SMTP (535)',
+            'Gagal Login SMTP: Username atau Password email SMTP pada file .env server tidak cocok. Harap periksa variabel SMTP_USER, SMTP_PASS, dan SMTP_HOST di file .env server Node.js Anda.'
+          );
+        } else {
+          showAlert.error('Gagal Mengirim Buletin', `Detail Error: ${errorMsg}`);
+        }
+        fetchSentLogs();
+        return;
       }
 
       showAlert.success(
         'Pengiriman Berhasil!',
-        `Buletin telah berhasil dikirimkan ke ${subscribers.length} pelanggan.`
+        `Buletin telah berhasil dikirimkan ke ${resData.count || subscribers.length} pelanggan.`
       );
       setIsManualModalOpen(false);
       setManualSubject('');
       setManualTitle('');
       setManualContent('');
       fetchSentLogs();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showAlert.error('Pengiriman Gagal', 'Gagal mengirimkan buletin. Pastikan konfigurasi SMTP di server sudah benar.');
+      showAlert.error('Pengiriman Gagal', 'Gagal mengirimkan buletin. Pastikan server Node.js dan konfigurasi SMTP di file .env sudah benar.');
     } finally {
       setIsSending(false);
     }

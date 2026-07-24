@@ -15,13 +15,21 @@ import QRCode from "qrcode";
 
 // Helper function to create transporter
 const getTransporter = () => {
+  const host = process.env.SMTP_HOST || "smtp.hostinger.com";
+  const port = Number(process.env.SMTP_PORT) || 465;
+  const isSecure = port === 465;
+
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.ethereal.email",
-    port: Number(process.env.SMTP_PORT) || 587,
+    host: host,
+    port: port,
+    secure: isSecure,
     auth: {
-      user: process.env.SMTP_USER || "dallas.reinger@ethereal.email",
-      pass: process.env.SMTP_PASS || "rST2kUvqVd39x32P6j",
+      user: process.env.SMTP_USER || "humas@kemenagoki.id",
+      pass: process.env.SMTP_PASS || "",
     },
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 };
 
@@ -283,6 +291,7 @@ async function startServer() {
 
       const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
       let sentCount = 0;
+      let lastError = "";
 
       for (const sub of subscribers) {
         const htmlBody = `
@@ -324,6 +333,7 @@ async function startServer() {
           sentCount++;
         } catch (emailErr: any) {
           const errMsg = emailErr?.message || 'Gagal koneksi SMTP';
+          lastError = errMsg;
           logItem.status = `Gagal: ${errMsg}`;
           console.error(`[NEWSLETTER] Failed to send email to ${sub.email}:`, emailErr);
         }
@@ -340,7 +350,16 @@ async function startServer() {
         }
       }
 
-      res.json({ success: true, count: sentCount });
+      if (sentCount === 0 && lastError) {
+        return res.status(400).json({
+          success: false,
+          count: 0,
+          error: lastError,
+          details: `Gagal otentikasi/koneksi SMTP: ${lastError}`
+        });
+      }
+
+      res.json({ success: true, count: sentCount, total: subscribers.length, lastError });
     } catch (err: any) {
       console.error("Error in /api/newsletter/send:", err);
       res.status(500).json({ error: "Gagal mengirim buletin", details: err.message });

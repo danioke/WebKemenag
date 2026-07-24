@@ -144,7 +144,7 @@ export default function PengumumanDetail() {
             <span className="sm:hidden">Kembali</span>
           </Link>
           <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
-          <Link to="/semua-pengumuman" className="hover:text-green-700 transition-colors hidden sm:block">
+          <Link to="/pengumuman" className="hover:text-green-700 transition-colors hidden sm:block">
             Pengumuman
           </Link>
           <ChevronRight size={14} className="text-gray-400 shrink-0 hidden sm:block" />
